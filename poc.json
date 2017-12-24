@@ -1,0 +1,84 @@
+{
+	"manifestType": "minecraftModpack",
+	"manifestVersion": 1,
+	"name": "Proof of Concept",
+	"version": "1.12.2-1.0.0.0",
+	"author": "TheRandomLabs",
+	"description": "Proof of concept extended Curse manifest.",
+	"files": [
+		{
+			"title": "ChatFlow",
+			"projectID": 231453,
+			"fileID": 2436360,
+			"side": "client",
+			"optional": true,
+			"relatedFiles": [
+				{
+					"path": "config/ChatFlow.dat",
+					"side": "client"
+				}
+			]
+		},
+		{
+			"title": "WorldEdit",
+			"projectID": 225608,
+			"fileID": 2460570,
+			"side": "both",
+			"optional": true,
+			"relatedFiles": []
+		},
+		{
+			"title": "Some Minimap Mod",
+			"projectID": 999999,
+			"fileID": 999999,
+			"side": "both",
+			"relatedFiles": [],
+			"group": "Some Minimap Mod",
+			"alternativeGroups": [
+				"Another Minimap Mod"
+			]
+		}
+	],
+	"alternativeMods": [
+		{
+			"title": "Another Minimap Mod",
+			"projectID": 1000000,
+			"fileID": 100000,
+			"side": "client",
+			"relatedFiles": [],
+			"group": "Another Minimap Mod"
+		},
+		{
+			"title": "AMMCore",
+			"projectID": 100001,
+			"fileID": 100001,
+			"side": "client",
+			"relatedFiles": [],
+			"group": "Another Minimap Mod"
+		}
+	],
+	"additionalFiles": [
+		{
+			"path": "config/randomfile.cfg",
+			"side": "client"
+		},
+		{
+			"path": "mods/randommod-*.jar",
+			"side": "server"
+		}
+	],
+	"overrides": "Overrides",
+	"minecraft": {
+		"version": "1.12.2",
+		"libraries": "libraries",
+		"modLoaders": [
+			{
+				"id": "forge-14.23.1.2581",
+				"primary": true
+			}
+		]
+	},
+	"optifineVersion": "latest",
+	"minimumRam": 1.0,
+	"recommendedRam": 2.0
+}
