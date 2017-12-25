@@ -2,6 +2,7 @@ package com.therandomlabs.curseapi.minecraft.modpack.caformat;
 
 import java.util.List;
 import java.util.function.IntPredicate;
+import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 
 public class PostprocessorVersion extends Postprocessor {
 	private final String prefix;
@@ -13,8 +14,13 @@ public class PostprocessorVersion extends Postprocessor {
 	}
 
 	@Override
-	public String name() {
+	public String toString() {
 		return prefix + "version";
+	}
+
+	@Override
+	public boolean isValid(String value) {
+		return MinecraftVersion.fromString(value) != null;
 	}
 
 	@Override

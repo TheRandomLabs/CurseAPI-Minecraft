@@ -7,7 +7,7 @@ public final class Marker {
 	public static final char SERVER = 's';
 	public static final char BOTH = 'b';
 
-	public static final char optional = 'o';
+	public static final char OPTIONAL = 'o';
 
 	private Marker() {}
 }

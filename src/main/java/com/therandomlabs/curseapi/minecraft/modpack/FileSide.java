@@ -20,4 +20,11 @@ public enum FileSide {
 	public String toString() {
 		return name;
 	}
+
+	public static FileSide fromBooleans(boolean client, boolean server, boolean both) {
+		if(both || (client && server)) {
+			return BOTH;
+		}
+		return client ? CLIENT : SERVER;
+	}
 }

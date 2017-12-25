@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.util.CurseEventHandling;
 import com.therandomlabs.utils.collection.ImmutableList;
@@ -30,7 +29,7 @@ public class PreprocessorImport extends Preprocessor {
 	PreprocessorImport() {}
 
 	@Override
-	public String name() {
+	public String toString() {
 		return "import";
 	}
 
@@ -74,10 +73,6 @@ public class PreprocessorImport extends Preprocessor {
 			return;
 		}
 
-		lines.addAll(index + 1, linesToImport.stream().filter(line -> {
-			//Don't import variables
-			line = line.trim();
-			return !line.isEmpty() && line.charAt(0) != Variable.CHARACTER;
-		}).collect(Collectors.toList()));
+		lines.addAll(index + 1, CAManifest.prune(linesToImport));
 	}
 }

@@ -21,13 +21,26 @@ public abstract class Postprocessor {
 	public static final Postprocessor OLDER_THAN_OR_EQUAL_TO =
 			new PostprocessorVersion("<=", result -> result <= 0);
 
-	static final List<Postprocessor> postprocessors = new TRLList<>();
+	private static final List<Postprocessor> postprocessors = new TRLList<>();
 
 	protected Postprocessor() {
 		postprocessors.add(this);
 	}
 
-	public abstract String name();
+	@Override
+	public abstract String toString();
+
+	public abstract boolean isValid(String value);
 
 	public abstract List<String> apply(CAManifest manifest, String value);
+
+	public static Postprocessor fromName(String name) {
+		for(Postprocessor postprocessor : postprocessors) {
+			if(postprocessor.toString().equalsIgnoreCase(name)) {
+				return postprocessor;
+			}
+		}
+
+		return null;
+	}
 }

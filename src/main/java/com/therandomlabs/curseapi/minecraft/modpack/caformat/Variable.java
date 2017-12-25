@@ -61,7 +61,7 @@ public class Variable {
 			"4",
 			NumberUtils::isDouble);
 
-	static final List<Variable> variables = new TRLList<>();
+	private static final List<Variable> variables = new TRLList<>();
 
 	private final String name;
 	private final String defaultValue;
@@ -75,7 +75,8 @@ public class Variable {
 		variables.add(this);
 	}
 
-	public String name() {
+	@Override
+	public String toString() {
 		return name;
 	}
 
@@ -85,5 +86,15 @@ public class Variable {
 
 	public boolean isValid(String value) {
 		return validator.test(value);
+	}
+
+	public static Variable fromName(String name) {
+		for(Variable variable : variables) {
+			if(variable.toString().equalsIgnoreCase(name)) {
+				return variable;
+			}
+		}
+
+		return null;
 	}
 }
