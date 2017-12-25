@@ -39,7 +39,7 @@ public class CurseManifest implements Cloneable {
 		manifest.name = name;
 		manifest.version = version;
 		manifest.author = author;
-		manifest.description = manifest.description;
+		manifest.description = description;
 		manifest.files = CloneException.tryClone(files);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft;

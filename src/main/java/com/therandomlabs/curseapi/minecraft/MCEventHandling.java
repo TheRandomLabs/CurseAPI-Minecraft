@@ -46,7 +46,7 @@ public class MCEventHandling {
 
 		@Override
 		public void downloadingMod(String modName, int count, int total) {
-			if(modName == Mod.UNKNOWN_NAME) {
+			if(modName.equals(Mod.UNKNOWN_NAME)) {
 				getLogger().info("Downloading mod %s of %s...", count, total, modName);
 			} else {
 				getLogger().info("Downloading mod %s of %s: %s", count, total, modName);
@@ -57,7 +57,7 @@ public class MCEventHandling {
 
 		@Override
 		public void downloadedMod(String modName, String fileName, int count) {
-			if(modName == Mod.UNKNOWN_NAME) {
+			if(modName.equals(Mod.UNKNOWN_NAME)) {
 				getLogger().info("Downloaded mod %s: %s", modName, fileName);
 			} else {
 				getLogger().info("Downloaded mod: " + fileName);

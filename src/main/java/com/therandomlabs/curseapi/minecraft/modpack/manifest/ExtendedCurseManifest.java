@@ -45,7 +45,7 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.name = name;
 		manifest.version = version;
 		manifest.author = author;
-		manifest.description = manifest.description;
+		manifest.description = description;
 		manifest.files = CloneException.tryClone(files);
 		manifest.alternativeMods = CloneException.tryClone(alternativeMods);
 		manifest.groups = CloneException.tryClone(groups);
