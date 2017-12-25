@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
+import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.utils.runnable.RunnableWithInputAndThrowable;
 import com.therandomlabs.utils.wrapper.Wrapper;
 
@@ -46,7 +46,7 @@ public class MCEventHandling {
 
 		@Override
 		public void downloadingMod(String modName, int count, int total) {
-			if(modName.equals(ExtendedCurseManifest.UNKNOWN_NAME)) {
+			if(modName == Mod.UNKNOWN_NAME) {
 				getLogger().info("Downloading mod %s of %s...", count, total, modName);
 			} else {
 				getLogger().info("Downloading mod %s of %s: %s", count, total, modName);
@@ -57,7 +57,7 @@ public class MCEventHandling {
 
 		@Override
 		public void downloadedMod(String modName, String fileName, int count) {
-			if(modName.equals(ExtendedCurseManifest.UNKNOWN_NAME)) {
+			if(modName == Mod.UNKNOWN_NAME) {
 				getLogger().info("Downloaded mod %s: %s", modName, fileName);
 			} else {
 				getLogger().info("Downloaded mod: " + fileName);

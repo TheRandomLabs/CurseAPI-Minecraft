@@ -1,6 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.manifest;
-
-import com.therandomlabs.curseapi.minecraft.modpack.FileSide;
+package com.therandomlabs.curseapi.minecraft.modpack;
 
 public class FileInfo implements Cloneable {
 	public String path;

@@ -17,7 +17,8 @@
 					"path": "config/ChatFlow.dat",
 					"side": "client"
 				}
-			]
+			],
+			"group": ""
 		},
 		{
 			"title": "WorldEdit",
@@ -25,7 +26,8 @@
 			"fileID": 2460570,
 			"side": "both",
 			"optional": true,
-			"relatedFiles": []
+			"relatedFiles": [],
+			"group": ""
 		},
 		{
 			"title": "Some Minimap Mod",
@@ -33,10 +35,7 @@
 			"fileID": 999999,
 			"side": "both",
 			"relatedFiles": [],
-			"group": "Some Minimap Mod",
-			"alternativeGroups": [
-				"Another Minimap Mod"
-			]
+			"group": "Some Minimap Mod"
 		}
 	],
 	"alternativeMods": [
@@ -55,6 +54,14 @@
 			"side": "client",
 			"relatedFiles": [],
 			"group": "Another Minimap Mod"
+		}
+	],
+	"groups": [
+		{
+			"primary": "Some Minimap Mod",
+			"alternatives": [
+				"Another Minimap Mod"
+			]
 		}
 	],
 	"additionalFiles": [

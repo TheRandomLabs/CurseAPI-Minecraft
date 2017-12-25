@@ -2,28 +2,33 @@ package com.therandomlabs.curseapi.minecraft.modpack.caformat;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.therandomlabs.curseapi.minecraft.modpack.Mod;
+import com.therandomlabs.utils.collection.TRLList;
 
 public class CAManifest {
-	public static class Mod {
+	// [ Primary Mod Group ] [ Some Other Mod That Does Something Similar ]
+	public static final char GROUP_DEFINER_OPENER = '[';
+	public static final char GROUP_DEFINER_CLOSER = ']';
+	public static final char GROUP_MARKER = ';';
 
-	}
+	private final Map<Variable, String> variables = new HashMap<>();
+	private final Map<Preprocessor, String> preprocessors = new HashMap<>();
+	private final Map<Postprocessor, String> postprocessors = new HashMap<>();
+	private final TRLList<Mod> mods = new TRLList<>();
 
-	private final HashMap<Variable, String> variables = new HashMap<>();
-	private final HashMap<Preprocessor, String> preprocessors = new HashMap<>();
-	private final HashMap<Postprocessor, String> postprocessors = new HashMap<>();
-
-	@SuppressWarnings("unchecked")
 	public Map<Variable, String> getVariables() {
-		return (Map<Variable, String>) variables.clone();
+		return variables;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<Preprocessor, String> getPreprocessors() {
-		return (Map<Preprocessor, String>) preprocessors.clone();
+		return preprocessors;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<Postprocessor, String> getPostprocessors() {
-		return (Map<Postprocessor, String>) postprocessors.clone();
+		return postprocessors;
+	}
+
+	public TRLList<Mod> getMods() {
+		return mods;
 	}
 }

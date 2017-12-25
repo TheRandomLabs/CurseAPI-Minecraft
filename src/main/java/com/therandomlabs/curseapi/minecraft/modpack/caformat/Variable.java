@@ -55,11 +55,11 @@ public class Variable {
 
 	public static final Variable MINIMUM_RAM = new Variable("minimum_ram",
 			"3",
-			NumberUtils::isInteger);
+			NumberUtils::isDouble);
 
 	public static final Variable RECOMMENDED_RAM = new Variable("recommended_ram",
 			"4",
-			NumberUtils::isInteger);
+			NumberUtils::isDouble);
 
 	static final List<Variable> variables = new TRLList<>();
 

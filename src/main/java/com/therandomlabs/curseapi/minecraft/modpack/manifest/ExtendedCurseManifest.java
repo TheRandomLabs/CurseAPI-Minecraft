@@ -1,54 +1,24 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
-import com.therandomlabs.curseapi.minecraft.modpack.FileSide;
+import com.therandomlabs.curseapi.minecraft.modpack.FileInfo;
+import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.util.CloneException;
 
 public class ExtendedCurseManifest implements Cloneable {
-	public static class Mod implements Cloneable {
-		public String title = UNKNOWN_NAME;
-		public int projectID;
-		public int fileID;
-		public FileSide side = FileSide.BOTH;
-		public boolean optional;
-		public FileInfo[] relatedFiles = new FileInfo[0];
+	public static class GroupInfo implements Cloneable {
+		public String primary;
+		public String[] alternatives;
+
+		public GroupInfo(String primary, String[] alternatives) {
+			this.primary = primary;
+			this.alternatives = alternatives;
+		}
 
 		@Override
-		public Mod clone() {
-			final Mod mod = new Mod();
-
-			mod.title = title;
-			mod.projectID = projectID;
-			mod.fileID = fileID;
-			mod.side = side;
-			mod.optional = optional;
-			mod.relatedFiles = CloneException.tryClone(relatedFiles);
-
-			return mod;
+		public GroupInfo clone() {
+			return new GroupInfo(primary, alternatives);
 		}
 	}
-
-	public static class ModWithAlternatives extends Mod {
-		public String group;
-		public String[] alternativeGroups;
-
-		@Override
-		public ModWithAlternatives clone() {
-			final ModWithAlternatives mod = new ModWithAlternatives();
-
-			mod.title = title;
-			mod.projectID = projectID;
-			mod.fileID = fileID;
-			mod.side = side;
-			mod.optional = optional;
-			mod.relatedFiles = CloneException.tryClone(relatedFiles);
-			mod.group = group;
-			mod.alternativeGroups = alternativeGroups.clone();
-
-			return mod;
-		}
-	}
-
-	public static final String UNKNOWN_NAME = "Unknown Name";
 
 	public String manifestType;
 	public int manifestVersion;
@@ -57,6 +27,8 @@ public class ExtendedCurseManifest implements Cloneable {
 	public String author;
 	public String description;
 	public Mod[] files;
+	public Mod[] alternativeMods;
+	public GroupInfo[] groups;
 	public FileInfo[] additionalFiles = new FileInfo[0];
 	public String overrides;
 	public MinecraftInfo minecraft;
@@ -75,8 +47,11 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.author = author;
 		manifest.description = manifest.description;
 		manifest.files = CloneException.tryClone(files);
+		manifest.alternativeMods = CloneException.tryClone(alternativeMods);
+		manifest.groups = CloneException.tryClone(groups);
+		manifest.additionalFiles = CloneException.tryClone(additionalFiles);
 		manifest.overrides = overrides;
-		manifest.minecraft = minecraft;
+		manifest.minecraft = minecraft.clone();
 		manifest.optifineVersion = optifineVersion;
 		manifest.minimumRam = minimumRam;
 		manifest.recommendedRam = recommendedRam;
