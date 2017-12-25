@@ -20,17 +20,17 @@ public class ExtendedCurseManifest implements Cloneable {
 		}
 	}
 
-	public String manifestType;
-	public int manifestVersion;
+	public String manifestType = "minecraftModpack";
+	public int manifestVersion = 1;
 	public String name;
 	public String version;
 	public String author;
 	public String description;
 	public Mod[] files;
-	public Mod[] alternativeMods;
-	public GroupInfo[] groups;
+	public Mod[] alternativeMods = new Mod[0];
+	public GroupInfo[] groups = new GroupInfo[0];
 	public FileInfo[] additionalFiles = new FileInfo[0];
-	public String overrides;
+	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
 	public String optifineVersion = "latest";
 	public double minimumRam = 3.0;
@@ -55,6 +55,22 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.optifineVersion = optifineVersion;
 		manifest.minimumRam = minimumRam;
 		manifest.recommendedRam = recommendedRam;
+
+		return manifest;
+	}
+
+	public CurseManifest toCurseManifest() {
+		final CurseManifest manifest = new CurseManifest();
+
+		manifest.manifestType = manifestType;
+		manifest.manifestVersion = manifestVersion;
+		manifest.name = name;
+		manifest.version = version;
+		manifest.author = author;
+		manifest.description = description;
+		manifest.files = CurseManifest.CurseMod.fromMods(files);
+		manifest.overrides = overrides;
+		manifest.minecraft = minecraft.clone();
 
 		return manifest;
 	}
