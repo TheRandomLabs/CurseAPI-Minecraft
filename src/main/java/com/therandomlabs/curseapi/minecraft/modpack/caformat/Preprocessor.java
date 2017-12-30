@@ -8,9 +8,9 @@ import com.therandomlabs.utils.collection.TRLList;
 public abstract class Preprocessor {
 	public static final char CHARACTER = '#';
 
-	public static final Preprocessor IMPORT = new PreprocessorImport();
-
 	private static final List<Preprocessor> preprocessors = new TRLList<>();
+
+	public static final Preprocessor IMPORT = new PreprocessorImport();
 
 	protected Preprocessor() {
 		preprocessors.add(this);
@@ -19,9 +19,9 @@ public abstract class Preprocessor {
 	@Override
 	public abstract String toString();
 
-	public abstract boolean isValid(String value);
+	public abstract boolean isValid(String value, String[] args);
 
-	public abstract void apply(TRLList<String> lines, int index, String value)
+	public abstract void apply(TRLList<String> lines, int index, String value, String[] args)
 			throws CurseException, IOException;
 
 	public static Preprocessor fromName(String name) {

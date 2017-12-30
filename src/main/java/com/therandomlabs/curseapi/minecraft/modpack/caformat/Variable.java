@@ -15,6 +15,8 @@ public class Variable {
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
 
+	private static final List<Variable> variables = new TRLList<>();
+
 	public static final Variable NAME = new Variable("name",
 			"My Modpack",
 			name -> true);
@@ -45,6 +47,8 @@ public class Variable {
 			ReleaseType.ALPHA.toString(),
 			releaseType -> ReleaseType.fromName(releaseType) != null);
 
+	public static final Variable AUTHOR = new Variable("author", "Me", author -> true);
+
 	public static final Variable DESCRIPTION = new Variable("description",
 			"The coolest modpack!",
 			description -> true);
@@ -60,8 +64,6 @@ public class Variable {
 	public static final Variable RECOMMENDED_RAM = new Variable("recommended_ram",
 			"4",
 			NumberUtils::isDouble);
-
-	private static final List<Variable> variables = new TRLList<>();
 
 	private final String name;
 	private final String defaultValue;

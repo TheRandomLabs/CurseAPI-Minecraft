@@ -5,6 +5,8 @@ import com.therandomlabs.curseapi.CurseException;
 
 @SuppressWarnings("unused")
 public interface MCEventHandler {
+	default void noFilesFound(int projectID) throws CurseException {}
+
 	default void autosavedInstallerData() throws CurseException {}
 
 	default void deleting(String fileName) throws CurseException {}

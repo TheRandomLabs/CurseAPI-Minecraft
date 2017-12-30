@@ -12,12 +12,12 @@ public class PostprocessorVersionGroup extends Postprocessor {
 	}
 
 	@Override
-	public boolean isValid(String value) {
-		return MinecraftVersion.groupFromString(value) != null;
+	public boolean isValid(String value, String[] args) {
+		return MinecraftVersion.groupFromString(args[0]) != null;
 	}
 
 	@Override
-	public List<String> apply(CAManifest manifest, String value) {
+	public List<String> apply(CAManifest manifest, String value, String[] args) {
 		//TODO
 		return null;
 	}

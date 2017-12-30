@@ -1,6 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.modpack.caformat;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,13 +13,20 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseFileList;
 import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.ReleaseType;
+import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.modpack.FileInfo;
 import com.therandomlabs.curseapi.minecraft.modpack.FileSide;
 import com.therandomlabs.curseapi.minecraft.modpack.Mod;
+import com.therandomlabs.curseapi.minecraft.modpack.manifest.CurseManifest;
+import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest.GroupInfo;
+import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLCollectors;
 import com.therandomlabs.utils.collection.TRLList;
+import com.therandomlabs.utils.concurrent.ThreadUtils;
+import com.therandomlabs.utils.io.IOUtils;
+import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.number.NumberUtils;
 import com.therandomlabs.utils.wrapper.BooleanWrapper;
@@ -36,6 +45,7 @@ public class CAManifest {
 	private final Map<Postprocessor, String> postprocessors = new HashMap<>();
 	private final TRLList<GroupInfo> groups = new TRLList<>();
 	private final TRLList<Mod> mods = new TRLList<>();
+	private final TRLList<FileInfo> additionalFiles = new TRLList<>();
 
 	private CAManifest() {}
 
@@ -55,6 +65,39 @@ public class CAManifest {
 		return mods;
 	}
 
+	public TRLList<FileInfo> getAdditionalFiles() {
+		return additionalFiles;
+	}
+
+	public CurseManifest toCurseManifest() {
+		return toExtendedCurseManifest().toCurseManifest();
+	}
+
+	public ExtendedCurseManifest toExtendedCurseManifest() {
+		final ExtendedCurseManifest manifest = new ExtendedCurseManifest();
+
+		manifest.name = variables.get(Variable.NAME);
+		manifest.version = variables.get(Variable.VERSION);
+		manifest.author = variables.get(Variable.AUTHOR);
+		manifest.description = variables.get(Variable.DESCRIPTION);
+		manifest.files = mods.toArray(new Mod[0]);
+		manifest.alternativeMods = new Mod[0]; //TODO mods should already have group data,
+												//it just needs to be split now
+		manifest.groups = groups.toArray(new GroupInfo[0]);
+		manifest.additionalFiles = additionalFiles.toArray(new FileInfo[0]);
+		manifest.minecraft = new MinecraftInfo(variables.get(Variable.MINECRAFT),
+				variables.get(Variable.FORGE));
+		manifest.optifineVersion = variables.get(Variable.OPTIFINE);
+		manifest.minimumRam = Double.parseDouble(variables.get(Variable.MINIMUM_RAM));
+		manifest.recommendedRam = Double.parseDouble(variables.get(Variable.RECOMMENDED_RAM));
+
+		return manifest;
+	}
+
+	public void writeTo(Path path) throws IOException {
+		NIOUtils.write(path, toExtendedCurseManifest().toPrettyJsonWithTabs());
+	}
+
 	public static CAManifest parse(List<String> lines)
 			throws CurseException, IOException, ManifestParseException {
 		final TRLList<String> pruned = prune(lines);
@@ -64,8 +107,9 @@ public class CAManifest {
 		parseVariables(pruned, manifest.variables);
 		parsePreprocessors(pruned, manifest.preprocessors);
 		parseGroups(pruned, manifest.groups);
-		parseMods(pruned, manifest.mods, manifest.variables);
+		parseMods(pruned, manifest.mods, manifest.additionalFiles, manifest.variables);
 		parsePostprocessors(pruned, manifest);
+		retrieveModInfo(manifest.mods, manifest.variables);
 
 		return null;
 	}
@@ -83,6 +127,11 @@ public class CAManifest {
 		}
 
 		return pruned;
+	}
+
+	public static CAManifest from(Path path)
+			throws CurseException, IOException, ManifestParseException {
+		return parse(Files.readAllLines(path));
 	}
 
 	private static void parseVariables(TRLList<String> lines,
@@ -120,13 +169,14 @@ public class CAManifest {
 			}
 
 			final String value = join(data, 1);
+			final String[] args = getData(value);
 
-			if(!preprocessor.isValid(value)) {
+			if(!preprocessor.isValid(value, args)) {
 				throw new ManifestParseException("Invalid value \"%s\" for preprocessor: %s",
 						value, preprocessor);
 			}
 
-			preprocessor.apply(lines, line.getKey(), value);
+			preprocessor.apply(lines, line.getKey(), value, args);
 
 			preprocessors.put(preprocessor, value);
 		}
@@ -182,7 +232,8 @@ public class CAManifest {
 	}
 
 	private static void parseMods(List<String> lines, List<Mod> mods,
-			Map<Variable, String> variables) throws CurseException, ManifestParseException {
+			List<FileInfo> additionalFiles, Map<Variable, String> variables)
+			throws ManifestParseException {
 		lines = lines.stream().filter(line -> !line.startsWith(Postprocessor.CHARACTER + " ")).
 				collect(TRLCollectors.toArrayList());
 
@@ -217,7 +268,8 @@ public class CAManifest {
 
 			data = ArrayUtils.subArray(data, i);
 
-			parseModData(line, data, side, group, optional.get(), mods, variables);
+			parseModData(line, data, side, group, optional.get(), mods, additionalFiles,
+					variables);
 		}
 	}
 
@@ -258,35 +310,25 @@ public class CAManifest {
 
 			optional.set(true);
 			break;
+		default:
+			throw new ManifestParseException("Invalid marker: " + marker);
 		}
 	}
 
 	private static void parseModData(String line, String[] data, FileSide side, String group,
-			boolean optional, List<Mod> mods, Map<Variable, String> variables)
-					throws CurseException, ManifestParseException {
+			boolean optional, List<Mod> mods, List<FileInfo> additionalFiles,
+			Map<Variable, String> variables) throws ManifestParseException {
 		if(data.length == 0) {
 			throw new ManifestParseException("A project ID or file path must be defined: " + line);
 		}
 
 		final int projectID = NumberUtils.parseInt(data[0], 0);
 		if(projectID >= CurseAPI.MIN_PROJECT_ID) {
-			final CurseProject project = CurseProject.fromID(projectID);
-
 			final int relatedFilesIndex;
 
 			int fileID = data.length > 1 ? NumberUtils.parseInt(data[1], 0) : 0;
 			if(fileID < CurseAPI.MIN_PROJECT_ID) {
-				final CurseFileList list = project.files().
-						filterMCVersionGroup(variables.get(Variable.MINECRAFT)).
-						filterMinimumStability(
-								ReleaseType.fromName(variables.get(Variable.MINIMUM_STABILITY)));
-				if(list.isEmpty()) {
-					//TODO log no files found
-					return;
-				}
-
-				fileID = list.get(0).id();
-
+				fileID = -1;
 				relatedFilesIndex = 1;
 			} else {
 				relatedFilesIndex = 2;
@@ -294,26 +336,72 @@ public class CAManifest {
 
 			final Mod mod = new Mod();
 
-			mod.title = project.title();
 			mod.projectID = projectID;
 			mod.fileID = fileID;
 			mod.side = side;
 			mod.optional = optional;
-			mod.relatedFiles = getRelatedFiles(ArrayUtils.subArray(data, relatedFilesIndex));
+			mod.relatedFiles =
+					getRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
 			mod.group = group;
 
 			mods.add(mod);
 		} else {
+			final String path = ArrayUtils.join(data, " ");
 
+			if(!IOUtils.isValidPath(path)) {
+				throw new ManifestParseException("Invalid path: " + path);
+			}
+
+			additionalFiles.add(new FileInfo(path, side));
 		}
 	}
 
-	private static FileInfo[] getRelatedFiles(String[] data) throws ManifestParseException {
-		return null;
+	private static FileInfo[] getRelatedFiles(FileSide side, String[] data, String line)
+			throws ManifestParseException {
+		final List<FileInfo> relatedFiles = new TRLList<>();
+
+		final BooleanWrapper client = new BooleanWrapper();
+		final BooleanWrapper server = new BooleanWrapper();
+		final BooleanWrapper both = new BooleanWrapper();
+		final BooleanWrapper optional = new BooleanWrapper();
+
+		for(String element : data) {
+			if(element.length() > 1 && element.charAt(0) == Marker.CHARACTER) {
+				if(element.length() != 2) {
+					throw new ManifestParseException("Invalid marker: " + element.substring(1));
+				}
+
+				parseMarker(line, element.charAt(1), client, server, both, optional);
+
+				if(optional.get()) {
+					throw new ManifestParseException("A related file may not be defined as " +
+							"optional: " + line);
+				}
+
+				side = FileSide.fromBooleans(client.get(), server.get(), both.get());
+
+				continue;
+			}
+
+			//TODO support spaces
+
+			if(!IOUtils.isValidPath(element)) {
+				throw new ManifestParseException("Invalid path: " + element);
+			}
+
+			relatedFiles.add(new FileInfo(element, side));
+
+			client.set(false);
+			server.set(false);
+			both.set(false);
+			optional.set(false);
+		}
+
+		return relatedFiles.toArray(new FileInfo[0]);
 	}
 
 	private static void parsePostprocessors(List<String> lines, CAManifest manifest)
-			throws CurseException, ManifestParseException {
+			throws ManifestParseException {
 		final Map<Integer, String> filtered = filter(lines, Postprocessor.CHARACTER);
 
 		for(String line : filtered.values()) {
@@ -324,16 +412,38 @@ public class CAManifest {
 			}
 
 			final String value = join(data, 1);
+			final String[] args = getData(value);
 
-			if(!postprocessor.isValid(value)) {
+			if(!postprocessor.isValid(value, args)) {
 				throw new ManifestParseException("Invalid value \"%s\" for postprocessor: %s",
 						value, postprocessor);
 			}
 
-			parseMods(postprocessor.apply(manifest, value), manifest.mods, manifest.variables);
+			parseMods(postprocessor.apply(manifest, value, args), manifest.mods,
+					manifest.additionalFiles, manifest.variables);
 
 			manifest.postprocessors.put(postprocessor, value);
 		}
+	}
+
+	private static void retrieveModInfo(List<Mod> mods, Map<Variable, String> variables)
+			throws CurseException {
+		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(), index -> {
+			final Mod mod = mods.get(index);
+			final CurseProject project = CurseProject.fromID(mod.projectID);
+
+			final CurseFileList list = project.files().
+					filterMCVersionGroup(variables.get(Variable.MINECRAFT)).
+					filterMinimumStability(
+							ReleaseType.fromName(variables.get(Variable.MINIMUM_STABILITY)));
+			if(list.isEmpty()) {
+				MCEventHandling.forEach(handler -> handler.noFilesFound(mod.projectID));
+				return;
+			}
+
+			mod.title = project.title();
+			mod.fileID = list.get(0).id();
+		});
 	}
 
 	private static Map<Integer, String> filter(List<String> lines, char character) {

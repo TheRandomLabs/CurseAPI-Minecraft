@@ -6,6 +6,8 @@ import com.therandomlabs.utils.collection.TRLList;
 public abstract class Postprocessor {
 	public static final char CHARACTER = '*';
 
+	private static final List<Postprocessor> postprocessors = new TRLList<>();
+
 	public static final Postprocessor NEWER_THAN =
 			new PostprocessorVersion(">", result -> result > 0);
 
@@ -21,8 +23,6 @@ public abstract class Postprocessor {
 	public static final Postprocessor OLDER_THAN_OR_EQUAL_TO =
 			new PostprocessorVersion("<=", result -> result <= 0);
 
-	private static final List<Postprocessor> postprocessors = new TRLList<>();
-
 	protected Postprocessor() {
 		postprocessors.add(this);
 	}
@@ -30,9 +30,9 @@ public abstract class Postprocessor {
 	@Override
 	public abstract String toString();
 
-	public abstract boolean isValid(String value);
+	public abstract boolean isValid(String value, String[] args);
 
-	public abstract List<String> apply(CAManifest manifest, String value);
+	public abstract List<String> apply(CAManifest manifest, String value, String[] args);
 
 	public static Postprocessor fromName(String name) {
 		for(Postprocessor postprocessor : postprocessors) {

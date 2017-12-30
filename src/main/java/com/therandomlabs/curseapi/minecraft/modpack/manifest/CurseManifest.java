@@ -1,5 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseProject;
@@ -96,5 +98,17 @@ public class CurseManifest implements Cloneable {
 		manifest.minecraft = minecraft.clone();
 
 		return manifest;
+	}
+
+	public String toJson() {
+		return new Gson().toJson(this);
+	}
+
+	public String toPrettyJson() {
+		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+	}
+
+	public String toPrettyJsonWithTabs() {
+		return toPrettyJson().replaceAll("  ", "\t");
 	}
 }

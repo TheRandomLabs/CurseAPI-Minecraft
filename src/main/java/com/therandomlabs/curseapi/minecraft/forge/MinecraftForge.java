@@ -22,6 +22,7 @@ public final class MinecraftForge {
 
 	private MinecraftForge() {}
 
+	@SuppressWarnings("unused")
 	public static boolean isValidVersion(String version) throws CurseException {
 		//TODO
 		return true;

@@ -34,7 +34,7 @@ public class PreprocessorImport extends Preprocessor {
 	}
 
 	@Override
-	public boolean isValid(String value) {
+	public boolean isValid(String value, String[] args) {
 		if(value.equalsIgnoreCase(LIGHTCHOCOLATE) || value.equalsIgnoreCase(DARKCHOCOLATE)) {
 			return true;
 		}
@@ -53,7 +53,7 @@ public class PreprocessorImport extends Preprocessor {
 	}
 
 	@Override
-	public void apply(TRLList<String> lines, int index, String value)
+	public void apply(TRLList<String> lines, int index, String value, String[] args)
 			throws CurseException, IOException {
 		List<String> linesToImport = null;
 
