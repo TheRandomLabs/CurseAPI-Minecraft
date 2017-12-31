@@ -14,6 +14,7 @@ import com.therandomlabs.curseapi.CurseFileList;
 import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.ReleaseType;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
+import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.modpack.FileInfo;
 import com.therandomlabs.curseapi.minecraft.modpack.FileSide;
 import com.therandomlabs.curseapi.minecraft.modpack.Mod;
@@ -69,11 +70,11 @@ public class CAManifest {
 		return additionalFiles;
 	}
 
-	public CurseManifest toCurseManifest() {
+	public CurseManifest toCurseManifest() throws CurseException {
 		return toExtendedCurseManifest().toCurseManifest();
 	}
 
-	public ExtendedCurseManifest toExtendedCurseManifest() {
+	public ExtendedCurseManifest toExtendedCurseManifest() throws CurseException {
 		final ExtendedCurseManifest manifest = new ExtendedCurseManifest();
 
 		manifest.name = variables.get(Variable.NAME);
@@ -86,7 +87,7 @@ public class CAManifest {
 		manifest.groups = groups.toArray(new GroupInfo[0]);
 		manifest.additionalFiles = additionalFiles.toArray(new FileInfo[0]);
 		manifest.minecraft = new MinecraftInfo(variables.get(Variable.MINECRAFT),
-				variables.get(Variable.FORGE));
+				MinecraftForge.get(manifest.version, variables.get(Variable.FORGE)));
 		manifest.optifineVersion = variables.get(Variable.OPTIFINE);
 		manifest.minimumRam = Double.parseDouble(variables.get(Variable.MINIMUM_RAM));
 		manifest.recommendedRam = Double.parseDouble(variables.get(Variable.RECOMMENDED_RAM));
@@ -94,7 +95,7 @@ public class CAManifest {
 		return manifest;
 	}
 
-	public void writeTo(Path path) throws IOException {
+	public void writeTo(Path path) throws CurseException, IOException {
 		NIOUtils.write(path, toExtendedCurseManifest().toPrettyJsonWithTabs(), true);
 	}
 

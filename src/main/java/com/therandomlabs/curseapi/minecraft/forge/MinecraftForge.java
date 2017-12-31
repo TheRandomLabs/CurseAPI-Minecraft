@@ -3,6 +3,7 @@ package com.therandomlabs.curseapi.minecraft.forge;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Locale;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.util.DocumentUtils;
@@ -19,6 +20,9 @@ public final class MinecraftForge {
 	public static final String INSTALLER_URL =
 			"https://files.minecraftforge.net/maven/net/minecraftforge/forge/" +
 			FORGE_VERSION + "/forge-" + FORGE_VERSION + "-installer.jar";
+
+	public static final String LATEST = "latest";
+	public static final String RECOMMENDED = "recommended";
 
 	private MinecraftForge() {}
 
@@ -75,5 +79,21 @@ public final class MinecraftForge {
 	public static String getInstalledDirectoryName(MinecraftVersion minecraftVersion,
 			String forgeVersion) {
 		return getInstalledDirectoryName(minecraftVersion.toString(), forgeVersion);
+	}
+
+	public static String get(String minecraftVersion, String forgeVersion) throws CurseException {
+		return get(MinecraftVersion.fromString(minecraftVersion), forgeVersion);
+	}
+
+	public static String get(MinecraftVersion minecraftVersion, String forgeVersion)
+			throws CurseException {
+		forgeVersion = forgeVersion.toLowerCase(Locale.ENGLISH);
+		if(forgeVersion.equals(LATEST)) {
+			return getLatestVersion(minecraftVersion);
+		}
+		if(forgeVersion.equals(RECOMMENDED)) {
+			return getRecommendedVersion(minecraftVersion);
+		}
+		return forgeVersion;
 	}
 }
