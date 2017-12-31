@@ -59,11 +59,11 @@ public class Variable {
 
 	public static final Variable MINIMUM_RAM = new Variable("minimum_ram",
 			"3",
-			NumberUtils::isDouble);
+			NumberUtils::isInteger);
 
 	public static final Variable RECOMMENDED_RAM = new Variable("recommended_ram",
 			"4",
-			NumberUtils::isDouble);
+			NumberUtils::isInteger);
 
 	private final String name;
 	private final String defaultValue;

@@ -92,8 +92,8 @@ public class CAManifest {
 				MinecraftForge.get(minecraft, variables.get(Variable.FORGE)));
 
 		manifest.optifineVersion = variables.get(Variable.OPTIFINE);
-		manifest.minimumRam = Double.parseDouble(variables.get(Variable.MINIMUM_RAM));
-		manifest.recommendedRam = Double.parseDouble(variables.get(Variable.RECOMMENDED_RAM));
+		manifest.minimumRam = Integer.parseInt(variables.get(Variable.MINIMUM_RAM));
+		manifest.recommendedRam = Integer.parseInt(variables.get(Variable.RECOMMENDED_RAM));
 
 		return manifest;
 	}

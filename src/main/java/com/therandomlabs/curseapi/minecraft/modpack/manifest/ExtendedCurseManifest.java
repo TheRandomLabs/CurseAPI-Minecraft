@@ -35,8 +35,8 @@ public class ExtendedCurseManifest implements Cloneable {
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
 	public String optifineVersion = "latest";
-	public double minimumRam = 3.0;
-	public double recommendedRam = 4.0;
+	public int minimumRam = 3072;
+	public int recommendedRam = 4096;
 
 	@Override
 	public ExtendedCurseManifest clone() {
