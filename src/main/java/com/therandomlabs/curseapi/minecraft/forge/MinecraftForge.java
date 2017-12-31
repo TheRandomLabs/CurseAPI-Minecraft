@@ -1,6 +1,5 @@
 package com.therandomlabs.curseapi.minecraft.forge;
 
-import static com.therandomlabs.utils.logging.Logging.getLogger;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -42,7 +41,6 @@ public final class MinecraftForge {
 	}
 
 	public static String getLatestVersion(String version) throws CurseException {
-		getLogger().fatalError(version);
 		return getLatestVersion(MinecraftVersion.fromString(version));
 	}
 
@@ -90,12 +88,15 @@ public final class MinecraftForge {
 	public static String get(MinecraftVersion minecraftVersion, String forgeVersion)
 			throws CurseException {
 		forgeVersion = forgeVersion.toLowerCase(Locale.ENGLISH);
+
 		if(forgeVersion.equals(LATEST)) {
 			return getLatestVersion(minecraftVersion);
 		}
+
 		if(forgeVersion.equals(RECOMMENDED)) {
 			return getRecommendedVersion(minecraftVersion);
 		}
+
 		return forgeVersion;
 	}
 }

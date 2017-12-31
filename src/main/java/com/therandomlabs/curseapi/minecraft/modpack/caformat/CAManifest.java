@@ -86,8 +86,11 @@ public class CAManifest {
 												//it just needs to be split now
 		manifest.groups = groups.toArray(new GroupInfo[0]);
 		manifest.additionalFiles = additionalFiles.toArray(new FileInfo[0]);
-		manifest.minecraft = new MinecraftInfo(variables.get(Variable.MINECRAFT),
-				MinecraftForge.get(manifest.version, variables.get(Variable.FORGE)));
+
+		final String minecraft = variables.get(Variable.MINECRAFT);
+		manifest.minecraft = new MinecraftInfo(minecraft,
+				MinecraftForge.get(minecraft, variables.get(Variable.FORGE)));
+
 		manifest.optifineVersion = variables.get(Variable.OPTIFINE);
 		manifest.minimumRam = Double.parseDouble(variables.get(Variable.MINIMUM_RAM));
 		manifest.recommendedRam = Double.parseDouble(variables.get(Variable.RECOMMENDED_RAM));
