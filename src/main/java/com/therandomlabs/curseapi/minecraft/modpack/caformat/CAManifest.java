@@ -95,7 +95,7 @@ public class CAManifest {
 	}
 
 	public void writeTo(Path path) throws IOException {
-		NIOUtils.write(path, toExtendedCurseManifest().toPrettyJsonWithTabs());
+		NIOUtils.write(path, toExtendedCurseManifest().toPrettyJsonWithTabs(), true);
 	}
 
 	public static CAManifest parse(List<String> lines)
@@ -111,7 +111,7 @@ public class CAManifest {
 		parsePostprocessors(pruned, manifest);
 		retrieveModInfo(manifest.mods, manifest.variables);
 
-		return null;
+		return manifest;
 	}
 
 	public static TRLList<String> prune(List<String> lines) {
@@ -136,7 +136,7 @@ public class CAManifest {
 
 	private static void parseVariables(TRLList<String> lines,
 			Map<Variable, String> variables) throws ManifestParseException {
-		final Map<Integer, String> filtered = filter(lines, Preprocessor.CHARACTER);
+		final Map<Integer, String> filtered = filter(lines, Variable.CHARACTER);
 
 		for(String line : filtered.values()) {
 			final String[] data = getData(line);
@@ -154,6 +154,8 @@ public class CAManifest {
 
 			variables.put(variable, value);
 		}
+
+		//TODO make sure all variables are declared
 	}
 
 	private static void parsePreprocessors(TRLList<String> lines,
@@ -448,9 +450,9 @@ public class CAManifest {
 
 	private static Map<Integer, String> filter(List<String> lines, char character) {
 		final Map<Integer, String> filtered = new HashMap<>();
-		for(int i = 0; i < lines.size(); i++) {
-			if(lines.get(i).startsWith(character + " ")) {
-				filtered.put(i, lines.get(i).substring(2));
+		for(int i = 0, j = 0; i < lines.size(); i++, j++) {
+			if(lines.get(i).charAt(0) == character && lines.get(i).charAt(1) == ' ') {
+				filtered.put(j, lines.get(i).substring(2));
 				lines.remove(i--);
 			}
 		}

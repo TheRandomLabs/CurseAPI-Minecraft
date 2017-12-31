@@ -7,7 +7,7 @@ public final class ModLoaderInfo implements Cloneable {
 	public ModLoaderInfo() {}
 
 	public ModLoaderInfo(String forgeVersion) {
-		id = "forge-" + forgeVersion.split("-")[1];
+		id = "forge-" + forgeVersion;
 	}
 
 	@Override
