@@ -346,6 +346,13 @@ public class CAManifest {
 				relatedFilesIndex = 2;
 			}
 
+			for(Mod mod : mods) {
+				if(mod.projectID == projectID) {
+					mods.remove(mod);
+					break;
+				}
+			}
+
 			final Mod mod = new Mod();
 
 			mod.projectID = projectID;
@@ -440,6 +447,8 @@ public class CAManifest {
 
 	private static void retrieveModInfo(List<Mod> mods, Map<Variable, String> variables)
 			throws CurseException {
+		final List<Mod> modsToRemove = new TRLList<>();
+
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(), index -> {
 			final Mod mod = mods.get(index);
 			final CurseProject project = CurseProject.fromID(mod.projectID);
@@ -450,12 +459,17 @@ public class CAManifest {
 							ReleaseType.fromName(variables.get(Variable.MINIMUM_STABILITY)));
 			if(list.isEmpty()) {
 				MCEventHandling.forEach(handler -> handler.noFilesFound(mod.projectID));
+				modsToRemove.add(mod);
 				return;
 			}
 
 			mod.title = project.title();
 			mod.fileID = list.get(0).id();
 		});
+
+		for(Mod mod : modsToRemove) {
+			mods.remove(mod);
+		}
 	}
 
 	private static Map<Integer, String> filter(List<String> lines, char character) {
