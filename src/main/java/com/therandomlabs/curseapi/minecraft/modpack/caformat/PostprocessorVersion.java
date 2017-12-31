@@ -4,15 +4,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.IntPredicate;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
+import com.therandomlabs.utils.collection.ArrayUtils;
+import com.therandomlabs.utils.collection.ImmutableList;
 
 public class PostprocessorVersion extends Postprocessor {
 	private final String name;
-	@SuppressWarnings("unused")
-	private final IntPredicate testCompareResult;
+	private final IntPredicate predicate;
 
-	PostprocessorVersion(String name, IntPredicate testCompareResult) {
+	PostprocessorVersion(String name, IntPredicate predicate) {
 		this.name = name;
-		this.testCompareResult = testCompareResult;
+		this.predicate = predicate;
 	}
 
 	@Override
@@ -27,7 +28,14 @@ public class PostprocessorVersion extends Postprocessor {
 
 	@Override
 	public List<String> apply(CAManifest manifest, String value, String[] args) {
-		//TODO
+		final MinecraftVersion modpackVersion = MinecraftVersion.fromString(
+				manifest.getVariables().get(Variable.MINECRAFT));
+		final MinecraftVersion toCompare = MinecraftVersion.fromString(args[0]);
+
+		if(predicate.test(toCompare.compareTo(modpackVersion))) {
+			return new ImmutableList<>(ArrayUtils.join(ArrayUtils.subArray(args, 1), " "));
+		}
+
 		return Collections.emptyList();
 	}
 }

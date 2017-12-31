@@ -1,14 +1,17 @@
 package com.therandomlabs.curseapi.minecraft.modpack.caformat;
 
+import java.util.Collections;
 import java.util.List;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
+import com.therandomlabs.utils.collection.ArrayUtils;
+import com.therandomlabs.utils.collection.ImmutableList;
 
 public class PostprocessorVersionGroup extends Postprocessor {
 	PostprocessorVersionGroup() {}
 
 	@Override
 	public String toString() {
-		return "=version";
+		return "=";
 	}
 
 	@Override
@@ -18,7 +21,14 @@ public class PostprocessorVersionGroup extends Postprocessor {
 
 	@Override
 	public List<String> apply(CAManifest manifest, String value, String[] args) {
-		//TODO
-		return null;
+		final MinecraftVersion modpackVersion = MinecraftVersion.groupFromString(
+				manifest.getVariables().get(Variable.MINECRAFT));
+		final MinecraftVersion toCompare = MinecraftVersion.groupFromString(args[0]);
+
+		if(modpackVersion == toCompare) {
+			return new ImmutableList<>(ArrayUtils.join(ArrayUtils.subArray(args, 1), " "));
+		}
+
+		return Collections.emptyList();
 	}
 }
