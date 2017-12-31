@@ -105,6 +105,7 @@ public class CAManifest {
 
 		final CAManifest manifest = new CAManifest();
 
+		initializeVariables(manifest.variables);
 		parseVariables(pruned, manifest.variables);
 		parsePreprocessors(pruned, manifest.preprocessors);
 		parseGroups(pruned, manifest.groups);
@@ -135,6 +136,13 @@ public class CAManifest {
 		return parse(Files.readAllLines(path));
 	}
 
+	private static void initializeVariables(Map<Variable, String> variables) {
+		variables.clear();
+		for(Variable variable : Variable.getVariables()) {
+			variables.put(variable, variable.defaultValue());
+		}
+	}
+
 	private static void parseVariables(TRLList<String> lines,
 			Map<Variable, String> variables) throws ManifestParseException {
 		final Map<Integer, String> filtered = filter(lines, Variable.CHARACTER);
@@ -155,8 +163,6 @@ public class CAManifest {
 
 			variables.put(variable, value);
 		}
-
-		//TODO make sure all variables are declared
 	}
 
 	private static void parsePreprocessors(TRLList<String> lines,

@@ -99,4 +99,8 @@ public class Variable {
 
 		return null;
 	}
+
+	public static Variable[] getVariables() {
+		return variables.toArray(new Variable[0]);
+	}
 }
