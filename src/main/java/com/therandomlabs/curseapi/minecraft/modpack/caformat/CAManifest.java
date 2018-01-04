@@ -41,11 +41,16 @@ public class CAManifest {
 	public static final String COMMENT = "//";
 	public static final char COMMENT_CHARACTER = ':';
 
+	public static final char REMOVE_PROJECT_ID = '-';
+
+	public static final char SPACE_PLACEHOLDER = ':';
+
 	private final Map<Variable, String> variables = new HashMap<>();
 	private final Map<Preprocessor, String> preprocessors = new HashMap<>();
 	private final Map<Postprocessor, String> postprocessors = new HashMap<>();
 	private final TRLList<GroupInfo> groups = new TRLList<>();
 	private final TRLList<Mod> mods = new TRLList<>();
+	private final TRLList<Mod> alternativeMods = new TRLList<>();
 	private final TRLList<FileInfo> additionalFiles = new TRLList<>();
 
 	private CAManifest() {}
@@ -66,6 +71,10 @@ public class CAManifest {
 		return mods;
 	}
 
+	public TRLList<Mod> getAlternativeMods() {
+		return alternativeMods;
+	}
+
 	public TRLList<FileInfo> getAdditionalFiles() {
 		return additionalFiles;
 	}
@@ -82,8 +91,7 @@ public class CAManifest {
 		manifest.author = variables.get(Variable.AUTHOR);
 		manifest.description = variables.get(Variable.DESCRIPTION);
 		manifest.files = mods.toArray(new Mod[0]);
-		manifest.alternativeMods = new Mod[0]; //TODO mods should already have group data,
-												//it just needs to be split now
+		manifest.alternativeMods = alternativeMods.toArray(new Mod[0]);
 		manifest.groups = groups.toArray(new GroupInfo[0]);
 		manifest.additionalFiles = additionalFiles.toArray(new FileInfo[0]);
 
@@ -112,7 +120,8 @@ public class CAManifest {
 		parseVariables(pruned, manifest.variables);
 		parsePreprocessors(pruned, manifest.preprocessors);
 		parseGroups(pruned, manifest.groups);
-		parseMods(pruned, manifest.mods, manifest.additionalFiles, manifest.variables);
+		parseMods(pruned, manifest.mods, manifest.alternativeMods, manifest.additionalFiles,
+				manifest.variables);
 		parsePostprocessors(pruned, manifest);
 		retrieveModInfo(manifest.mods, manifest.variables);
 
@@ -126,7 +135,11 @@ public class CAManifest {
 			line = line.trim();
 			if(!line.isEmpty() && !line.startsWith(COMMENT) &&
 					line.charAt(0) != COMMENT_CHARACTER) {
-				line = StringUtils.split(line, COMMENT_CHARACTER)[0];
+				//Variables can have colons in their values
+				if(!line.startsWith(Variable.CHARACTER + " ")) {
+					line = StringUtils.split(line, COMMENT_CHARACTER)[0];
+				}
+
 				pruned.add(line);
 			}
 		}
@@ -243,7 +256,7 @@ public class CAManifest {
 		}
 	}
 
-	private static void parseMods(List<String> lines, List<Mod> mods,
+	private static void parseMods(List<String> lines, List<Mod> mods, List<Mod> alternativeMods,
 			List<FileInfo> additionalFiles, Map<Variable, String> variables)
 			throws ManifestParseException {
 		lines = lines.stream().filter(line -> !line.startsWith(Postprocessor.CHARACTER + " ")).
@@ -256,6 +269,25 @@ public class CAManifest {
 			if(data[0].equals(String.valueOf(GROUP_MARKER))) {
 				group = join(data, 1);
 				continue;
+			}
+
+			if(data[0].equals(String.valueOf(REMOVE_PROJECT_ID))) {
+				final int projectID = NumberUtils.parseInt(data[1], 0);
+				if(projectID < CurseAPI.MIN_PROJECT_ID) {
+					throw new ManifestParseException("Invalid project ID: " + data[1]);
+				}
+
+				for(int i = 0; i < mods.size(); i++) {
+					if(mods.get(i).projectID == projectID) {
+						mods.remove(i--);
+					}
+				}
+
+				for(int i = 0; i < alternativeMods.size(); i++) {
+					if(alternativeMods.get(i).projectID == projectID) {
+						alternativeMods.remove(i--);
+					}
+				}
 			}
 
 			final BooleanWrapper client = new BooleanWrapper();
@@ -280,8 +312,8 @@ public class CAManifest {
 
 			data = ArrayUtils.subArray(data, i);
 
-			parseModData(line, data, side, group, optional.get(), mods, additionalFiles,
-					variables);
+			parseModData(line, data, side, group, optional.get(), mods, alternativeMods,
+					additionalFiles, variables);
 		}
 	}
 
@@ -328,8 +360,9 @@ public class CAManifest {
 	}
 
 	private static void parseModData(String line, String[] data, FileSide side, String group,
-			boolean optional, List<Mod> mods, List<FileInfo> additionalFiles,
-			Map<Variable, String> variables) throws ManifestParseException {
+			boolean optional, List<Mod> mods, List<Mod> alternativeMods,
+			List<FileInfo> additionalFiles, Map<Variable, String> variables)
+					throws ManifestParseException {
 		if(data.length == 0) {
 			throw new ManifestParseException("A project ID or file path must be defined: " + line);
 		}
@@ -346,7 +379,13 @@ public class CAManifest {
 				relatedFilesIndex = 2;
 			}
 
+			boolean isAlternative = false;
+
 			for(Mod mod : mods) {
+				if(mod.group.equals(group)) {
+					isAlternative = true;
+				}
+
 				if(mod.projectID == projectID) {
 					mods.remove(mod);
 					break;
@@ -363,9 +402,14 @@ public class CAManifest {
 					getRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
 			mod.group = group;
 
-			mods.add(mod);
+			if(isAlternative) {
+				alternativeMods.add(mod);
+			} else {
+				mods.add(mod);
+			}
 		} else {
-			final String path = ArrayUtils.join(data, " ");
+			final String path = StringUtils.replaceAll(ArrayUtils.join(data, " "),
+					SPACE_PLACEHOLDER, ' ');
 
 			if(!IOUtils.isValidPath(path)) {
 				throw new ManifestParseException("Invalid path: " + path);
@@ -402,7 +446,7 @@ public class CAManifest {
 				continue;
 			}
 
-			//TODO support spaces
+			element = StringUtils.replaceAll(element, SPACE_PLACEHOLDER, ' ');
 
 			if(!IOUtils.isValidPath(element)) {
 				throw new ManifestParseException("Invalid path: " + element);
@@ -439,7 +483,7 @@ public class CAManifest {
 			}
 
 			parseMods(postprocessor.apply(manifest, value, args), manifest.mods,
-					manifest.additionalFiles, manifest.variables);
+					manifest.alternativeMods, manifest.additionalFiles, manifest.variables);
 
 			manifest.postprocessors.put(postprocessor, value);
 		}
