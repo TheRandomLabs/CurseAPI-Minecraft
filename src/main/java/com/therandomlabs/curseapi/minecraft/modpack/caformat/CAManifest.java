@@ -50,6 +50,7 @@ public class CAManifest {
 	private final Map<Postprocessor, String> postprocessors = new HashMap<>();
 	private final TRLList<GroupInfo> groups = new TRLList<>();
 	private final TRLList<Mod> mods = new TRLList<>();
+	private final TRLList<Mod> serverOnlyMods = new TRLList<>();
 	private final TRLList<Mod> alternativeMods = new TRLList<>();
 	private final TRLList<FileInfo> additionalFiles = new TRLList<>();
 
@@ -69,6 +70,10 @@ public class CAManifest {
 
 	public TRLList<Mod> getMods() {
 		return mods;
+	}
+
+	public TRLList<Mod> getServerOnlyMods() {
+		return serverOnlyMods;
 	}
 
 	public TRLList<Mod> getAlternativeMods() {
@@ -91,6 +96,7 @@ public class CAManifest {
 		manifest.author = variables.get(Variable.AUTHOR);
 		manifest.description = variables.get(Variable.DESCRIPTION);
 		manifest.files = mods.toArray(new Mod[0]);
+		manifest.serverOnlyMods = serverOnlyMods.toArray(new Mod[0]);
 		manifest.alternativeMods = alternativeMods.toArray(new Mod[0]);
 		manifest.groups = groups.toArray(new GroupInfo[0]);
 		manifest.additionalFiles = additionalFiles.toArray(new FileInfo[0]);
@@ -120,8 +126,8 @@ public class CAManifest {
 		parseVariables(pruned, manifest.variables);
 		parsePreprocessors(pruned, manifest.preprocessors);
 		parseGroups(pruned, manifest.groups);
-		parseMods(pruned, manifest.mods, manifest.alternativeMods, manifest.additionalFiles,
-				manifest.variables);
+		parseMods(pruned, manifest.mods, manifest.serverOnlyMods, manifest.alternativeMods,
+				manifest.additionalFiles, manifest.variables);
 		parsePostprocessors(pruned, manifest);
 		retrieveModInfo(manifest.mods, manifest.variables);
 
@@ -256,9 +262,9 @@ public class CAManifest {
 		}
 	}
 
-	private static void parseMods(List<String> lines, List<Mod> mods, List<Mod> alternativeMods,
-			List<FileInfo> additionalFiles, Map<Variable, String> variables)
-			throws ManifestParseException {
+	private static void parseMods(List<String> lines, List<Mod> mods, List<Mod> serverOnlyMods,
+			List<Mod> alternativeMods, List<FileInfo> additionalFiles,
+			Map<Variable, String> variables) throws ManifestParseException {
 		lines = lines.stream().filter(line -> !line.startsWith(Postprocessor.CHARACTER + " ")).
 				collect(TRLCollectors.toArrayList());
 
@@ -312,8 +318,9 @@ public class CAManifest {
 
 			data = ArrayUtils.subArray(data, i);
 
-			parseModData(line, data, side, group, optional.get(), mods, alternativeMods,
-					additionalFiles, variables);
+			parseModData(line, data, side, group, optional.get(),
+					side == FileSide.SERVER ? serverOnlyMods : mods,
+					alternativeMods, additionalFiles, variables);
 		}
 	}
 
@@ -483,7 +490,8 @@ public class CAManifest {
 			}
 
 			parseMods(postprocessor.apply(manifest, value, args), manifest.mods,
-					manifest.alternativeMods, manifest.additionalFiles, manifest.variables);
+					manifest.serverOnlyMods, manifest.alternativeMods, manifest.additionalFiles,
+					manifest.variables);
 
 			manifest.postprocessors.put(postprocessor, value);
 		}

@@ -29,6 +29,7 @@ public class ExtendedCurseManifest implements Cloneable {
 	public String author;
 	public String description;
 	public Mod[] files;
+	public Mod[] serverOnlyMods = new Mod[0];
 	public Mod[] alternativeMods = new Mod[0];
 	public GroupInfo[] groups = new GroupInfo[0];
 	public FileInfo[] additionalFiles = new FileInfo[0];
@@ -49,6 +50,7 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.author = author;
 		manifest.description = description;
 		manifest.files = CloneException.tryClone(files);
+		manifest.serverOnlyMods = CloneException.tryClone(serverOnlyMods);
 		manifest.alternativeMods = CloneException.tryClone(alternativeMods);
 		manifest.groups = CloneException.tryClone(groups);
 		manifest.additionalFiles = CloneException.tryClone(additionalFiles);
