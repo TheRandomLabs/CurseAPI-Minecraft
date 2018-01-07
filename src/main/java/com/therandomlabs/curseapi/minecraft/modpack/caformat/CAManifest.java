@@ -129,7 +129,7 @@ public class CAManifest {
 		parsePreprocessors(pruned, manifest.preprocessors);
 		parseGroups(pruned, manifest.groups);
 		parseMods(pruned, manifest.mods, manifest.serverOnlyMods, manifest.alternativeMods,
-				manifest.additionalFiles, manifest.variables);
+				manifest.additionalFiles, manifest.variables, manifest.groups);
 		parsePostprocessors(pruned, manifest);
 		retrieveModInfo(manifest.mods, manifest.variables);
 		retrieveModInfo(manifest.serverOnlyMods, manifest.variables);
@@ -268,9 +268,8 @@ public class CAManifest {
 
 	private static void parseMods(List<String> lines, List<Mod> mods, List<Mod> serverOnlyMods,
 			List<Mod> alternativeMods, List<FileInfo> additionalFiles,
-			Map<Variable, String> variables) throws ManifestParseException {
-		final List<String> groups = new TRLList<>();
-
+			Map<Variable, String> variables, List<GroupInfo> groups)
+					throws ManifestParseException {
 		lines = lines.stream().filter(line -> !line.startsWith(Postprocessor.CHARACTER + " ")).
 				collect(TRLCollectors.toArrayList());
 
@@ -379,8 +378,8 @@ public class CAManifest {
 
 	private static void parseModData(String line, String[] data, FileSide side, String group,
 			boolean optional, List<Mod> mods, List<Mod> serverOnlyMods, List<Mod> alternativeMods,
-			List<FileInfo> additionalFiles, Map<Variable, String> variables, List<String> groups)
-					throws ManifestParseException {
+			List<FileInfo> additionalFiles, Map<Variable, String> variables,
+			List<GroupInfo> groups) throws ManifestParseException {
 		if(data.length == 0) {
 			throw new ManifestParseException("A project ID or file path must be defined: " + line);
 		}
@@ -428,13 +427,24 @@ public class CAManifest {
 					getRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
 			mod.group = group;
 
-			if(!group.isEmpty() && !groups.contains(group)) {
+			//No group = primary group
+			boolean isPrimaryGroup = group.isEmpty();
+			if(!isPrimaryGroup) {
+				for(GroupInfo groupInfo : groups) {
+					if(groupInfo.primary.equals(group)) {
+						isPrimaryGroup = true;
+						break;
+					}
+
+					if(ArrayUtils.contains(groupInfo.alternatives, group)) {
+						break;
+					}
+				}
+			}
+
+			if(!isPrimaryGroup) {
 				alternativeMods.add(mod);
 			} else {
-				if(!group.isEmpty()) {
-					groups.add(group);
-				}
-
 				if(side == FileSide.SERVER) {
 					serverOnlyMods.add(mod);
 				} else {
@@ -518,7 +528,7 @@ public class CAManifest {
 
 			parseMods(postprocessor.apply(manifest, value, args), manifest.mods,
 					manifest.serverOnlyMods, manifest.alternativeMods, manifest.additionalFiles,
-					manifest.variables);
+					manifest.variables, manifest.groups);
 
 			manifest.postprocessors.put(postprocessor, value);
 		}

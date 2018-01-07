@@ -22,7 +22,7 @@ public enum FileSide {
 	}
 
 	public static FileSide fromBooleans(boolean client, boolean server, boolean both) {
-		if(both || (client && server)) {
+		if(both || (client && server) || (!client && !server && !both)) {
 			return BOTH;
 		}
 		return client ? CLIENT : SERVER;
