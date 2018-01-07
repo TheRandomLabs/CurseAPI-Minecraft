@@ -1,5 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
+import java.util.Arrays;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.minecraft.modpack.FileInfo;
@@ -77,6 +78,13 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.minecraft = minecraft.clone();
 
 		return manifest;
+	}
+
+	public void sort() {
+		Arrays.sort(files, (mod1, mod2) -> mod1.title.compareTo(mod2.title));
+		Arrays.sort(serverOnlyMods, (mod1, mod2) -> mod1.title.compareTo(mod2.title));
+		Arrays.sort(alternativeMods, (mod1, mod2) -> mod1.title.compareTo(mod2.title));
+		Arrays.sort(additionalFiles, (file1, file2) -> file1.path.compareTo(file2.path));
 	}
 
 	public String toJson() {

@@ -111,6 +111,8 @@ public class CAManifest {
 		manifest.minimumRam = Integer.parseInt(variables.get(Variable.MINIMUM_RAM));
 		manifest.recommendedRam = Integer.parseInt(variables.get(Variable.RECOMMENDED_RAM));
 
+		manifest.sort();
+
 		return manifest;
 	}
 
