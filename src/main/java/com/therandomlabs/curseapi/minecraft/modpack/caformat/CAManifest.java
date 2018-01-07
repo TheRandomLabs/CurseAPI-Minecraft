@@ -32,6 +32,8 @@ import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.number.NumberUtils;
 import com.therandomlabs.utils.wrapper.BooleanWrapper;
 
+//TODO why is everything static? method signatures are ridiculously long
+//Clean up this mess, remove code repetition, etc.
 public class CAManifest {
 	// [ Primary Mod Group ] [ Some Other Mod That Does Something Similar ]
 	public static final char GROUP_DEFINER_OPENER = '[';
@@ -130,6 +132,8 @@ public class CAManifest {
 				manifest.additionalFiles, manifest.variables);
 		parsePostprocessors(pruned, manifest);
 		retrieveModInfo(manifest.mods, manifest.variables);
+		retrieveModInfo(manifest.serverOnlyMods, manifest.variables);
+		retrieveModInfo(manifest.alternativeMods, manifest.variables);
 
 		return manifest;
 	}
@@ -265,6 +269,8 @@ public class CAManifest {
 	private static void parseMods(List<String> lines, List<Mod> mods, List<Mod> serverOnlyMods,
 			List<Mod> alternativeMods, List<FileInfo> additionalFiles,
 			Map<Variable, String> variables) throws ManifestParseException {
+		final List<String> groups = new TRLList<>();
+
 		lines = lines.stream().filter(line -> !line.startsWith(Postprocessor.CHARACTER + " ")).
 				collect(TRLCollectors.toArrayList());
 
@@ -286,6 +292,12 @@ public class CAManifest {
 				for(int i = 0; i < mods.size(); i++) {
 					if(mods.get(i).projectID == projectID) {
 						mods.remove(i--);
+					}
+				}
+
+				for(int i = 0; i < serverOnlyMods.size(); i++) {
+					if(serverOnlyMods.get(i).projectID == projectID) {
+						serverOnlyMods.remove(i--);
 					}
 				}
 
@@ -318,9 +330,8 @@ public class CAManifest {
 
 			data = ArrayUtils.subArray(data, i);
 
-			parseModData(line, data, side, group, optional.get(),
-					side == FileSide.SERVER ? serverOnlyMods : mods,
-					alternativeMods, additionalFiles, variables);
+			parseModData(line, data, side, group, optional.get(), mods, serverOnlyMods,
+					alternativeMods, additionalFiles, variables, groups);
 		}
 	}
 
@@ -367,8 +378,8 @@ public class CAManifest {
 	}
 
 	private static void parseModData(String line, String[] data, FileSide side, String group,
-			boolean optional, List<Mod> mods, List<Mod> alternativeMods,
-			List<FileInfo> additionalFiles, Map<Variable, String> variables)
+			boolean optional, List<Mod> mods, List<Mod> serverOnlyMods, List<Mod> alternativeMods,
+			List<FileInfo> additionalFiles, Map<Variable, String> variables, List<String> groups)
 					throws ManifestParseException {
 		if(data.length == 0) {
 			throw new ManifestParseException("A project ID or file path must be defined: " + line);
@@ -386,15 +397,25 @@ public class CAManifest {
 				relatedFilesIndex = 2;
 			}
 
-			boolean isAlternative = false;
+			//TODO clean up this mess
 
 			for(Mod mod : mods) {
-				if(mod.group.equals(group)) {
-					isAlternative = true;
-				}
-
 				if(mod.projectID == projectID) {
 					mods.remove(mod);
+					break;
+				}
+			}
+
+			for(Mod mod : serverOnlyMods) {
+				if(mod.projectID == projectID) {
+					mods.remove(mod);
+					break;
+				}
+			}
+
+			for(Mod mod : alternativeMods) {
+				if(mod.projectID == projectID) {
+					alternativeMods.remove(mod);
 					break;
 				}
 			}
@@ -409,10 +430,16 @@ public class CAManifest {
 					getRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
 			mod.group = group;
 
-			if(isAlternative) {
+			if(!groups.contains(group)) {
 				alternativeMods.add(mod);
 			} else {
-				mods.add(mod);
+				groups.add(group);
+
+				if(side == FileSide.SERVER) {
+					serverOnlyMods.add(mod);
+				} else {
+					mods.add(mod);
+				}
 			}
 		} else {
 			final String path = StringUtils.replaceAll(ArrayUtils.join(data, " "),
@@ -499,6 +526,10 @@ public class CAManifest {
 
 	private static void retrieveModInfo(List<Mod> mods, Map<Variable, String> variables)
 			throws CurseException {
+		if(mods.isEmpty()) {
+			return;
+		}
+
 		final List<Mod> modsToRemove = new TRLList<>();
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(), index -> {
