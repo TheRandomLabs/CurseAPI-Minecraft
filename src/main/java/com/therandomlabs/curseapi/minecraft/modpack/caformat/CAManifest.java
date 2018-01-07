@@ -397,8 +397,6 @@ public class CAManifest {
 				relatedFilesIndex = 2;
 			}
 
-			//TODO clean up this mess
-
 			for(Mod mod : mods) {
 				if(mod.projectID == projectID) {
 					mods.remove(mod);
@@ -430,10 +428,12 @@ public class CAManifest {
 					getRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
 			mod.group = group;
 
-			if(!groups.contains(group)) {
+			if(!group.isEmpty() && !groups.contains(group)) {
 				alternativeMods.add(mod);
 			} else {
-				groups.add(group);
+				if(!group.isEmpty()) {
+					groups.add(group);
+				}
 
 				if(side == FileSide.SERVER) {
 					serverOnlyMods.add(mod);

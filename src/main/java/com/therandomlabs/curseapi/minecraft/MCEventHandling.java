@@ -16,7 +16,7 @@ public class MCEventHandling {
 	public static class DefaultMCEventHandler implements MCEventHandler {
 		@Override
 		public void noFilesFound(int projectID) {
-			getLogger().debug("No files with specified attributes found for project with ID: " +
+			getLogger().warning("No files with specified attributes found for project with ID: " +
 					projectID);
 		}
 
