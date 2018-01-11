@@ -32,6 +32,7 @@ import com.therandomlabs.utils.network.NetworkUtils;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
+//https://github.com/google/gson/issues/395 may occur
 //TODO a way to choose alternative mod groups and whether to install optional mods
 public final class ModpackInstaller {
 	private static final List<Path> temporaryFiles = new TRLList<>();
@@ -474,4 +475,198 @@ public final class ModpackInstaller {
 		temporaryFiles.add(path);
 		return path;
 	}
+
+	/*private static void copyNewFiles(Path modpackLocation, InstallerConfig config,
+			InstallerData data, Modpack modpack)
+			throws IOException {
+		final Path overrides = modpackLocation.resolve(modpack.getOverrides());
+		final Path installTo = Paths.get(config.installTo);
+
+		TRLList<String> filesToIgnore =
+				config.isServer ? modpack.getClientOnlyFiles() : modpack.getServerOnlyFiles();
+		filesToIgnore = filesToIgnore.toArrayList();
+		filesToIgnore.addAll(config.excludeFiles);
+
+		final List<String> excludedFiles = filesToIgnore;
+
+		Files.walkFileTree(overrides, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes)
+					throws IOException {
+				copyFile(overrides, installTo, excludedFiles, config, data, modpack, file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path directory,
+					BasicFileAttributes attributes) throws IOException {
+				visitDirectory(overrides, installTo, excludedFiles, directory);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
+
+	static void copyFile(Path overrides, Path installTo, List<String> excludedFiles,
+			InstallerConfig config, InstallerData data, Modpack modpack, Path file)
+			throws IOException {
+		final Path relativized = relativize(overrides, file);
+
+		if(shouldSkip(excludedFiles, relativized)) {
+			return;
+		}
+
+		final Path newFile = installTo(config, relativized);
+
+		if(Files.isDirectory(newFile)) {
+			NIOUtils.deleteDirectory(newFile);
+		}
+
+		final String name = name(file);
+
+		try {
+			MCEventHandling.forEach(handler -> handler.copying(toString(relativized)));
+		} catch(CurseException ex) {
+			//It's just event handling, shouldn't matter too much ATM
+		}
+
+		boolean variablesReplaced = shouldReplaceVariables(config.variableFileExtensions, name);
+		if(variablesReplaced) {
+			variablesReplaced = replaceVariablesAndCopy(file, newFile, modpack);
+		}
+
+		if(!variablesReplaced) {
+			Files.copy(file, newFile, StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		if(!variablesReplaced) {
+			if(config.shouldKeepModpack) {
+				Files.copy(file, newFile, StandardCopyOption.REPLACE_EXISTING);
+			} else {
+				Files.move(file, newFile, StandardCopyOption.REPLACE_EXISTING);
+			}
+		}
+
+		data.installedFiles.add(toString(relativized));
+	}
+
+	private static boolean shouldReplaceVariables(String[] variableFileExtensions, String name) {
+		for(String extension : variableFileExtensions) {
+			if(name.endsWith("." + extension)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static void visitDirectory(Path overrides, Path installTo, List<String> excludedFiles,
+			Path directory) throws IOException {
+		directory = relativize(overrides, directory);
+
+		if(shouldSkip(excludedFiles, directory)) {
+			return;
+		}
+
+		final Path installToPath = installTo.resolve(directory.toString());
+
+		//Make sure installToPath is a directory that exists
+
+		if(Files.exists(installToPath) && !Files.isDirectory(installToPath)) {
+			Files.delete(installToPath);
+		}
+
+		if(!Files.exists(installToPath)) {
+			Files.createDirectory(installToPath);
+		}
+	}
+
+	private static boolean replaceVariablesAndCopy(Path file, Path newFile, Modpack modpack)
+			throws IOException {
+		try {
+			final String toWrite = NIOUtils.readFile(file).
+					replaceAll(MINECRAFT_VERSION, modpack.getMinecraftVersionString()).
+					replaceAll(MODPACK_NAME, modpack.getName()).
+					replaceAll(MODPACK_VERSION, modpack.getVersion()).
+					replaceAll(FULL_MODPACK_NAME, modpack.getFullName()).
+					replaceAll(MODPACK_AUTHOR, modpack.getAuthor()) +
+					System.lineSeparator();
+
+			NIOUtils.write(newFile, toWrite);
+		} catch(MalformedInputException ex) {
+			ex.printStackTrace();
+			getLogger().error("This exception was caused by the file: " + file);
+			getLogger().error("Make sure the file is encoded in UTF-8!");
+			getLogger().error("Variables in this file will not be processed.");
+
+			return false;
+		}
+
+		return true;
+	}
+
+	private static Path relativize(Path overrides, Path path) {
+		return overrides.relativize(path).normalize();
+	}
+
+	private static boolean shouldSkip(List<String> excludedFiles, Path path) {
+		for(String fileName : excludedFiles) {
+			final Path excludedFile = Paths.get("config", fileName).normalize();
+			if(path.equals(excludedFile) || NIOUtils.isParent(excludedFile, path)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static void downloadMods(InstallerConfig config, InstallerData data, Modpack modpack)
+			throws CurseException, IOException {
+		if(modpack.getMods().isEmpty()) {
+			return;
+		}
+
+		final AtomicInteger count = new AtomicInteger();
+
+		final int threads = config.threads > 0 ? config.threads : CurseAPI.getMaximumThreads();
+
+		final int size = modpack.getMods().size();
+		try {
+			ThreadUtils.splitWorkload(threads, size, index ->
+					downloadMod(config, data, modpack.getMods().get(index),
+							count.incrementAndGet(), size));
+		} catch(Exception ex) {
+			if(ex instanceof CurseException) {
+				throw (CurseException) ex;
+			}
+
+			if(ex instanceof IOException) {
+				throw (IOException) ex;
+			}
+
+			throw (RuntimeException) ex;
+		}
+	}
+
+	private static void downloadMod(InstallerConfig config, InstallerData data,
+			ModInfo mod, int count, int total) throws CurseException, IOException {
+		MCEventHandling.forEach(handler -> handler.downloadingMod(mod.title, count, total));
+
+		final URL url = CurseForge.getFileURL(mod.projectID, mod.fileID);
+
+		final Path downloaded = NIOUtils.downloadToDirectory(url, installTo(config, "mods"));
+
+		final Path relativizedLocation = Paths.get(config.installTo).relativize(downloaded);
+
+		final ModData modData = new ModData();
+
+		modData.projectID = mod.projectID;
+		modData.fileID = mod.fileID;
+		modData.location = toString(relativizedLocation);
+		modData.relatedFiles = mod.relatedFiles;
+
+		MCEventHandling.forEach(
+				handler -> handler.downloadedMod(mod.title, name(downloaded), count));
+
+		data.mods.add(modData);
+	}*/
+
+	//TODO iterateModSources installForge createEULAAndServerStarters
 }
