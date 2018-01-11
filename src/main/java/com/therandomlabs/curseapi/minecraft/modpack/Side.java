@@ -2,7 +2,7 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 
 import com.google.gson.annotations.SerializedName;
 
-public enum FileSide {
+public enum Side {
 	@SerializedName("both")
 	BOTH("both"),
 	@SerializedName("client")
@@ -12,7 +12,7 @@ public enum FileSide {
 
 	private final String name;
 
-	FileSide(String name) {
+	Side(String name) {
 		this.name = name;
 	}
 
@@ -21,7 +21,7 @@ public enum FileSide {
 		return name;
 	}
 
-	public static FileSide fromBooleans(boolean client, boolean server, boolean both) {
+	public static Side fromBooleans(boolean client, boolean server, boolean both) {
 		if(both || (client && server) || (!client && !server && !both)) {
 			return BOTH;
 		}

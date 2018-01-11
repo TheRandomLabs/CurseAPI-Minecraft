@@ -16,7 +16,7 @@ import com.therandomlabs.curseapi.ReleaseType;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.modpack.FileInfo;
-import com.therandomlabs.curseapi.minecraft.modpack.FileSide;
+import com.therandomlabs.curseapi.minecraft.modpack.Side;
 import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.CurseManifest;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
@@ -327,7 +327,7 @@ public class CAManifest {
 				parseMarker(line, data[i].charAt(1), client, server, both, optional);
 			}
 
-			final FileSide side = FileSide.fromBooleans(client.get(), server.get(), both.get());
+			final Side side = Side.fromBooleans(client.get(), server.get(), both.get());
 
 			data = ArrayUtils.subArray(data, i);
 
@@ -378,7 +378,7 @@ public class CAManifest {
 		}
 	}
 
-	private static void parseModData(String line, String[] data, FileSide side, String group,
+	private static void parseModData(String line, String[] data, Side side, String group,
 			boolean optional, List<Mod> mods, List<Mod> serverOnlyMods, List<Mod> alternativeMods,
 			List<FileInfo> additionalFiles, Map<Variable, String> variables,
 			List<GroupInfo> groups) throws ManifestParseException {
@@ -447,7 +447,7 @@ public class CAManifest {
 			if(!isPrimaryGroup) {
 				alternativeMods.add(mod);
 			} else {
-				if(side == FileSide.SERVER) {
+				if(side == Side.SERVER) {
 					serverOnlyMods.add(mod);
 				} else {
 					mods.add(mod);
@@ -465,7 +465,7 @@ public class CAManifest {
 		}
 	}
 
-	private static FileInfo[] getRelatedFiles(FileSide side, String[] data, String line)
+	private static FileInfo[] getRelatedFiles(Side side, String[] data, String line)
 			throws ManifestParseException {
 		final List<FileInfo> relatedFiles = new TRLList<>();
 
@@ -487,7 +487,7 @@ public class CAManifest {
 							"optional: " + line);
 				}
 
-				side = FileSide.fromBooleans(client.get(), server.get(), both.get());
+				side = Side.fromBooleans(client.get(), server.get(), both.get());
 
 				continue;
 			}

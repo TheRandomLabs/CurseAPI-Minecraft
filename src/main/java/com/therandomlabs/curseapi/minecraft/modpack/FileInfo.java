@@ -2,11 +2,11 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 
 public class FileInfo implements Cloneable {
 	public String path;
-	public FileSide side;
+	public Side side;
 
 	public FileInfo() {}
 
-	public FileInfo(String path, FileSide side) {
+	public FileInfo(String path, Side side) {
 		this.path = path;
 		this.side = side;
 	}

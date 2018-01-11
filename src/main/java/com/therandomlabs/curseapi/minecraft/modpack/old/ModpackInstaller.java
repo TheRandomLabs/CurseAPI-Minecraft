@@ -23,7 +23,8 @@ import com.therandomlabs.curseapi.curseforge.CurseForge;
 import com.therandomlabs.curseapi.minecraft.MCEventHandler;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
-import com.therandomlabs.curseapi.minecraft.modpack.old.InstallerData.ModData;
+import com.therandomlabs.curseapi.minecraft.modpack.installer.InstallerData;
+import com.therandomlabs.curseapi.minecraft.modpack.installer.InstallerData.ModData;
 import com.therandomlabs.curseapi.util.MiscUtils;
 import com.therandomlabs.curseapi.util.URLUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
@@ -45,7 +46,7 @@ public final class ModpackInstaller {
 	public static final String FULL_MODPACK_NAME = "::FULL_MODPACK_NAME::";
 	public static final String MODPACK_AUTHOR = "::MODPACK_AUTHOR::";
 
-	private static final List<Path> temporaryFiles = new ArrayList<>();
+	private static final List<Path> temporaryFiles = new TRLList<>();
 
 	private ModpackInstaller() {}
 

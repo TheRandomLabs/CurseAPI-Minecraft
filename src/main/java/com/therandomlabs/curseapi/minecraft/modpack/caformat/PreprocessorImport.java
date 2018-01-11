@@ -64,6 +64,8 @@ public class PreprocessorImport extends Preprocessor {
 
 			final String toImport = NetworkUtils.read(url);
 
+			CurseEventHandling.forEach(handler -> handler.postDownloadDocument(value));
+
 			linesToImport = new ImmutableList<>(StringUtils.splitNewline(toImport));
 		} catch(MalformedURLException ex) {
 			linesToImport = Files.readAllLines(Paths.get(value));

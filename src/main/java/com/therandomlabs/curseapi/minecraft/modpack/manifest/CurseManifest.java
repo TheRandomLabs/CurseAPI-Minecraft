@@ -111,4 +111,13 @@ public class CurseManifest implements Cloneable {
 	public String toPrettyJsonWithTabs() {
 		return toPrettyJson().replaceAll("  ", "\t");
 	}
+
+	public boolean containsMod(int projectID, int fileID) {
+		for(CurseMod mod : files) {
+			if(mod.projectID == projectID && mod.fileID == fileID) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -9,6 +9,7 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
+import com.therandomlabs.curseapi.minecraft.modpack.installer.InstallerData;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ModLoaderInfo;
 import com.therandomlabs.utils.collection.ImmutableList;

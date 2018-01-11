@@ -8,7 +8,7 @@ public class Mod implements Cloneable {
 	public String title = UNKNOWN_NAME;
 	public int projectID;
 	public int fileID;
-	public FileSide side = FileSide.BOTH;
+	public Side side = Side.BOTH;
 	public boolean optional;
 	public FileInfo[] relatedFiles = new FileInfo[0];
 	public String group = "";

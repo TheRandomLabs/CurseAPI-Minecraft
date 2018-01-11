@@ -30,4 +30,8 @@ public final class MinecraftInfo implements Cloneable {
 
 		return info;
 	}
+
+	public String getForgeVersion() {
+		return modLoaders[0].id.replaceAll("forge", version.toString());
+	}
 }

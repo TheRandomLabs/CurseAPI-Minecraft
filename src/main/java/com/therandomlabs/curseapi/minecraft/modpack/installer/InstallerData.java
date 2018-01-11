@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.old;
+package com.therandomlabs.curseapi.minecraft.modpack.installer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public final class InstallerData implements Cloneable {
 	public String minecraftVersion;
 	public String forgeVersion;
 	public List<ModData> mods = new ArrayList<>();
-	public ArrayList<String> installedFiles = new ArrayList<>();
+	public List<String> installedFiles = new ArrayList<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -37,7 +37,7 @@ public final class InstallerData implements Cloneable {
 		data.minecraftVersion = minecraftVersion;
 		data.forgeVersion = forgeVersion;
 		data.mods = CloneException.tryClone(mods);
-		data.installedFiles = (ArrayList<String>) installedFiles.clone();
+		data.installedFiles = (ArrayList<String>) ((ArrayList<String>) installedFiles).clone();
 
 		return data;
 	}
