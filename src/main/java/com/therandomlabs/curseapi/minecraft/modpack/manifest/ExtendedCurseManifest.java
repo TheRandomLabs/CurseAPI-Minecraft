@@ -1,5 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -10,6 +12,7 @@ import com.therandomlabs.curseapi.minecraft.modpack.FileInfo;
 import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.modpack.Side;
 import com.therandomlabs.curseapi.util.CloneException;
+import com.therandomlabs.utils.collection.CollectionUtils;
 import com.therandomlabs.utils.collection.TRLList;
 
 public class ExtendedCurseManifest implements Cloneable {
@@ -146,6 +149,11 @@ public class ExtendedCurseManifest implements Cloneable {
 			}
 		}
 		files = newMods.toArray(new Mod[0]);
+	}
+
+	public TRLList<Path> getExcludedPaths(Side side) {
+		return CollectionUtils.convert(FileInfo.getExcludedPaths(additionalFiles, side),
+				Paths::get);
 	}
 
 	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)

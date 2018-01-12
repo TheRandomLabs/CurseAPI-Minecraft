@@ -27,4 +27,8 @@ public class Mod implements Cloneable {
 
 		return mod;
 	}
+
+	public String[] getRelatedFiles(Side side) {
+		return FileInfo.getPaths(relatedFiles, side);
+	}
 }
