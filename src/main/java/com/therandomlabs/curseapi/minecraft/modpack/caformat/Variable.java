@@ -58,11 +58,19 @@ public class Variable {
 			version -> true); //TODO
 
 	public static final Variable MINIMUM_RAM = new Variable("minimum_ram",
-			"3",
+			"3072",
 			NumberUtils::isInteger);
 
 	public static final Variable RECOMMENDED_RAM = new Variable("recommended_ram",
-			"4",
+			"4096",
+			NumberUtils::isInteger);
+
+	public static final Variable MINIMUM_SERVER_RAM = new Variable("minimum_server_ram",
+			"2048",
+			NumberUtils::isInteger);
+
+	public static final Variable RECOMMENDED_SERVER_RAM = new Variable("recommended_server_ram",
+			"3072",
 			NumberUtils::isInteger);
 
 	private final String name;

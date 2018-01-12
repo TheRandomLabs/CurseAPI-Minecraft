@@ -46,6 +46,7 @@ import net.lingala.zip4j.exception.ZipException;
 //TODO a way to choose alternative mod groups and whether to install optional mods
 //iterateModSources, installForge, createEULAAndServerStarters
 //ModpackZipper class - sided mods (manifest)/files, server-specific support
+//installOptiFine
 public final class ModpackInstaller {
 	public static final URL LIGHTCHOCOLATE;
 
@@ -355,6 +356,10 @@ public final class ModpackInstaller {
 		installFromDirectory(extracted);
 	}
 
+	public void installFromDirectory(String modpack) throws CurseException, IOException {
+		installFromDirectory(Paths.get(modpack));
+	}
+
 	public void installFromDirectory(Path modpack) throws CurseException, IOException {
 		ensureDirectoryExists(installDir);
 
@@ -639,21 +644,6 @@ public final class ModpackInstaller {
 		return installDir.resolve(installerData);
 	}
 
-	public static void deleteTemporaryFiles() {
-		for(int i = 0; i < temporaryFiles.size(); i++) {
-			try {
-				if(Files.isDirectory(temporaryFiles.get(i))) {
-					NIOUtils.deleteDirectory(temporaryFiles.get(i));
-				} else {
-					Files.deleteIfExists(temporaryFiles.get(i));
-				}
-				temporaryFiles.remove(i--);
-			} catch(IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-	}
-
 	private static void removeModsFromManifest(ExtendedCurseManifest manifest,
 			List<InstallerData.ModData> mods) {
 		manifest.removeModsIf(mod -> {
@@ -708,5 +698,20 @@ public final class ModpackInstaller {
 		}
 
 		return true;
+	}
+
+	public static void deleteTemporaryFiles() {
+		for(int i = 0; i < temporaryFiles.size(); i++) {
+			try {
+				if(Files.isDirectory(temporaryFiles.get(i))) {
+					NIOUtils.deleteDirectory(temporaryFiles.get(i));
+				} else {
+					Files.deleteIfExists(temporaryFiles.get(i));
+				}
+				temporaryFiles.remove(i--);
+			} catch(IOException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 }

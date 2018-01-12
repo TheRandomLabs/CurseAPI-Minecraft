@@ -49,6 +49,8 @@ public class ExtendedCurseManifest implements Cloneable {
 	public String optifineVersion;
 	public int minimumRam = 3072;
 	public int recommendedRam = 4096;
+	public int minimumServerRam = 2048;
+	public int recommendedServerRam = 3072;
 
 	@Override
 	public ExtendedCurseManifest clone() {
