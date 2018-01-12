@@ -12,3 +12,11 @@ Features:
 
 Planned features:
 * Documentation and a wiki.
+
+Modpack installation example:
+
+	Logging.<ToggleableLogger>getLogger().disableDebug();
+	new ModpackInstaller().
+			installTo("LightChocolate Server").
+			side(Side.SERVER).
+			install(ModpackInstaller.LIGHTCHOCOLATE);
