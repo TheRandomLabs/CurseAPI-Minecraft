@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.caformat;
+package com.therandomlabs.curseapi.minecraft.caformat.pre;
 
 import java.io.IOException;
 import java.util.List;

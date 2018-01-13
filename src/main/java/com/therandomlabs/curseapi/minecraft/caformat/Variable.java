@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.caformat;
+package com.therandomlabs.curseapi.minecraft.caformat;
 
 import java.util.List;
 import java.util.function.Predicate;

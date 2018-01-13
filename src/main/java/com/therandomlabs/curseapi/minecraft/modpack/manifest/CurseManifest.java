@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseProject;
-import com.therandomlabs.curseapi.minecraft.modpack.Mod;
+import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 

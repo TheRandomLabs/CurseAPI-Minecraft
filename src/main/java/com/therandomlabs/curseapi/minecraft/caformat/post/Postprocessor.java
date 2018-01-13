@@ -1,6 +1,7 @@
-package com.therandomlabs.curseapi.minecraft.modpack.caformat;
+package com.therandomlabs.curseapi.minecraft.caformat.post;
 
 import java.util.List;
+import com.therandomlabs.curseapi.minecraft.caformat.CAManifest;
 import com.therandomlabs.utils.collection.TRLList;
 
 public abstract class Postprocessor {

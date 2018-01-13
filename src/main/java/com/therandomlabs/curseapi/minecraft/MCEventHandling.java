@@ -5,7 +5,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.utils.runnable.RunnableWithInputAndThrowable;
 import com.therandomlabs.utils.wrapper.Wrapper;
 

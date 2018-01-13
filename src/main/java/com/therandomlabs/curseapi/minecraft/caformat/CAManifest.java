@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.caformat;
+package com.therandomlabs.curseapi.minecraft.caformat;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,11 +13,13 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseFileList;
 import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.ReleaseType;
+import com.therandomlabs.curseapi.minecraft.FileInfo;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
+import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.minecraft.Side;
+import com.therandomlabs.curseapi.minecraft.caformat.post.Postprocessor;
+import com.therandomlabs.curseapi.minecraft.caformat.pre.Preprocessor;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
-import com.therandomlabs.curseapi.minecraft.modpack.FileInfo;
-import com.therandomlabs.curseapi.minecraft.modpack.Side;
-import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.CurseManifest;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.GroupInfo;
@@ -522,9 +524,11 @@ public class CAManifest {
 						value, postprocessor);
 			}
 
-			parseMods(postprocessor.apply(manifest, value, args), manifest.mods,
+			final List<String> applied = postprocessor.apply(manifest, value, args);
+			parseMods(applied, manifest.mods,
 					manifest.serverOnlyMods, manifest.alternativeMods, manifest.additionalFiles,
 					manifest.variables, manifest.groups);
+			parsePostprocessors(applied, manifest);
 
 			manifest.postprocessors.put(postprocessor, value);
 		}

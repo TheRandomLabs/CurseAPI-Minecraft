@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.caformat;
+package com.therandomlabs.curseapi.minecraft.caformat;
 
 public final class Marker {
 	public static final char CHARACTER = '!';

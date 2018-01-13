@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack;
+package com.therandomlabs.curseapi.minecraft;
 
 import com.google.gson.annotations.SerializedName;
 

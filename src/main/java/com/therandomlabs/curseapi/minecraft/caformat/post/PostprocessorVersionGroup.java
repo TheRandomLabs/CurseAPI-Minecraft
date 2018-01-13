@@ -1,8 +1,10 @@
-package com.therandomlabs.curseapi.minecraft.modpack.caformat;
+package com.therandomlabs.curseapi.minecraft.caformat.post;
 
 import java.util.Collections;
 import java.util.List;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
+import com.therandomlabs.curseapi.minecraft.caformat.CAManifest;
+import com.therandomlabs.curseapi.minecraft.caformat.Variable;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 

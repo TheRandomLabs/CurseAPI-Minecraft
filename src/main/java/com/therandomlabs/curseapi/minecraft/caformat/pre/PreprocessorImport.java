@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.caformat;
+package com.therandomlabs.curseapi.minecraft.caformat.pre;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -8,6 +8,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.minecraft.caformat.CAManifest;
 import com.therandomlabs.curseapi.util.CurseEventHandling;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;

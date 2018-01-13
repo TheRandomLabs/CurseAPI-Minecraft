@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack;
+package com.therandomlabs.curseapi.minecraft;
 
 import java.util.List;
 import com.therandomlabs.utils.collection.TRLList;
