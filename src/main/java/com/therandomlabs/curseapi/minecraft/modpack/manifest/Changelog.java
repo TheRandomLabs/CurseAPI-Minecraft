@@ -293,7 +293,8 @@ public class Changelog {
 
 		if(changelog.hasForgeVersionChanged()) {
 			string.append("Went from Forge ").append(changelog.getOldForgeVersion()).
-					append(" to ").append(changelog.getNewForgeVersion()).append(newline);
+					append(" to ").append(changelog.getNewForgeVersion()).append('.').
+					append(newline);
 		}
 
 		final String toString = string.toString();
