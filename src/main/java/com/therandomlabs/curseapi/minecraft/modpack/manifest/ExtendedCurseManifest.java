@@ -1,5 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import com.therandomlabs.curseapi.minecraft.FileInfo;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.util.CloneException;
+import com.therandomlabs.curseapi.util.MiscUtils;
 import com.therandomlabs.utils.collection.CollectionUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
@@ -244,5 +246,13 @@ public class ExtendedCurseManifest implements Cloneable {
 			throws CurseException {
 		return manifest.isActuallyExtended() ?
 				manifest : manifest.toCurseManifest().toExtendedManifest();
+	}
+
+	public static ExtendedCurseManifest from(String path) throws IOException {
+		return from(Paths.get(path));
+	}
+
+	public static ExtendedCurseManifest from(Path path) throws IOException {
+		return MiscUtils.fromJson(path, ExtendedCurseManifest.class);
 	}
 }

@@ -344,8 +344,7 @@ public final class ModpackInstaller {
 			throw new CurseException("manifest.json not found in modpack directory: " + modpack);
 		}
 
-		final ExtendedCurseManifest manifest =
-				MiscUtils.fromJson(manifestPath, ExtendedCurseManifest.class);
+		final ExtendedCurseManifest manifest = ExtendedCurseManifest.from(manifestPath);
 
 		shouldFinish = false;
 		installFromManifest(manifest);
@@ -365,7 +364,7 @@ public final class ModpackInstaller {
 	}
 
 	public void installFromManifest(Path manifest) throws CurseException, IOException {
-		installFromManifest(MiscUtils.fromJson(manifest, ExtendedCurseManifest.class));
+		installFromManifest(ExtendedCurseManifest.from(manifest));
 	}
 
 	public void installFromManifest(CurseManifest manifest) throws CurseException, IOException {

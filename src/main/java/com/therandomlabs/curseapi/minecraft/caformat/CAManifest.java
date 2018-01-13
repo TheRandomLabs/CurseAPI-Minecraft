@@ -3,6 +3,7 @@ package com.therandomlabs.curseapi.minecraft.caformat;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -116,6 +117,10 @@ public class CAManifest {
 		return manifest;
 	}
 
+	public void writeTo(String path) throws CurseException, IOException {
+		writeTo(Paths.get(path));
+	}
+
 	public void writeTo(Path path) throws CurseException, IOException {
 		NIOUtils.write(path, toExtendedCurseManifest().toPrettyJsonWithTabs(), true);
 	}
@@ -157,6 +162,11 @@ public class CAManifest {
 		}
 
 		return pruned;
+	}
+
+	public static CAManifest from(String path)
+			throws CurseException, IOException, ManifestParseException {
+		return from(Paths.get(path));
 	}
 
 	public static CAManifest from(Path path)
