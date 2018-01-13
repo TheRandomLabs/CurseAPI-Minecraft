@@ -59,13 +59,19 @@ public class PreprocessorImport extends Preprocessor {
 		List<String> linesToImport = null;
 
 		try {
+			if(value.equalsIgnoreCase(LIGHTCHOCOLATE)) {
+				value = LIGHTCHOCOLATE_URL;
+			} else if(value.equalsIgnoreCase(DARKCHOCOLATE)) {
+				value = DARKCHOCOLATE_URL;
+			}
+
 			final URL url = new URL(value);
 
-			CurseEventHandling.forEach(handler -> handler.preDownloadDocument(value));
+			CurseEventHandling.forEach(handler -> handler.preDownloadDocument(url.toString()));
 
 			final String toImport = NetworkUtils.read(url);
 
-			CurseEventHandling.forEach(handler -> handler.postDownloadDocument(value));
+			CurseEventHandling.forEach(handler -> handler.postDownloadDocument(url.toString()));
 
 			linesToImport = new ImmutableList<>(StringUtils.splitNewline(toImport));
 		} catch(MalformedURLException ex) {
