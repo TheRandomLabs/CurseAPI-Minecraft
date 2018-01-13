@@ -53,6 +53,7 @@ public final class ModpackInstaller {
 	private Path installDir = Paths.get(".");
 	private Path installerData = Paths.get("ca_modpack_data.json");
 
+	private final HashSet<String> preferredGroups = new HashSet<>();
 	private final HashSet<Path> modSources = new HashSet<>();
 	private final HashSet<String> extensionsWithVariables = new HashSet<>();
 	private final HashSet<Integer> excludedProjects = new HashSet<>();
@@ -122,6 +123,17 @@ public final class ModpackInstaller {
 
 	public Path getInstallerData() {
 		return installerData;
+	}
+
+	public ModpackInstaller withPreferredGroups(String... groups) {
+		ensureNotRunning();
+		preferredGroups.addAll(new ImmutableList<>(groups));
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Set<String> getPreferredGroups() {
+		return (Set<String>) preferredGroups.clone();
 	}
 
 	public ModpackInstaller withModSource(String... source) {
@@ -394,6 +406,9 @@ public final class ModpackInstaller {
 			manifest.server();
 			break;
 		}
+
+		//TODO test
+		manifest.preferGroups(preferredGroups);
 
 		deleteOldFiles(manifest);
 		downloadMods(manifest);

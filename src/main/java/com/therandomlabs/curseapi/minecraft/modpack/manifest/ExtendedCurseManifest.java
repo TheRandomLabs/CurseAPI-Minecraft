@@ -3,7 +3,12 @@ package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,24 +18,10 @@ import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.modpack.Side;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.collection.CollectionUtils;
+import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 
 public class ExtendedCurseManifest implements Cloneable {
-	public static class GroupInfo implements Cloneable {
-		public String primary;
-		public String[] alternatives;
-
-		public GroupInfo(String primary, String[] alternatives) {
-			this.primary = primary;
-			this.alternatives = alternatives;
-		}
-
-		@Override
-		public GroupInfo clone() {
-			return new GroupInfo(primary, alternatives);
-		}
-	}
-
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 	public String name;
@@ -135,6 +126,87 @@ public class ExtendedCurseManifest implements Cloneable {
 	public void server() {
 		removeModsIf(mod -> mod.side == Side.CLIENT);
 		moveServerOnlyModsToFiles();
+	}
+
+	public void preferGroups(String... groups) {
+		preferGroups(new ImmutableList<>(groups));
+	}
+
+	public Map<String, GroupInfo> getGroups(Collection<String> groupNames) {
+		final Map<String, GroupInfo> groups = new HashMap<>(groupNames.size());
+		for(String name : groupNames) {
+			final GroupInfo group = GroupInfo.getGroup(this.groups, name);
+			if(group != null) {
+				groups.put(name, group);
+			}
+		}
+		return groups;
+	}
+
+	public void preferGroups(Collection<String> groupNames) {
+		final Map<String, GroupInfo> groups = getGroups(groupNames);
+
+		final List<Mod> moveFiles = new TRLList<>();
+		final Set<String> moveFilesGroups = new HashSet<>();
+		final List<Mod> moveAlternatives = new TRLList<>();
+		final Set<String> moveAlternativesGroups = new HashSet<>();
+
+		for(Mod mod : files) {
+			if(mod.group.isEmpty() || groupNames.contains(mod.group)) {
+				continue;
+			}
+
+			final Map.Entry<String, GroupInfo> group = GroupInfo.getGroup(groups, mod.group);
+			if(group == null) {
+				continue;
+			}
+
+			final List<String> otherGroupNames =
+					group.getValue().getOtherGroupNames(group.getKey());
+			if(otherGroupNames.contains(mod.group)) {
+				moveFiles.add(mod);
+				moveFilesGroups.add(group.getKey());
+			}
+		}
+
+		for(Mod mod : alternativeMods) {
+			if(mod.group.isEmpty() || groupNames.contains(mod.group)) {
+				continue;
+			}
+
+			if(moveFilesGroups.contains(mod.group)) {
+				moveAlternatives.add(mod);
+				continue;
+			}
+
+			final Map.Entry<String, GroupInfo> group = GroupInfo.getGroup(groups, mod.group);
+			if(group == null) {
+				continue;
+			}
+
+			final List<String> otherGroupNames =
+					group.getValue().getOtherGroupNames(group.getKey());
+			if(otherGroupNames.contains(mod.group)) {
+				moveAlternatives.add(mod);
+				moveAlternativesGroups.add(group.getKey());
+			}
+		}
+
+		for(Mod mod : files) {
+			if(moveAlternativesGroups.contains(mod.group)) {
+				moveFiles.add(mod);
+			}
+		}
+
+		final List<Mod> fileList = new TRLList<>(files);
+		fileList.addAll(moveAlternatives);
+		fileList.removeAll(moveFiles);
+		files = fileList.toArray(new Mod[0]);
+
+		final List<Mod> alternativesList = new TRLList<>(alternativeMods);
+		alternativesList.addAll(moveFiles);
+		alternativesList.removeAll(moveAlternatives);
+		alternativeMods = alternativesList.toArray(new Mod[0]);
 	}
 
 	public TRLList<Mod> getOptionalMods() {

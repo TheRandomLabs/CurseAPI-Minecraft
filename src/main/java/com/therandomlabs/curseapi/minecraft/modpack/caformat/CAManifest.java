@@ -20,7 +20,7 @@ import com.therandomlabs.curseapi.minecraft.modpack.Side;
 import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.CurseManifest;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
-import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest.GroupInfo;
+import com.therandomlabs.curseapi.minecraft.modpack.manifest.GroupInfo;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLCollectors;
@@ -259,6 +259,12 @@ public class CAManifest {
 						"each group: " + line);
 			}
 
+			for(String name : groupNames) {
+				if(GroupInfo.hasGroup(groups, name)) {
+					throw new ManifestParseException("Duplicate group definition: " + name);
+				}
+			}
+
 			final TRLList<String> list = new TRLList<>(groupNames);
 			final GroupInfo group =
 					new GroupInfo(list.get(0), list.subList(1).toArray(new String[0]));
@@ -427,29 +433,19 @@ public class CAManifest {
 					getRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
 			mod.group = group;
 
-			//No group = primary group
-			boolean isPrimaryGroup = group.isEmpty();
-			if(!isPrimaryGroup) {
-				for(GroupInfo groupInfo : groups) {
-					if(groupInfo.primary.equals(group)) {
-						isPrimaryGroup = true;
-						break;
-					}
-
-					if(ArrayUtils.contains(groupInfo.alternatives, group)) {
-						break;
-					}
-				}
+			if(!group.isEmpty() && !GroupInfo.hasGroup(groups, group)) {
+				throw new ManifestParseException("The group \"%s\" has not been defined yet",
+						group);
 			}
 
-			if(!isPrimaryGroup) {
-				alternativeMods.add(mod);
-			} else {
+			if(group.isEmpty() || GroupInfo.isPrimary(groups, group)) {
 				if(side == Side.SERVER) {
 					serverOnlyMods.add(mod);
 				} else {
 					mods.add(mod);
 				}
+			} else {
+				alternativeMods.add(mod);
 			}
 		} else {
 			final String path = StringUtils.replaceAll(ArrayUtils.join(data, " "),
