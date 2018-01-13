@@ -32,8 +32,6 @@ import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.number.NumberUtils;
 import com.therandomlabs.utils.wrapper.BooleanWrapper;
 
-//TODO why is everything static? method signatures are ridiculously long
-//Clean up this mess, remove code repetition, etc.
 public class CAManifest {
 	// [ Primary Mod Group ] [ Some Other Mod That Does Something Similar ]
 	public static final char GROUP_DEFINER_OPENER = '[';

@@ -43,10 +43,8 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 //https://github.com/google/gson/issues/395 may occur
-//TODO a way to choose alternative mod groups and whether to install optional mods
-//iterateModSources, installForge, createEULAAndServerStarters
-//ModpackZipper class - sided mods (manifest)/files, server-specific support
-//installOptiFine
+//TODO preferredGroups string list, iterateModSources, installOptiFine, installForge,
+//createEULAAndServerStarters, ModpackZipper class
 public final class ModpackInstaller {
 	public static final URL LIGHTCHOCOLATE;
 
@@ -79,6 +77,8 @@ public final class ModpackInstaller {
 	private boolean shouldCopyOverrides = true;
 	private boolean shouldFinish = true;
 
+	private boolean running;
+
 	static {
 		URL lightchocolate = null;
 		try {
@@ -101,7 +101,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller installTo(Path directory) {
-		Assertions.nonNull(directory, "directory");
+		ensureNotRunning();
 		installDir = directory;
 		return this;
 	}
@@ -115,6 +115,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller writeInstallerDataTo(Path data) {
+		ensureNotRunning();
 		installerData = data;
 		return this;
 	}
@@ -128,6 +129,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller withModSource(Path... source) {
+		ensureNotRunning();
 		modSources.addAll(new ImmutableList<>(source));
 		return this;
 	}
@@ -138,6 +140,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller withExtensionsWithVariables(String... extensions) {
+		ensureNotRunning();
 		extensionsWithVariables.addAll(new ImmutableList<>(extensions));
 		return this;
 	}
@@ -148,6 +151,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller excludeProject(int... projectID) {
+		ensureNotRunning();
 		excludedProjects.addAll(new ImmutableList<>(ArrayUtils.toBoxedArray(projectID)));
 		return this;
 	}
@@ -162,6 +166,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller excludePath(Path... path) {
+		ensureNotRunning();
 		excludedPaths.addAll(new ImmutableList<>(path));
 		return this;
 	}
@@ -172,6 +177,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller redownloadMods(boolean flag) {
+		ensureNotRunning();
 		redownloadMods = flag;
 		return this;
 	}
@@ -181,6 +187,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller side(Side side) {
+		ensureNotRunning();
 		this.side = side;
 		return this;
 	}
@@ -190,6 +197,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller installForge(boolean flag) {
+		ensureNotRunning();
 		installForge = flag;
 		return this;
 	}
@@ -199,6 +207,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller deleteOldForgeVersion(boolean flag) {
+		ensureNotRunning();
 		deleteOldForgeVersion = flag;
 		return this;
 	}
@@ -208,6 +217,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller createEULA(boolean flag) {
+		ensureNotRunning();
 		createEULA = flag;
 		return this;
 	}
@@ -217,6 +227,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller createServerStarters(boolean flag) {
+		ensureNotRunning();
 		createServerStarters = flag;
 		return this;
 	}
@@ -226,6 +237,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller threads(int threads) {
+		ensureNotRunning();
 		this.threads = threads;
 		return this;
 	}
@@ -235,6 +247,7 @@ public final class ModpackInstaller {
 	}
 
 	public ModpackInstaller dataAutosaveInterval(long interval) {
+		ensureNotRunning();
 		dataAutosaveInterval = interval;
 		return this;
 	}
@@ -244,15 +257,18 @@ public final class ModpackInstaller {
 	}
 
 	public void install(int projectID) throws CurseException, IOException, ZipException {
+		ensureNotRunning();
 		install(CurseProject.fromID(projectID).files().get(0));
 	}
 
 	public void install(int projectID, int fileID)
 			throws CurseException, IOException, ZipException {
+		ensureNotRunning();
 		install(CurseProject.fromID(projectID).fileFromID(fileID));
 	}
 
 	public void install(CurseProject project) throws CurseException, IOException, ZipException {
+		ensureNotRunning();
 		install(project.files().get(0));
 	}
 
@@ -265,6 +281,8 @@ public final class ModpackInstaller {
 	}
 
 	public void install(URL url) throws CurseException, IOException, ZipException {
+		ensureNotRunning();
+
 		final Path downloaded = tempPath();
 
 		MCEventHandling.forEach(handler -> handler.downloadingFromURL(url));
@@ -272,6 +290,58 @@ public final class ModpackInstaller {
 		NIOUtils.download(url, downloaded);
 
 		installFromZip(downloaded);
+	}
+
+	public void installFromZip(Path zip) throws CurseException, IOException, ZipException {
+		Assertions.file(zip);
+		installFromZip(new ZipFile(zip.toFile()));
+	}
+
+	public void installFromZip(ZipFile zip) throws CurseException, IOException, ZipException {
+		ensureNotRunning();
+
+		if(!zip.isValidZipFile()) {
+			throw new CurseException("Invalid zip file");
+		}
+
+		Path extracted = tempPath();
+		zip.extractAll(extracted.toString());
+
+		//Mainly to support modpacks downloaded directly from GitHub,
+		//where all files are in a parent folder with the name of the repository
+		final List<Path> files = NIOUtils.list(extracted);
+		if(files.size() == 1 && Files.isDirectory(files.get(0))) {
+			extracted = files.get(0);
+		}
+
+		shouldCopyOverrides = false;
+
+		installFromDirectory(extracted);
+	}
+
+	public void installFromDirectory(String modpack) throws CurseException, IOException {
+		installFromDirectory(Paths.get(modpack));
+	}
+
+	public void installFromDirectory(Path modpack) throws CurseException, IOException {
+		initialize();
+
+		final Path manifestPath = modpack.resolve("manifest.json");
+
+		if(!Files.exists(manifestPath)) {
+			throw new CurseException("manifest.json not found in modpack directory: " + modpack);
+		}
+
+		final ExtendedCurseManifest manifest =
+				MiscUtils.fromJson(manifestPath, ExtendedCurseManifest.class);
+
+		shouldFinish = false;
+		installFromManifest(manifest);
+		shouldFinish = true;
+
+		copyFiles(modpack.resolve(manifest.overrides), manifest);
+
+		finish();
 	}
 
 	public void installFromManifest(URL url) throws CurseException, IOException {
@@ -292,7 +362,7 @@ public final class ModpackInstaller {
 
 	public void installFromManifest(ExtendedCurseManifest manifest)
 			throws CurseException, IOException {
-		ensureDirectoryExists(installDir);
+		initialize();
 
 		data.minecraftVersion = manifest.minecraft.version.toString();
 		data.forgeVersion = manifest.minecraft.getForgeVersion();
@@ -302,7 +372,7 @@ public final class ModpackInstaller {
 		if(dataAutosaveInterval > 0L) {
 			autosaver = new Timer(() -> {
 				try {
-					NIOUtils.write(installerData(), new Gson().toJson(data));
+					NIOUtils.write(installerData, new Gson().toJson(data));
 					MCEventHandling.forEach(MCEventHandler::autosavedInstallerData);
 				} catch(CurseException | IOException ex) {
 					//Doesn't matter; this is just autosave anyway
@@ -331,67 +401,16 @@ public final class ModpackInstaller {
 		finish();
 	}
 
-	public void installFromZip(Path zip) throws CurseException, IOException, ZipException {
-		Assertions.file(zip);
-		installFromZip(new ZipFile(zip.toFile()));
-	}
-
-	public void installFromZip(ZipFile zip) throws CurseException, IOException, ZipException {
-		if(!zip.isValidZipFile()) {
-			throw new CurseException("Invalid zip file");
-		}
-
-		Path extracted = tempPath();
-		zip.extractAll(extracted.toString());
-
-		//Mainly to support modpacks downloaded directly from GitHub,
-		//where all files are in a parent folder with the name of the repository
-		final List<Path> files = NIOUtils.list(extracted);
-		if(files.size() == 1 && Files.isDirectory(files.get(0))) {
-			extracted = files.get(0);
-		}
-
-		shouldCopyOverrides = false;
-
-		installFromDirectory(extracted);
-	}
-
-	public void installFromDirectory(String modpack) throws CurseException, IOException {
-		installFromDirectory(Paths.get(modpack));
-	}
-
-	public void installFromDirectory(Path modpack) throws CurseException, IOException {
-		ensureDirectoryExists(installDir);
-
-		final Path manifestPath = modpack.resolve("manifest.json");
-
-		if(!Files.exists(manifestPath)) {
-			throw new CurseException("manifest.json not found in modpack directory: " + modpack);
-		}
-
-		final ExtendedCurseManifest manifest =
-				MiscUtils.fromJson(manifestPath, ExtendedCurseManifest.class);
-
-		shouldFinish = false;
-		installFromManifest(manifest);
-		shouldFinish = true;
-
-		copyFiles(modpack.resolve(manifest.overrides), manifest);
-
-		finish();
-	}
-
 	private void deleteOldFiles(ExtendedCurseManifest manifest)
 			throws CurseException, IOException {
-		final Path path = installerData();
-		if(!Files.exists(path)) {
+		if(!Files.exists(installerData)) {
 			if(autosaver != null) {
 				autosaver.start();
 			}
 			return;
 		}
 
-		final InstallerData oldData = MiscUtils.fromJson(path, InstallerData.class);
+		final InstallerData oldData = MiscUtils.fromJson(installerData, InstallerData.class);
 		if(autosaver != null) {
 			autosaver.start();
 		}
@@ -624,6 +643,53 @@ public final class ModpackInstaller {
 		ensureDirectoryExists(installDir.resolve(directory.toString()));
 	}
 
+	private void initialize() throws IOException {
+		Assertions.nonNull(installDir, "installDir");
+		Assertions.nonNull(installerData, "installerData");
+
+		if(Files.isDirectory(installerData)) {
+			NIOUtils.deleteDirectory(installerData);
+		}
+
+		if(installerData.getRoot() == null) {
+			installerData = installDir.resolve(installerData);
+		}
+
+		for(Path modSource : modSources) {
+			Assertions.nonNull(modSource, "modSource");
+			Assertions.directory(modSource);
+		}
+
+		for(String extensionWithVariable : extensionsWithVariables) {
+			Assertions.nonNull(extensionWithVariable, "extensionWithVariable");
+			Assertions.nonEmpty(extensionWithVariable, "extensionWithVariable");
+		}
+
+		for(Path excludedPath : excludedPaths) {
+			Assertions.nonNull(excludedPath, "excludedPath");
+			if(excludedPath.getRoot() != null) {
+				throw new IllegalArgumentException("\"" + excludedPath +
+						"\" has a root component");
+			}
+		}
+
+		Assertions.nonNull(side, "side");
+
+		if(shouldFinish && running) {
+			throw new IllegalStateException("This ModpackInstaller is already running");
+		}
+
+		running = true;
+
+		ensureDirectoryExists(installDir);
+	}
+
+	private void ensureNotRunning() {
+		if(running) {
+			throw new IllegalStateException("This ModpackInstaller is already running");
+		}
+	}
+
 	private void finish() throws IOException {
 		if(!shouldFinish) {
 			return;
@@ -635,13 +701,16 @@ public final class ModpackInstaller {
 
 		//Last save
 		autosaver.stop();
-		NIOUtils.write(installerData(), new Gson().toJson(data));
+		autosaver = null;
+		NIOUtils.write(installerData, new Gson().toJson(data));
+		data = null;
 
 		deleteTemporaryFiles();
-	}
 
-	private Path installerData() {
-		return installDir.resolve(installerData);
+		shouldCopyOverrides = true;
+		shouldFinish = true;
+
+		running = false;
 	}
 
 	private static void removeModsFromManifest(ExtendedCurseManifest manifest,

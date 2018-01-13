@@ -137,6 +137,16 @@ public class ExtendedCurseManifest implements Cloneable {
 		moveServerOnlyModsToFiles();
 	}
 
+	public TRLList<Mod> getOptionalMods() {
+		final TRLList<Mod> mods = new TRLList<>();
+		for(Mod mod : files) {
+			if(mod.optional) {
+				mods.add(mod);
+			}
+		}
+		return mods;
+	}
+
 	public void moveServerOnlyModsToFiles() {
 		final TRLList<Mod> files = new TRLList<>(this.files);
 		files.addAll(serverOnlyMods);
