@@ -198,6 +198,18 @@ public class Changelog {
 		return added;
 	}
 
+	public String getOldForgeVersion() {
+		return oldManifest.minecraft.getForgeVersion();
+	}
+
+	public String getNewForgeVersion() {
+		return newManifest.minecraft.getForgeVersion();
+	}
+
+	public boolean hasForgeVersionChanged() {
+		return !getOldForgeVersion().equals(getNewForgeVersion());
+	}
+
 	@Override
 	public String toString() {
 		try {
@@ -276,7 +288,12 @@ public class Changelog {
 				string.append(newline).append("\t").append("- ").append(added.title);
 			}
 
-			string.append(newline);
+			string.append(newline).append(newline);
+		}
+
+		if(changelog.hasForgeVersionChanged()) {
+			string.append("Went from Forge ").append(changelog.getOldForgeVersion()).
+					append(" to ").append(changelog.getNewForgeVersion()).append(newline);
 		}
 
 		final String toString = string.toString();
