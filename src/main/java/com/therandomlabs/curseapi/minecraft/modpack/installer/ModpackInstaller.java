@@ -43,8 +43,7 @@ import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 //https://github.com/google/gson/issues/395 may occur
-//TODO preferredGroups string list, iterateModSources, installOptiFine, installForge,
-//createEULAAndServerStarters, ModpackZipper class
+//TODO iterateModSources, installOptiFine, installForge, createEULAAndServerStarters
 public final class ModpackInstaller {
 	public static final URL LIGHTCHOCOLATE;
 
@@ -749,7 +748,7 @@ public final class ModpackInstaller {
 		}
 	}
 
-	private static Path tempPath() {
+	static Path tempPath() {
 		final Path path =
 				NIOUtils.TEMP_DIRECTORY.get().resolve("CurseAPI_Modpack" + System.nanoTime());
 		temporaryFiles.add(path);
@@ -792,9 +791,7 @@ public final class ModpackInstaller {
 					Files.deleteIfExists(temporaryFiles.get(i));
 				}
 				temporaryFiles.remove(i--);
-			} catch(IOException ex) {
-				ex.printStackTrace();
-			}
+			} catch(IOException ex) {} //Doesn't matter, probably still in use
 		}
 	}
 }
