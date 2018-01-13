@@ -229,6 +229,16 @@ public class Changelog {
 		final StringBuilder string = new StringBuilder();
 		final String newline = IOConstants.LINE_SEPARATOR;
 
+		if(!changelog.getAdded().isEmpty()) {
+			string.append("Added:");
+
+			for(Mod added : changelog.getAdded()) {
+				string.append(newline).append("\t").append("- ").append(added.title);
+			}
+
+			string.append(newline).append(newline);
+		}
+
 		if(!changelog.getUpdated().isEmpty()) {
 			//Preload updated files
 			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), changelog.getUpdated().size(),
@@ -276,16 +286,6 @@ public class Changelog {
 
 			for(Mod removed : changelog.getRemoved()) {
 				string.append(newline).append("\t").append("- ").append(removed.title);
-			}
-
-			string.append(newline).append(newline);
-		}
-
-		if(!changelog.getAdded().isEmpty()) {
-			string.append("Added:");
-
-			for(Mod added : changelog.getAdded()) {
-				string.append(newline).append("\t").append("- ").append(added.title);
 			}
 
 			string.append(newline).append(newline);

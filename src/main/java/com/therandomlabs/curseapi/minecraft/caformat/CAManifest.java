@@ -206,26 +206,27 @@ public class CAManifest {
 	private static void parsePreprocessors(TRLList<String> lines,
 			Map<Preprocessor, String> preprocessors)
 			throws CurseException, IOException, ManifestParseException {
-		final Map<Integer, String> filtered = filter(lines, Preprocessor.CHARACTER);
+		Map<Integer, String> filtered;
+		while(!(filtered = filter(lines, Preprocessor.CHARACTER)).isEmpty()) {
+			for(Map.Entry<Integer, String> line : filtered.entrySet()) {
+				final String[] data = getData(line);
+				final Preprocessor preprocessor = Preprocessor.fromName(data[0]);
+				if(preprocessor == null) {
+					throw new ManifestParseException("Invalid preprocessor: " + data[0]);
+				}
 
-		for(Map.Entry<Integer, String> line : filtered.entrySet()) {
-			final String[] data = getData(line);
-			final Preprocessor preprocessor = Preprocessor.fromName(data[0]);
-			if(preprocessor == null) {
-				throw new ManifestParseException("Invalid preprocessor: " + data[0]);
+				final String value = join(data, 1);
+				final String[] args = getData(value);
+
+				if(!preprocessor.isValid(value, args)) {
+					throw new ManifestParseException("Invalid value \"%s\" for preprocessor: %s",
+							value, preprocessor);
+				}
+
+				preprocessor.apply(lines, line.getKey(), value, args);
+
+				preprocessors.put(preprocessor, value);
 			}
-
-			final String value = join(data, 1);
-			final String[] args = getData(value);
-
-			if(!preprocessor.isValid(value, args)) {
-				throw new ManifestParseException("Invalid value \"%s\" for preprocessor: %s",
-						value, preprocessor);
-			}
-
-			preprocessor.apply(lines, line.getKey(), value, args);
-
-			preprocessors.put(preprocessor, value);
 		}
 	}
 
@@ -323,6 +324,8 @@ public class CAManifest {
 						alternativeMods.remove(i--);
 					}
 				}
+
+				continue;
 			}
 
 			final BooleanWrapper client = new BooleanWrapper();
