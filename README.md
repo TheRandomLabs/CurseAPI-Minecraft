@@ -2,7 +2,7 @@
 An extension of CurseAPI that deals with the creation, parsing, and installation of Minecraft modpacks.
 
 Features:
-* The CurseAPI Manifest Format, which CurseAPI can generate Curse manifests from
+* The CurseAPI Manifest Format, which CurseAPI can generate Curse manifests from. I haven't written any documentation for it yet, but you can see an example [here](https://github.com/TheRandomLabs/LightChocolate)
 * The extended Curse manifest format
 * Modpack installation, which doesn't redownload files that are already there (or in other places)
 * Parsing Curse manifests

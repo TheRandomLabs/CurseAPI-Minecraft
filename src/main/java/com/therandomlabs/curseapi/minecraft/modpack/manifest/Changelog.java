@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -76,7 +77,7 @@ public class Changelog {
 			return getNewModFile().name();
 		}
 
-		public Map<String, String> getChangelog() throws CurseException {
+		public Map<String, String> getChangelog() throws CurseException, IOException {
 			if(isDowngrade()) {
 				return Collections.emptyMap();
 			}
@@ -138,7 +139,11 @@ public class Changelog {
 					}
 
 					changelog.put("Changelog retrieved from GitHub", parsed.toString());
-				} catch(IOException ex) {}
+				} catch(CurseException ex) {
+					if(!(ex.getCause() instanceof MalformedURLException)) {
+						throw ex;
+					}
+				}
 			}
 
 			final CurseFileList files;
@@ -278,15 +283,15 @@ public class Changelog {
 		return !getOldForgeVersion().equals(getNewForgeVersion());
 	}
 
-	public String tryToString() throws CurseException {
+	public String tryToString() throws CurseException, IOException {
 		return changelogString(this);
 	}
 
 	@Override
 	public String toString() {
 		try {
-			return changelogString(this);
-		} catch(CurseException ex) {
+			return tryToString();
+		} catch(CurseException | IOException ex) {
 			ex.printStackTrace();
 		}
 		return "";
@@ -297,7 +302,7 @@ public class Changelog {
 		return new Changelog(oldManifest, newManifest);
 	}
 
-	private static String changelogString(Changelog changelog) throws CurseException {
+	private static String changelogString(Changelog changelog) throws CurseException, IOException {
 		final StringBuilder string = new StringBuilder();
 		final String newline = IOConstants.LINE_SEPARATOR;
 
