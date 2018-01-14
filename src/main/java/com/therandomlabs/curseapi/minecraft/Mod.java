@@ -1,5 +1,7 @@
 package com.therandomlabs.curseapi.minecraft;
 
+import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.util.CloneException;
 
 public class Mod implements Cloneable {
@@ -26,6 +28,13 @@ public class Mod implements Cloneable {
 		mod.group = group;
 
 		return mod;
+	}
+
+	public String title() throws CurseException {
+		if(title.equals(UNKNOWN_NAME)) {
+			title = CurseProject.fromID(projectID).title();
+		}
+		return title;
 	}
 
 	public String[] getRelatedFiles(Side side) {

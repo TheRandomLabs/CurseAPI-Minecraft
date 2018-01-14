@@ -315,7 +315,7 @@ public class Changelog {
 			string.append("Added:");
 
 			for(Mod added : changelog.getAdded()) {
-				string.append(newline).append("\t").append("- ").append(added.title);
+				string.append(newline).append("\t").append("- ").append(added.title());
 			}
 
 			string.append(newline).append(newline);
@@ -369,7 +369,7 @@ public class Changelog {
 			string.append("Removed:");
 
 			for(Mod removed : changelog.getRemoved()) {
-				string.append(newline).append("\t").append("- ").append(removed.title);
+				string.append(newline).append("\t").append("- ").append(removed.title());
 			}
 
 			string.append(newline).append(newline);
