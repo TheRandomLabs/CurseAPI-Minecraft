@@ -9,11 +9,10 @@ import java.nio.file.Paths;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.caformat.CAManifest;
-import com.therandomlabs.curseapi.util.CurseEventHandling;
+import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.StringUtils;
-import com.therandomlabs.utils.network.NetworkUtils;
 
 public class PreprocessorImport extends Preprocessor {
 	public static final char CHARACTER = '#';
@@ -67,11 +66,7 @@ public class PreprocessorImport extends Preprocessor {
 
 			final URL url = new URL(value);
 
-			CurseEventHandling.forEach(handler -> handler.preDownloadDocument(url.toString()));
-
-			final String toImport = NetworkUtils.read(url);
-
-			CurseEventHandling.forEach(handler -> handler.postDownloadDocument(url.toString()));
+			final String toImport = DocumentUtils.read(url);
 
 			linesToImport = new ImmutableList<>(StringUtils.splitNewline(toImport));
 		} catch(MalformedURLException ex) {

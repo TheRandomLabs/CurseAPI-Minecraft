@@ -1,5 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,6 +10,8 @@ import com.therandomlabs.curseapi.CurseFile;
 import com.therandomlabs.curseapi.CurseFileList;
 import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.util.DocumentUtils;
+import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.io.IOConstants;
@@ -73,18 +76,81 @@ public class Changelog {
 			return getNewModFile().name();
 		}
 
-		public Map<String, String> getChangelog() throws CurseException {
+		public Map<String, String> getChangelog() throws CurseException, IOException {
 			if(isDowngrade()) {
 				return Collections.emptyMap();
 			}
 
 			final Map<String, String> changelog = new LinkedHashMap<>();
 
-			final CurseFileList files = getProject().files().filterVersions(mcVersion).
-					between(getOldModFile(), getNewModFile());
+			if(getNewModFile().uploader().equals("TeamCoFH")) {
+				//CoFH just links to a txt file on their GitHub, so we do some black magic
+				String url = getNewModFile().changelog().trim();
+				url = url.split("]")[0].substring(1);
+				url = url.replace("/blob", "");
+				url = url.replace("github", "raw.githubusercontent");
 
-			for(CurseFile file : files) {
-				changelog.put(file.name(), file.changelog());
+				final String fullChangelog = DocumentUtils.read(url);
+
+				String oldVersion = getOldModName().split("-")[2];
+				int lengthToRemove = ArrayUtils.last(oldVersion.split("\\.")).length() + 1;
+				oldVersion = oldVersion.substring(0, oldVersion.length() - lengthToRemove);
+
+				String newVersion = getNewModName().split("-")[2];
+				lengthToRemove = ArrayUtils.last(newVersion.split("\\.")).length() + 1;
+				newVersion = newVersion.substring(0, newVersion.length() - lengthToRemove);
+
+				final String[] lines = StringUtils.splitNewline(fullChangelog);
+				final StringBuilder parsed = new StringBuilder();
+
+				boolean checkVersion = false;
+				boolean changelogStarted = false;
+
+				for(String line : lines) {
+					if(checkVersion) {
+						checkVersion = false;
+
+						line = line.trim();
+						if(line.isEmpty()) {
+							continue;
+						}
+
+						if(changelogStarted) {
+							if(line.substring(0, line.length() - 1).equals(oldVersion)) {
+								break;
+							}
+						} else {
+							if(line.substring(0, line.length() - 1).equals(newVersion)) {
+								changelogStarted = true;
+							}
+						}
+					}
+
+					if(line.startsWith("======") || line.startsWith("------")) {
+						checkVersion = true;
+						continue;
+					}
+
+					if(changelogStarted) {
+						parsed.append(line).append(System.lineSeparator());
+					}
+				}
+
+				changelog.put("Changelog retrieved from GitHub", parsed.toString());
+			} else {
+				final CurseFileList files;
+				if(getNewModFile().uploader().equals("mezz")) {
+					//99% of the time, all of the needed information will just be in the
+					//newest changelog due to how mezz does changelogs
+					files = CurseFileList.of(getNewModFile());
+				} else {
+					files = getProject().files().filterVersions(mcVersion).
+							between(getOldModFile(), getNewModFile());
+				}
+
+				for(int i = files.size() - 1; i >= 0; i--) {
+					changelog.put(files.get(i).name(), files.get(i).changelog());
+				}
 			}
 
 			return changelog;
@@ -210,11 +276,15 @@ public class Changelog {
 		return !getOldForgeVersion().equals(getNewForgeVersion());
 	}
 
+	public String tryToString() throws CurseException, IOException {
+		return changelogString(this);
+	}
+
 	@Override
 	public String toString() {
 		try {
 			return changelogString(this);
-		} catch(CurseException ex) {
+		} catch(CurseException | IOException ex) {
 			ex.printStackTrace();
 		}
 		return "";
@@ -225,7 +295,7 @@ public class Changelog {
 		return new Changelog(oldManifest, newManifest);
 	}
 
-	private static String changelogString(Changelog changelog) throws CurseException {
+	private static String changelogString(Changelog changelog) throws CurseException, IOException {
 		final StringBuilder string = new StringBuilder();
 		final String newline = IOConstants.LINE_SEPARATOR;
 
@@ -247,7 +317,9 @@ public class Changelog {
 			string.append("Updated:");
 
 			for(UpdateInfo updated : changelog.getUpdated()) {
-				string.append(newline).append("\t").append(updated.getModTitle()).append(':');
+				string.append(newline).append("\t").append(updated.getModTitle()).
+						append(" (went from ").append(updated.getOldModName()).append(" to ").
+						append(updated.getNewModName()).append("):");
 
 				for(Map.Entry<String, String> modChangelog : updated.getChangelog().entrySet()) {
 					string.append(newline).append("\t\t").append(modChangelog.getKey()).

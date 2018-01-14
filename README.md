@@ -6,7 +6,7 @@ Features:
 * The extended Curse manifest format
 * Modpack installation, which doesn't redownload files that are already there (or in other places)
 * Parsing Curse manifests
-* Changelog generation (feed it an old manifest and a new manifest, and it will create a Changelog object, which comes with a toString method)
+* Changelog generation with mod-specific support (feed it an old manifest and a new manifest, and it will create a Changelog object, which comes with a toString method)
 * Replacing "variables" in configuration files - both in installation and creating a zip file
 * Basic event handling
 * And more.

@@ -9,7 +9,7 @@ public class Mod implements Cloneable {
 	public int projectID;
 	public int fileID;
 	public Side side = Side.BOTH;
-	public boolean optional;
+	public boolean required;
 	public FileInfo[] relatedFiles = new FileInfo[0];
 	public String group = "";
 
@@ -21,7 +21,7 @@ public class Mod implements Cloneable {
 		mod.projectID = projectID;
 		mod.fileID = fileID;
 		mod.side = side;
-		mod.optional = optional;
+		mod.required = required;
 		mod.relatedFiles = CloneException.tryClone(relatedFiles);
 		mod.group = group;
 

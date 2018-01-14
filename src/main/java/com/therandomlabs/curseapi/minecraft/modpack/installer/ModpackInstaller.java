@@ -24,12 +24,13 @@ import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.curseforge.CurseForge;
 import com.therandomlabs.curseapi.minecraft.MCEventHandler;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
+import com.therandomlabs.curseapi.minecraft.Minecraft;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.CurseManifest;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
-import com.therandomlabs.curseapi.util.CurseEventHandling;
+import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.curseapi.util.MiscUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
@@ -38,7 +39,6 @@ import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.misc.Timer;
-import com.therandomlabs.utils.network.NetworkUtils;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
@@ -49,7 +49,7 @@ public final class ModpackInstaller {
 
 	private static final List<Path> temporaryFiles = new TRLList<>();
 
-	private Path installDir = Paths.get(".");
+	private Path installDir = Minecraft.getDirectory();
 	private Path installerData = Paths.get("ca_modpack_data.json");
 
 	private final HashSet<String> preferredGroups = new HashSet<>();
@@ -355,10 +355,8 @@ public final class ModpackInstaller {
 	}
 
 	public void installFromManifest(URL url) throws CurseException, IOException {
-		CurseEventHandling.forEach(handler -> handler.preDownloadDocument(url.toString()));
 		final ExtendedCurseManifest manifest =
-				new Gson().fromJson(NetworkUtils.read(url), ExtendedCurseManifest.class);
-		CurseEventHandling.forEach(handler -> handler.postDownloadDocument(url.toString()));
+				new Gson().fromJson(DocumentUtils.read(url), ExtendedCurseManifest.class);
 		installFromManifest(manifest);
 	}
 

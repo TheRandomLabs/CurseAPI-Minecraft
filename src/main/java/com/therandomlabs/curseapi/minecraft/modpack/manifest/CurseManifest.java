@@ -13,17 +13,19 @@ public class CurseManifest implements Cloneable {
 	public static class CurseMod implements Cloneable {
 		public int projectID;
 		public int fileID;
+		public boolean required;
 
 		public CurseMod() {}
 
-		public CurseMod(int projectID, int fileID) {
+		public CurseMod(int projectID, int fileID, boolean required) {
 			this.projectID = projectID;
 			this.fileID = fileID;
+			this.required = required;
 		}
 
 		@Override
 		public CurseMod clone() {
-			return new CurseMod(projectID, fileID);
+			return new CurseMod(projectID, fileID, required);
 		}
 
 		public Mod toMod() throws CurseException {
@@ -32,6 +34,7 @@ public class CurseManifest implements Cloneable {
 			mod.title = CurseProject.fromID(projectID).title();
 			mod.projectID = projectID;
 			mod.fileID = fileID;
+			mod.required = required;
 
 			return mod;
 		}
@@ -45,7 +48,7 @@ public class CurseManifest implements Cloneable {
 		}
 
 		public static CurseMod fromMod(Mod mod) {
-			return new CurseMod(mod.projectID, mod.fileID);
+			return new CurseMod(mod.projectID, mod.fileID, mod.required);
 		}
 
 		public static CurseMod[] fromMods(Mod[] mods) {

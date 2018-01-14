@@ -443,7 +443,7 @@ public class CAManifest {
 			mod.projectID = projectID;
 			mod.fileID = fileID;
 			mod.side = side;
-			mod.optional = optional;
+			mod.required = !optional;
 			mod.relatedFiles =
 					getRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
 			mod.group = group;

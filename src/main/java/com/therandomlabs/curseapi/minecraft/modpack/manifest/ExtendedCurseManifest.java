@@ -214,7 +214,7 @@ public class ExtendedCurseManifest implements Cloneable {
 	public TRLList<Mod> getOptionalMods() {
 		final TRLList<Mod> mods = new TRLList<>();
 		for(Mod mod : files) {
-			if(mod.optional) {
+			if(!mod.required) {
 				mods.add(mod);
 			}
 		}
