@@ -76,7 +76,7 @@ public class Changelog {
 			return getNewModFile().name();
 		}
 
-		public Map<String, String> getChangelog() throws CurseException, IOException {
+		public Map<String, String> getChangelog() throws CurseException {
 			if(isDowngrade()) {
 				return Collections.emptyMap();
 			}
@@ -84,73 +84,75 @@ public class Changelog {
 			final Map<String, String> changelog = new LinkedHashMap<>();
 
 			if(getNewModFile().uploader().equals("TeamCoFH")) {
-				//CoFH just links to a txt file on their GitHub, so we do some black magic
-				String url = getNewModFile().changelog().trim();
-				url = url.split("]")[0].substring(1);
-				url = url.replace("/blob", "");
-				url = url.replace("github", "raw.githubusercontent");
+				try {
+					//CoFH just links to a txt file on their GitHub, so we do some black magic
+					String url = getNewModFile().changelog().trim();
+					url = url.split("]")[0].substring(1);
+					url = url.replace("/blob", "");
+					url = url.replace("github", "raw.githubusercontent");
 
-				final String fullChangelog = DocumentUtils.read(url);
+					final String fullChangelog = DocumentUtils.read(url);
 
-				String oldVersion = getOldModName().split("-")[2];
-				int lengthToRemove = ArrayUtils.last(oldVersion.split("\\.")).length() + 1;
-				oldVersion = oldVersion.substring(0, oldVersion.length() - lengthToRemove);
+					String oldVersion = getOldModName().split("-")[2];
+					int lengthToRemove = ArrayUtils.last(oldVersion.split("\\.")).length() + 1;
+					oldVersion = oldVersion.substring(0, oldVersion.length() - lengthToRemove);
 
-				String newVersion = getNewModName().split("-")[2];
-				lengthToRemove = ArrayUtils.last(newVersion.split("\\.")).length() + 1;
-				newVersion = newVersion.substring(0, newVersion.length() - lengthToRemove);
+					String newVersion = getNewModName().split("-")[2];
+					lengthToRemove = ArrayUtils.last(newVersion.split("\\.")).length() + 1;
+					newVersion = newVersion.substring(0, newVersion.length() - lengthToRemove);
 
-				final String[] lines = StringUtils.splitNewline(fullChangelog);
-				final StringBuilder parsed = new StringBuilder();
+					final String[] lines = StringUtils.splitNewline(fullChangelog);
+					final StringBuilder parsed = new StringBuilder();
 
-				boolean checkVersion = false;
-				boolean changelogStarted = false;
+					boolean checkVersion = false;
+					boolean changelogStarted = false;
 
-				for(String line : lines) {
-					if(checkVersion) {
-						checkVersion = false;
+					for(String line : lines) {
+						if(checkVersion) {
+							checkVersion = false;
 
-						line = line.trim();
-						if(line.isEmpty()) {
+							line = line.trim();
+							if(line.isEmpty()) {
+								continue;
+							}
+
+							if(changelogStarted) {
+								if(line.substring(0, line.length() - 1).equals(oldVersion)) {
+									break;
+								}
+							} else {
+								if(line.substring(0, line.length() - 1).equals(newVersion)) {
+									changelogStarted = true;
+								}
+							}
+						}
+
+						if(line.startsWith("======") || line.startsWith("------")) {
+							checkVersion = true;
 							continue;
 						}
 
 						if(changelogStarted) {
-							if(line.substring(0, line.length() - 1).equals(oldVersion)) {
-								break;
-							}
-						} else {
-							if(line.substring(0, line.length() - 1).equals(newVersion)) {
-								changelogStarted = true;
-							}
+							parsed.append(line).append(System.lineSeparator());
 						}
 					}
 
-					if(line.startsWith("======") || line.startsWith("------")) {
-						checkVersion = true;
-						continue;
-					}
+					changelog.put("Changelog retrieved from GitHub", parsed.toString());
+				} catch(IOException ex) {}
+			}
 
-					if(changelogStarted) {
-						parsed.append(line).append(System.lineSeparator());
-					}
-				}
-
-				changelog.put("Changelog retrieved from GitHub", parsed.toString());
+			final CurseFileList files;
+			if(getNewModFile().uploader().equals("mezz")) {
+				//99% of the time, all of the needed information will just be in the
+				//newest changelog due to how mezz does changelogs
+				files = CurseFileList.of(getNewModFile());
 			} else {
-				final CurseFileList files;
-				if(getNewModFile().uploader().equals("mezz")) {
-					//99% of the time, all of the needed information will just be in the
-					//newest changelog due to how mezz does changelogs
-					files = CurseFileList.of(getNewModFile());
-				} else {
-					files = getProject().files().filterVersions(mcVersion).
-							between(getOldModFile(), getNewModFile());
-				}
+				files = getProject().files().filterVersions(mcVersion).
+						between(getOldModFile(), getNewModFile());
+			}
 
-				for(int i = files.size() - 1; i >= 0; i--) {
-					changelog.put(files.get(i).name(), files.get(i).changelog());
-				}
+			for(int i = files.size() - 1; i >= 0; i--) {
+				changelog.put(files.get(i).name(), files.get(i).changelog());
 			}
 
 			return changelog;
@@ -276,7 +278,7 @@ public class Changelog {
 		return !getOldForgeVersion().equals(getNewForgeVersion());
 	}
 
-	public String tryToString() throws CurseException, IOException {
+	public String tryToString() throws CurseException {
 		return changelogString(this);
 	}
 
@@ -284,7 +286,7 @@ public class Changelog {
 	public String toString() {
 		try {
 			return changelogString(this);
-		} catch(CurseException | IOException ex) {
+		} catch(CurseException ex) {
 			ex.printStackTrace();
 		}
 		return "";
@@ -295,9 +297,14 @@ public class Changelog {
 		return new Changelog(oldManifest, newManifest);
 	}
 
-	private static String changelogString(Changelog changelog) throws CurseException, IOException {
+	private static String changelogString(Changelog changelog) throws CurseException {
 		final StringBuilder string = new StringBuilder();
 		final String newline = IOConstants.LINE_SEPARATOR;
+
+		string.append(changelog.getOldManifest().name + ' ' + changelog.getOldManifest().version).
+				append(" to ").
+				append(changelog.getNewManifest().name + ' ' + changelog.getNewManifest().version).
+				append(newline).append(newline);
 
 		if(!changelog.getAdded().isEmpty()) {
 			string.append("Added:");
