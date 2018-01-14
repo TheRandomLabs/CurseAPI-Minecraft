@@ -20,6 +20,11 @@ import com.therandomlabs.utils.misc.StringUtils;
 
 public class Changelog {
 	public static class UpdateInfo implements Cloneable {
+		public static final int BIOMES_O_PLENTY_ID = 220318;
+		public static final int ACTUALLY_ADDITIONS_ID = 228404;
+		public static final String ACTUALLY_ADDITIONS_CHANGELOG = "https://raw." +
+				"githubusercontent.com/Ellpeck/ActuallyAdditions/master/update/changelog.md";
+
 		private CurseProject project;
 
 		private final String mcVersion;
@@ -77,6 +82,7 @@ public class Changelog {
 			return getNewModFile().name();
 		}
 
+		//Why is so much mod-specific code needed? WHYY?
 		public Map<String, String> getChangelog() throws CurseException, IOException {
 			if(isDowngrade()) {
 				return Collections.emptyMap();
@@ -86,59 +92,8 @@ public class Changelog {
 
 			if(getNewModFile().uploader().equals("TeamCoFH")) {
 				try {
-					//CoFH just links to a txt file on their GitHub, so we do some black magic
-					String url = getNewModFile().changelog().trim();
-					url = url.split("]")[0].substring(1);
-					url = url.replace("/blob", "");
-					url = url.replace("github", "raw.githubusercontent");
-
-					final String fullChangelog = DocumentUtils.read(url);
-
-					String oldVersion = getOldModName().split("-")[2];
-					int lengthToRemove = ArrayUtils.last(oldVersion.split("\\.")).length() + 1;
-					oldVersion = oldVersion.substring(0, oldVersion.length() - lengthToRemove);
-
-					String newVersion = getNewModName().split("-")[2];
-					lengthToRemove = ArrayUtils.last(newVersion.split("\\.")).length() + 1;
-					newVersion = newVersion.substring(0, newVersion.length() - lengthToRemove);
-
-					final String[] lines = StringUtils.splitNewline(fullChangelog);
-					final StringBuilder parsed = new StringBuilder();
-
-					boolean checkVersion = false;
-					boolean changelogStarted = false;
-
-					for(String line : lines) {
-						if(checkVersion) {
-							checkVersion = false;
-
-							line = line.trim();
-							if(line.isEmpty()) {
-								continue;
-							}
-
-							if(changelogStarted) {
-								if(line.substring(0, line.length() - 1).equals(oldVersion)) {
-									break;
-								}
-							} else {
-								if(line.substring(0, line.length() - 1).equals(newVersion)) {
-									changelogStarted = true;
-								}
-							}
-						}
-
-						if(line.startsWith("======") || line.startsWith("------")) {
-							checkVersion = true;
-							continue;
-						}
-
-						if(changelogStarted) {
-							parsed.append(line).append(System.lineSeparator());
-						}
-					}
-
-					changelog.put("Changelog retrieved from GitHub", parsed.toString());
+					getCoFHChangelog(changelog);
+					return changelog;
 				} catch(CurseException ex) {
 					if(!(ex.getCause() instanceof MalformedURLException)) {
 						throw ex;
@@ -146,21 +101,166 @@ public class Changelog {
 				}
 			}
 
-			final CurseFileList files;
+			if(getProject().id() == BIOMES_O_PLENTY_ID) {
+				getBiomesOPlentyChangelog(changelog);
+				return changelog;
+			}
+
+			if(getProject().id() == ACTUALLY_ADDITIONS_ID) {
+				getActuallyAdditionsChangelog(changelog);
+				return changelog;
+			}
+
 			if(getNewModFile().uploader().equals("mezz")) {
 				//99% of the time, all of the needed information will just be in the
 				//newest changelog due to how mezz does changelogs
-				files = CurseFileList.of(getNewModFile());
-			} else {
-				files = getProject().files().filterVersions(mcVersion).
-						between(getOldModFile(), getNewModFile());
+				changelog.put("Changelog retrieved from " + getNewModName(),
+						getNewModFile().changelog());
+				return changelog;
 			}
+
+			final CurseFileList files = getProject().files().filterVersions(mcVersion).
+					between(getOldModFile(), getNewModFile());
 
 			for(int i = files.size() - 1; i >= 0; i--) {
 				changelog.put(files.get(i).name(), files.get(i).changelog());
 			}
 
 			return changelog;
+		}
+
+		private void getCoFHChangelog(Map<String, String> changelog)
+				throws CurseException, IOException {
+			//CoFH just links to a txt file on their GitHub, so we do some black magic
+			String url = getNewModFile().changelog().trim();
+			url = url.split("]")[0].substring(1);
+			url = url.replace("/blob", "");
+			url = url.replace("github", "raw.githubusercontent");
+
+			final String fullChangelog = DocumentUtils.read(url);
+
+			String oldVersion = getOldModName().split("-")[2];
+			int lengthToRemove = ArrayUtils.last(oldVersion.split("\\.")).length() + 1;
+			oldVersion = oldVersion.substring(0, oldVersion.length() - lengthToRemove);
+
+			String newVersion = getNewModName().split("-")[2];
+			lengthToRemove = ArrayUtils.last(newVersion.split("\\.")).length() + 1;
+			newVersion = newVersion.substring(0, newVersion.length() - lengthToRemove);
+
+			final String[] lines = StringUtils.splitNewline(fullChangelog);
+			final StringBuilder parsed = new StringBuilder();
+
+			boolean checkVersion = false;
+			boolean changelogStarted = false;
+
+			for(String line : lines) {
+				if(checkVersion) {
+					checkVersion = false;
+
+					line = line.trim();
+					if(line.isEmpty()) {
+						continue;
+					}
+
+					if(changelogStarted) {
+						if(StringUtils.removeLastChar(line).equals(oldVersion)) {
+							break;
+						}
+					} else {
+						if(StringUtils.removeLastChar(line).equals(newVersion)) {
+							changelogStarted = true;
+						}
+					}
+				}
+
+				if(line.startsWith("======") || line.startsWith("------")) {
+					checkVersion = true;
+					continue;
+				}
+
+				if(changelogStarted) {
+					parsed.append(line).append(System.lineSeparator());
+				}
+			}
+
+			changelog.put("Changelog retrieved from GitHub", parsed.toString());
+		}
+
+		private void getBiomesOPlentyChangelog(Map<String, String> changelog)
+				throws CurseException {
+			String[] split = getOldModName().split("-");
+			final String oldVersion = split[1] + '-' + split[2];
+
+			split = getNewModName().split("-");
+			final String newVersion = split[1] + '-' + split[2];
+
+			final String[] lines = StringUtils.splitNewline(getNewModFile().changelog());
+			final StringBuilder parsed = new StringBuilder();
+
+			boolean changelogStarted = false;
+
+			for(String line : lines) {
+				if(line.equals("Changelog:")) {
+					continue;
+				}
+
+				if(line.startsWith("Build ")) {
+					final String version = StringUtils.removeLastChar(line.split(" ")[1]);
+					if(!changelogStarted) {
+						if(version.equals(newVersion)) {
+							changelogStarted = true;
+						}
+					} else {
+						if(version.equals(oldVersion)) {
+							break;
+						}
+					}
+				}
+
+				if(changelogStarted) {
+					parsed.append(line).append(System.lineSeparator());
+				}
+			}
+
+			changelog.put("Changelog retrieved from " + getNewModName(), parsed.toString());
+		}
+
+		private void getActuallyAdditionsChangelog(Map<String, String> changelog)
+				throws CurseException, IOException {
+			String[] split = getOldModName().split("-");
+			String oldVersion = split[1] + '-' + split[2];
+			oldVersion = StringUtils.removeLastChars(oldVersion, 4);
+
+			split = getNewModName().split("-");
+			String newVersion = split[1] + '-' + split[2];
+			newVersion = StringUtils.removeLastChars(newVersion, 4);
+
+			final String[] lines =
+					StringUtils.splitNewline(DocumentUtils.read(ACTUALLY_ADDITIONS_CHANGELOG));
+			final StringBuilder parsed = new StringBuilder();
+
+			boolean changelogStarted = false;
+
+			for(String line : lines) {
+				if(line.startsWith("# ")) {
+					final String version = line.split(" ")[1];
+					if(!changelogStarted) {
+						if(version.equals(newVersion)) {
+							changelogStarted = true;
+						}
+					} else {
+						if(version.equals(oldVersion)) {
+							break;
+						}
+					}
+				}
+
+				if(changelogStarted) {
+					parsed.append(line).append(System.lineSeparator());
+				}
+			}
+
+			changelog.put("Changlog retrieved from GitHub", parsed.toString());
 		}
 
 		public boolean isDowngrade() {
