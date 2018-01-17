@@ -44,23 +44,12 @@ public class FileInfo implements Cloneable {
 	}
 
 	public static TRLList<String> getExcludedPaths(FileInfo[] files, Side side) {
-		final String[] paths = getPaths(files, side);
-		final TRLList<String> excludedPaths = new TRLList<>(files.length - paths.length);
-
-		for(FileInfo file : files) {
-			boolean found = false;
-			for(String path : paths) {
-				if(file.path.equals(path)) {
-					found = true;
-					break;
-				}
-			}
-
-			if(!found) {
-				excludedPaths.add(file.path);
-			}
+		if(side == Side.CLIENT) {
+			return new TRLList<>(getPaths(files, Side.SERVER));
 		}
-
-		return excludedPaths;
+		if(side == Side.SERVER) {
+			return new TRLList<>(getPaths(files, Side.CLIENT));
+		}
+		return new TRLList<>();
 	}
 }

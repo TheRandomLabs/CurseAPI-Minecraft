@@ -35,6 +35,7 @@ import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.number.NumberUtils;
 import com.therandomlabs.utils.wrapper.BooleanWrapper;
 
+//TODO support URLs instead of project IDs, dependencies
 public class CAManifest {
 	// [ Primary Mod Group ] [ Some Other Mod That Does Something Similar ]
 	public static final char GROUP_DEFINER_OPENER = '[';
@@ -538,6 +539,11 @@ public class CAManifest {
 			}
 
 			final List<String> applied = postprocessor.apply(manifest, value, args);
+
+			filter(applied, Variable.CHARACTER);
+			filter(applied, Preprocessor.CHARACTER);
+			filter(applied, GROUP_DEFINER_OPENER);
+
 			parseMods(applied, manifest.mods,
 					manifest.serverOnlyMods, manifest.alternativeMods, manifest.additionalFiles,
 					manifest.variables, manifest.groups);
