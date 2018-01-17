@@ -19,7 +19,6 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.curseapi.util.MiscUtils;
-import com.therandomlabs.utils.collection.CollectionUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 
@@ -238,8 +237,11 @@ public class ExtendedCurseManifest implements Cloneable {
 	}
 
 	public TRLList<Path> getExcludedPaths(Side side) {
-		return CollectionUtils.convert(FileInfo.getExcludedPaths(additionalFiles, side),
-				Paths::get);
+		final TRLList<Path> paths = FileInfo.getExcludedPaths(additionalFiles, side);
+		for(Mod mod : files) {
+			paths.addAll(FileInfo.getExcludedPaths(mod.relatedFiles, side));
+		}
+		return paths;
 	}
 
 	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)

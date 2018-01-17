@@ -229,6 +229,9 @@ public class CAManifest {
 				preprocessors.put(preprocessor, value);
 			}
 		}
+
+		filter(lines, Variable.CHARACTER);
+		filter(lines, Preprocessor.CHARACTER);
 	}
 
 	private static void parseGroups(List<String> lines, List<GroupInfo> groups)
@@ -539,10 +542,6 @@ public class CAManifest {
 			}
 
 			final List<String> applied = postprocessor.apply(manifest, value, args);
-
-			filter(applied, Variable.CHARACTER);
-			filter(applied, Preprocessor.CHARACTER);
-			filter(applied, GROUP_DEFINER_OPENER);
 
 			parseMods(applied, manifest.mods,
 					manifest.serverOnlyMods, manifest.alternativeMods, manifest.additionalFiles,

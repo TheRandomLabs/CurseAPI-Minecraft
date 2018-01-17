@@ -1,6 +1,9 @@
 package com.therandomlabs.curseapi.minecraft;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import com.therandomlabs.utils.collection.CollectionUtils;
 import com.therandomlabs.utils.collection.TRLList;
 
 public class FileInfo implements Cloneable {
@@ -43,13 +46,15 @@ public class FileInfo implements Cloneable {
 		return paths.toArray(new String[0]);
 	}
 
-	public static TRLList<String> getExcludedPaths(FileInfo[] files, Side side) {
+	public static TRLList<Path> getExcludedPaths(FileInfo[] files, Side side) {
+		final String[] paths;
 		if(side == Side.CLIENT) {
-			return new TRLList<>(getPaths(files, Side.SERVER));
+			paths = getPaths(files, Side.SERVER);
+		} else if(side == Side.SERVER) {
+			paths = getPaths(files, Side.CLIENT);
+		} else {
+			paths = new String[0];
 		}
-		if(side == Side.SERVER) {
-			return new TRLList<>(getPaths(files, Side.CLIENT));
-		}
-		return new TRLList<>();
+		return CollectionUtils.convert(new TRLList<>(paths), Paths::get);
 	}
 }
