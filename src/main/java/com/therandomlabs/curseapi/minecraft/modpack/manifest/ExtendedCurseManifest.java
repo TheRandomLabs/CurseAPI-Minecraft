@@ -36,6 +36,7 @@ public class ExtendedCurseManifest implements Cloneable {
 	public FileInfo[] additionalFiles = new FileInfo[0];
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
+	public int projectID;
 	//OptiFine version can be null so it's easier to check whether a manifest is actually
 	//extended
 	public String optifineVersion;
@@ -61,6 +62,7 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.additionalFiles = CloneException.tryClone(additionalFiles);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
+		manifest.projectID = projectID;
 		manifest.optifineVersion = optifineVersion;
 		manifest.minimumRam = minimumRam;
 		manifest.recommendedRam = recommendedRam;
@@ -84,6 +86,7 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.files = CurseManifest.CurseMod.fromMods(files);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
+		manifest.projectID = projectID;
 
 		return manifest;
 	}

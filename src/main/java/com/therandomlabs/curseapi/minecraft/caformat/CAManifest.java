@@ -109,6 +109,8 @@ public class CAManifest {
 		manifest.minecraft = new MinecraftInfo(minecraft,
 				MinecraftForge.get(minecraft, variables.get(Variable.FORGE)));
 
+		manifest.projectID = Integer.parseInt(variables.get(Variable.PROJECT_ID));
+
 		manifest.optifineVersion = variables.get(Variable.OPTIFINE);
 		manifest.minimumRam = Integer.parseInt(variables.get(Variable.MINIMUM_RAM));
 		manifest.recommendedRam = Integer.parseInt(variables.get(Variable.RECOMMENDED_RAM));

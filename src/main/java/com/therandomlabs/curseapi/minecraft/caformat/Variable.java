@@ -2,6 +2,7 @@ package com.therandomlabs.curseapi.minecraft.caformat;
 
 import java.util.List;
 import java.util.function.Predicate;
+import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.ReleaseType;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
@@ -52,6 +53,10 @@ public class Variable {
 	public static final Variable DESCRIPTION = new Variable("description",
 			"The coolest modpack!",
 			description -> true);
+
+	public static final Variable PROJECT_ID = new Variable("project_id",
+			"0",
+			string -> NumberUtils.parseInt(string, 0) >= CurseAPI.MIN_PROJECT_ID);
 
 	public static final Variable OPTIFINE = new Variable("optifine",
 			LATEST,

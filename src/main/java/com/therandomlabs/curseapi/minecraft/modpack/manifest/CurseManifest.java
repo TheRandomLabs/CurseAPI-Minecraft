@@ -69,6 +69,7 @@ public class CurseManifest implements Cloneable {
 	public CurseMod[] files;
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
+	public int projectID;
 
 	@Override
 	public CurseManifest clone() {
@@ -83,6 +84,7 @@ public class CurseManifest implements Cloneable {
 		manifest.files = CloneException.tryClone(files);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
+		manifest.projectID = projectID;
 
 		return manifest;
 	}
@@ -99,6 +101,7 @@ public class CurseManifest implements Cloneable {
 		manifest.files = CurseMod.toMods(files);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
+		manifest.projectID = projectID;
 
 		return manifest;
 	}
