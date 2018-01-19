@@ -577,7 +577,9 @@ public class CAManifest {
 			}
 
 			mod.title = project.title();
-			mod.fileID = list.get(0).id();
+			if(mod.fileID == 0) {
+				mod.fileID = list.get(0).id();
+			}
 		});
 
 		for(Mod mod : modsToRemove) {
