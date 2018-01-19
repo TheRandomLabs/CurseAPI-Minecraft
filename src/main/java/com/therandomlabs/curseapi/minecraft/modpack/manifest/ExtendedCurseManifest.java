@@ -229,6 +229,12 @@ public class ExtendedCurseManifest implements Cloneable {
 		this.files = files.toArray(new Mod[0]);
 	}
 
+	public void moveAlternativeModsToFiles() {
+		final TRLList<Mod> files = new TRLList<>(this.files);
+		files.addAll(alternativeMods);
+		this.files = files.toArray(new Mod[0]);
+	}
+
 	public void removeModsIf(Predicate<Mod> predicate) {
 		final List<Mod> newMods = new TRLList<>(files.length);
 		for(Mod mod : files) {
