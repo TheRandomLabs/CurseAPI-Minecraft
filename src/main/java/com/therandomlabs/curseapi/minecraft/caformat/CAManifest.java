@@ -415,13 +415,8 @@ public class CAManifest {
 		if(projectID >= CurseAPI.MIN_PROJECT_ID) {
 			final int relatedFilesIndex;
 
-			int fileID = data.length > 1 ? NumberUtils.parseInt(data[1], 0) : 0;
-			if(fileID < CurseAPI.MIN_PROJECT_ID) {
-				fileID = -1;
-				relatedFilesIndex = 1;
-			} else {
-				relatedFilesIndex = 2;
-			}
+			int fileID = data.length > 1 ? NumberUtils.parseInt(data[1], -1) : -1;
+			relatedFilesIndex = fileID < CurseAPI.MIN_PROJECT_ID ? 1 : 2;
 
 			for(Mod mod : mods) {
 				if(mod.projectID == projectID) {
@@ -577,7 +572,7 @@ public class CAManifest {
 			}
 
 			mod.title = project.title();
-			if(mod.fileID == 0) {
+			if(mod.fileID < CurseAPI.MIN_PROJECT_ID) {
 				mod.fileID = list.get(0).id();
 			}
 		});
