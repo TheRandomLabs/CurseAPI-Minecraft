@@ -35,6 +35,7 @@ import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.number.NumberUtils;
 import com.therandomlabs.utils.wrapper.BooleanWrapper;
 
+//TODO rewrite, it still sucks
 //TODO support URLs instead of project IDs, dependencies
 public class CAManifest {
 	// [ Primary Mod Group ] [ Some Other Mod That Does Something Similar ]
@@ -140,6 +141,7 @@ public class CAManifest {
 		parseGroups(pruned, manifest.groups);
 		parseMods(pruned, manifest.mods, manifest.serverOnlyMods, manifest.alternativeMods,
 				manifest.additionalFiles, manifest.variables, manifest.groups);
+		parseRemovedMods(pruned, manifest);
 		parsePostprocessors(pruned, manifest);
 		retrieveModInfo(manifest.mods, manifest.variables);
 		retrieveModInfo(manifest.serverOnlyMods, manifest.variables);
@@ -304,33 +306,6 @@ public class CAManifest {
 
 			if(data[0].equals(String.valueOf(GROUP_MARKER))) {
 				group = join(data, 1);
-				continue;
-			}
-
-			if(data[0].equals(String.valueOf(REMOVE_PROJECT_ID))) {
-				final int projectID = NumberUtils.parseInt(data[1], 0);
-				if(projectID < CurseAPI.MIN_PROJECT_ID) {
-					throw new ManifestParseException("Invalid project ID: " + data[1]);
-				}
-
-				for(int i = 0; i < mods.size(); i++) {
-					if(mods.get(i).projectID == projectID) {
-						mods.remove(i--);
-					}
-				}
-
-				for(int i = 0; i < serverOnlyMods.size(); i++) {
-					if(serverOnlyMods.get(i).projectID == projectID) {
-						serverOnlyMods.remove(i--);
-					}
-				}
-
-				for(int i = 0; i < alternativeMods.size(); i++) {
-					if(alternativeMods.get(i).projectID == projectID) {
-						alternativeMods.remove(i--);
-					}
-				}
-
 				continue;
 			}
 
@@ -517,6 +492,39 @@ public class CAManifest {
 		}
 
 		return relatedFiles.toArray(new FileInfo[0]);
+	}
+
+	private static void parseRemovedMods(List<String> lines, CAManifest manifest)
+			throws ManifestParseException {
+		final Map<Integer, String> filtered = filter(lines, REMOVE_PROJECT_ID);
+
+		for(String line : filtered.values()) {
+			final String[] data = getData(line);
+			final int projectID = NumberUtils.parseInt(data[0], 0);
+			if(projectID < CurseAPI.MIN_PROJECT_ID) {
+				throw new ManifestParseException("Invalid project ID: " + data[0]);
+			}
+
+			for(int i = 0; i < manifest.mods.size(); i++) {
+				if(manifest.mods.get(i).projectID == projectID) {
+					manifest.mods.remove(i--);
+				}
+			}
+
+			for(int i = 0; i < manifest.serverOnlyMods.size(); i++) {
+				if(manifest.serverOnlyMods.get(i).projectID == projectID) {
+					manifest.serverOnlyMods.remove(i--);
+				}
+			}
+
+			for(int i = 0; i < manifest.alternativeMods.size(); i++) {
+				if(manifest.alternativeMods.get(i).projectID == projectID) {
+					manifest.alternativeMods.remove(i--);
+				}
+			}
+
+			continue;
+		}
 	}
 
 	private static void parsePostprocessors(List<String> lines, CAManifest manifest)
