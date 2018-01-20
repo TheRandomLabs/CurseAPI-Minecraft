@@ -655,15 +655,21 @@ public final class ModpackInstaller {
 	}
 
 	private void initialize() throws IOException {
+		if(running) {
+			return;
+		}
+
 		Assertions.nonNull(installDir, "installDir");
 		Assertions.nonNull(installerData, "installerData");
 
-		if(Files.isDirectory(installerData)) {
-			NIOUtils.deleteDirectory(installerData);
+		if(installerData.getRoot() == null) {
+			installerData = installDir.resolve(installerData).toAbsolutePath();
 		}
 
-		if(installerData.getRoot() == null) {
-			installerData = installDir.resolve(installerData);
+		Files.createDirectories(installerData.getParent());
+
+		if(Files.isDirectory(installerData)) {
+			NIOUtils.deleteDirectory(installerData);
 		}
 
 		for(Path modSource : modSources) {
