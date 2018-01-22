@@ -8,7 +8,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.caformat.CAManifest;
+import com.therandomlabs.curseapi.minecraft.caformat.CAManifest_;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
@@ -77,6 +77,6 @@ public class PreprocessorImport extends Preprocessor {
 			return;
 		}
 
-		lines.addAll(index + 1, CAManifest.prune(linesToImport));
+		lines.addAll(index + 1, CAManifest_.prune(linesToImport));
 	}
 }
