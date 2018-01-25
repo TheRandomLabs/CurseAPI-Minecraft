@@ -5,9 +5,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -94,10 +96,19 @@ public class ExtendedCurseManifest implements Cloneable {
 	}
 
 	public void sort() {
-		Arrays.sort(files, (mod1, mod2) -> mod1.title.compareTo(mod2.title));
-		Arrays.sort(serverOnlyMods, (mod1, mod2) -> mod1.title.compareTo(mod2.title));
-		Arrays.sort(alternativeMods, (mod1, mod2) -> mod1.title.compareTo(mod2.title));
-		Arrays.sort(additionalFiles, (file1, file2) -> file1.path.compareTo(file2.path));
+		final Comparator<Mod> modComparator = (mod1, mod2) -> {
+			final String title1 = mod1.title.toLowerCase(Locale.ENGLISH);
+			final String title2 = mod2.title.toLowerCase(Locale.ENGLISH);
+			return title1.compareTo(title2);
+		};
+		Arrays.sort(files, modComparator);
+		Arrays.sort(serverOnlyMods, modComparator);
+		Arrays.sort(alternativeMods, modComparator);
+		Arrays.sort(additionalFiles, (file1, file2) -> {
+			final String path1 = file1.path.toLowerCase(Locale.ENGLISH);
+			final String path2 = file2.path.toLowerCase(Locale.ENGLISH);
+			return path1.compareTo(path2);
+		});
 	}
 
 	public String toJson() {
