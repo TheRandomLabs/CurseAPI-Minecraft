@@ -21,7 +21,7 @@ public abstract class Preprocessor {
 
 	public abstract boolean isValid(String value, String[] args);
 
-	public abstract void apply(TRLList<String> lines, int index, String value, String[] args)
+	public abstract List<String> apply(String value, String[] args)
 			throws CurseException, IOException;
 
 	public static Preprocessor fromName(String name) {

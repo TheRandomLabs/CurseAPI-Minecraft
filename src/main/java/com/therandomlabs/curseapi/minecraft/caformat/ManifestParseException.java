@@ -1,6 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.caformat;
 
-public class ManifestParseException extends Exception {
+import com.therandomlabs.curseapi.CurseException;
+
+public class ManifestParseException extends CurseException {
 	private static final long serialVersionUID = 4378171312681446251L;
 
 	public ManifestParseException(String message) {

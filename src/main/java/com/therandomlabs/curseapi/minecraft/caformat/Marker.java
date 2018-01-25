@@ -9,5 +9,7 @@ public final class Marker {
 
 	public static final char OPTIONAL = 'o';
 
+	public static final char GET_DEPENDENCIES = 'd';
+
 	private Marker() {}
 }

@@ -1,7 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.caformat;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
@@ -19,7 +18,7 @@ public class Variable {
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
 
-	private static final List<Variable> variables = new TRLList<>();
+	static final List<Variable> variables = new TRLList<>();
 
 	public static final Variable NAME = new Variable("name",
 			"My Modpack",
@@ -87,7 +86,10 @@ public class Variable {
 
 	public static final Variable PROJECT_ID = new Variable("project_id",
 			"0",
-			string -> NumberUtils.parseInt(string, 0) >= CurseAPI.MIN_PROJECT_ID,
+			string -> {
+				final int id = NumberUtils.parseInt(string, 0);
+				return id == 0 || id >= CurseAPI.MIN_PROJECT_ID;
+			},
 			(manifest, variables, value) -> {
 				manifest.projectID = Integer.parseInt(value);
 			}
@@ -140,7 +142,7 @@ public class Variable {
 
 	@FunctionalInterface
 	public interface ApplyToManifest {
-		void apply(ExtendedCurseManifest manifest, Map<Variable, String> variables, String value)
+		void apply(ExtendedCurseManifest manifest, VariableMap variables, String value)
 				throws CurseException;
 	}
 
@@ -167,7 +169,7 @@ public class Variable {
 		return validator.test(value);
 	}
 
-	public void apply(ExtendedCurseManifest manifest, Map<Variable, String> variables,
+	public void apply(ExtendedCurseManifest manifest, VariableMap variables,
 			String value) throws CurseException {
 		if(applyToManifest != null) {
 			applyToManifest.apply(manifest, variables, value);

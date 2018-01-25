@@ -1,5 +1,6 @@
 package com.therandomlabs.curseapi.minecraft;
 
+import java.net.URL;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.util.CloneException;
@@ -14,7 +15,8 @@ public class Mod implements Cloneable, Comparable<Mod> {
 	public Side side = Side.BOTH;
 	public boolean required;
 	public FileInfo[] relatedFiles = new FileInfo[0];
-	public String group = "";
+	public String[] groups = new String[0];
+	public URL url;
 
 	@Override
 	public Mod clone() {
@@ -26,7 +28,8 @@ public class Mod implements Cloneable, Comparable<Mod> {
 		mod.side = side;
 		mod.required = required;
 		mod.relatedFiles = CloneException.tryClone(relatedFiles);
-		mod.group = group;
+		mod.groups = groups.clone();
+		mod.url = url;
 
 		return mod;
 	}

@@ -21,7 +21,9 @@ import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.curseapi.util.MiscUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
+import com.therandomlabs.utils.io.NIOUtils;
 
+//TODO validate, esp. groups
 public class ExtendedCurseManifest implements Cloneable {
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
@@ -58,7 +60,7 @@ public class ExtendedCurseManifest implements Cloneable {
 		manifest.files = CloneException.tryClone(files);
 		manifest.serverOnlyMods = CloneException.tryClone(serverOnlyMods);
 		manifest.alternativeMods = CloneException.tryClone(alternativeMods);
-		manifest.groups = CloneException.tryClone(groups);
+		manifest.groups = groups == null ? groups : CloneException.tryClone(groups);
 		manifest.additionalFiles = CloneException.tryClone(additionalFiles);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
@@ -156,49 +158,50 @@ public class ExtendedCurseManifest implements Cloneable {
 		final Set<String> moveAlternativesGroups = new HashSet<>();
 
 		for(Mod mod : files) {
-			if(mod.group.isEmpty() || groupNames.contains(mod.group)) {
-				continue;
-			}
+			for(String groupName : mod.groups) {
+				if(groupNames.contains(groupName)) {
+					continue;
+				}
 
-			final Map.Entry<String, GroupInfo> group = GroupInfo.getGroup(groups, mod.group);
-			if(group == null) {
-				continue;
-			}
+				final Map.Entry<String, GroupInfo> group = GroupInfo.getGroup(groups, groupName);
+				if(group == null) {
+					continue;
+				}
 
-			final List<String> otherGroupNames =
-					group.getValue().getOtherGroupNames(group.getKey());
-			if(otherGroupNames.contains(mod.group)) {
-				moveFiles.add(mod);
-				moveFilesGroups.add(group.getKey());
+				final List<String> otherGroupNames =
+						group.getValue().getOtherGroupNames(group.getKey());
+				if(otherGroupNames.contains(groupName)) {
+					moveFiles.add(mod);
+					moveFilesGroups.add(group.getKey());
+				}
 			}
 		}
 
 		for(Mod mod : alternativeMods) {
-			if(mod.group.isEmpty() || groupNames.contains(mod.group)) {
-				continue;
-			}
+			for(String groupName : mod.groups) {
+				if(groupName.isEmpty() || groupNames.contains(groupName)) {
+					continue;
+				}
 
-			if(moveFilesGroups.contains(mod.group)) {
-				moveAlternatives.add(mod);
-				continue;
-			}
+				final Map.Entry<String, GroupInfo> group = GroupInfo.getGroup(groups, groupName);
+				if(group == null) {
+					continue;
+				}
 
-			final Map.Entry<String, GroupInfo> group = GroupInfo.getGroup(groups, mod.group);
-			if(group == null) {
-				continue;
-			}
-
-			final List<String> otherGroupNames =
-					group.getValue().getOtherGroupNames(group.getKey());
-			if(otherGroupNames.contains(mod.group)) {
-				moveAlternatives.add(mod);
-				moveAlternativesGroups.add(group.getKey());
+				final List<String> otherGroupNames =
+						group.getValue().getOtherGroupNames(group.getKey());
+				if(otherGroupNames.contains(groupName)) {
+					moveAlternatives.add(mod);
+					moveAlternativesGroups.add(group.getKey());
+				}
 			}
 		}
 
 		for(Mod mod : files) {
-			if(moveAlternativesGroups.contains(mod.group)) {
-				moveFiles.add(mod);
+			for(String groupName : mod.groups) {
+				if(moveAlternativesGroups.contains(groupName)) {
+					moveFiles.add(mod);
+				}
 			}
 		}
 
@@ -251,6 +254,14 @@ public class ExtendedCurseManifest implements Cloneable {
 			paths.addAll(FileInfo.getExcludedPaths(mod.relatedFiles, side));
 		}
 		return paths;
+	}
+
+	public void writeTo(String path) throws IOException {
+		writeTo(Paths.get(path));
+	}
+
+	public void writeTo(Path path) throws IOException {
+		NIOUtils.write(path, toPrettyJsonWithTabs(), true);
 	}
 
 	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)

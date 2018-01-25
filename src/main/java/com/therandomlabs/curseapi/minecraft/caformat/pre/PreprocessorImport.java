@@ -8,10 +8,8 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.caformat.CAManifest_;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
-import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.StringUtils;
 
 public class PreprocessorImport extends Preprocessor {
@@ -53,8 +51,7 @@ public class PreprocessorImport extends Preprocessor {
 	}
 
 	@Override
-	public void apply(TRLList<String> lines, int index, String value, String[] args)
-			throws CurseException, IOException {
+	public List<String> apply(String value, String[] args) throws CurseException, IOException {
 		List<String> linesToImport = null;
 
 		try {
@@ -73,10 +70,6 @@ public class PreprocessorImport extends Preprocessor {
 			linesToImport = Files.readAllLines(Paths.get(value));
 		}
 
-		if(linesToImport == null) {
-			return;
-		}
-
-		lines.addAll(index + 1, CAManifest_.prune(linesToImport));
+		return linesToImport;
 	}
 }

@@ -1,7 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.caformat.post;
 
 import java.util.List;
-import com.therandomlabs.curseapi.minecraft.caformat.CAManifest_;
+import com.therandomlabs.curseapi.minecraft.caformat.CAManifest;
+import com.therandomlabs.curseapi.minecraft.caformat.VariableMap;
 import com.therandomlabs.utils.collection.TRLList;
 
 public abstract class Postprocessor {
@@ -33,7 +34,8 @@ public abstract class Postprocessor {
 
 	public abstract boolean isValid(String value, String[] args);
 
-	public abstract List<String> apply(CAManifest_ manifest, String value, String[] args);
+	public abstract List<String> apply(VariableMap variables, List<CAManifest.ModData> mods,
+			String value, String[] args);
 
 	public static Postprocessor fromName(String name) {
 		for(Postprocessor postprocessor : postprocessors) {

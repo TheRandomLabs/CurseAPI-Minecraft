@@ -459,7 +459,7 @@ public final class ModpackInstaller {
 				//Some mods are moved to mods/<version>/mod.jar
 				Files.deleteIfExists(installDir.resolve("mods").
 						resolve(oldData.minecraftVersion).
-						resolve(modLocation.getFileName().toString()));
+						resolve(NIOUtils.getName(modLocation)));
 			}
 
 			//Deleting related files
@@ -498,7 +498,7 @@ public final class ModpackInstaller {
 			if(manifest.containsMod(mod.projectID, mod.fileID)) {
 				Path modLocation = installDir.resolve(mod.location);
 
-				final String fileName = modLocation.getFileName().toString();
+				final String fileName = NIOUtils.getName(modLocation);
 
 				final Path altModLocation = installDir.resolve("mods").
 						resolve(oldData.minecraftVersion).
@@ -611,7 +611,7 @@ public final class ModpackInstaller {
 			MCEventHandling.forEach(handler -> handler.copying(toString(relativized)));
 		} catch(CurseException ex) {} //It's just autosaving; it doesn't matter
 
-		final String name = file.getFileName().toString();
+		final String name = NIOUtils.getName(file);
 
 		boolean shouldReplaceVariables = false;
 		for(String extension : extensionsWithVariables) {
@@ -666,7 +666,7 @@ public final class ModpackInstaller {
 			installerData = installDir.resolve(installerData).toAbsolutePath();
 		}
 
-		Files.createDirectories(installerData.getParent());
+		NIOUtils.ensureParentExists(installerData);
 
 		if(Files.isDirectory(installerData)) {
 			NIOUtils.deleteDirectory(installerData);

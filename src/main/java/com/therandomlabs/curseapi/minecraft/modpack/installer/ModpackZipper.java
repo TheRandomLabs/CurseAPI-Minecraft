@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
+import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.wrapper.Wrapper;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -51,7 +52,7 @@ public final class ModpackZipper {
 
 				boolean shouldReplaceVariables = false;
 				for(String extension : extensionsWithVariables) {
-					if(file.getFileName().toString().endsWith('.' + extension)) {
+					if(NIOUtils.getName(file).endsWith('.' + extension)) {
 						shouldReplaceVariables = true;
 						break;
 					}

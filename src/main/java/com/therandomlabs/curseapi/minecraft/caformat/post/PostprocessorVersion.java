@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.IntPredicate;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
-import com.therandomlabs.curseapi.minecraft.caformat.CAManifest_;
-import com.therandomlabs.curseapi.minecraft.caformat.Variable;
+import com.therandomlabs.curseapi.minecraft.caformat.CAManifest;
+import com.therandomlabs.curseapi.minecraft.caformat.VariableMap;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 
@@ -29,9 +29,9 @@ public class PostprocessorVersion extends Postprocessor {
 	}
 
 	@Override
-	public List<String> apply(CAManifest_ manifest, String value, String[] args) {
-		final MinecraftVersion modpackVersion = MinecraftVersion.fromString(
-				manifest.getVariables().get(Variable.MINECRAFT));
+	public List<String> apply(VariableMap variables, List<CAManifest.ModData> mods, String value,
+			String[] args) {
+		final MinecraftVersion modpackVersion = variables.mcVersion();
 		final MinecraftVersion toCompare = MinecraftVersion.fromString(args[0]);
 
 		if(predicate.test(toCompare.compareTo(modpackVersion))) {
