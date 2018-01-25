@@ -3,10 +3,11 @@ package com.therandomlabs.curseapi.minecraft;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import com.therandomlabs.utils.collection.CollectionUtils;
 import com.therandomlabs.utils.collection.TRLList;
 
-public class FileInfo implements Cloneable {
+public class FileInfo implements Cloneable, Comparable<FileInfo> {
 	public String path;
 	public Side side;
 
@@ -20,6 +21,11 @@ public class FileInfo implements Cloneable {
 	@Override
 	public FileInfo clone() {
 		return new FileInfo(path, side);
+	}
+
+	@Override
+	public int compareTo(FileInfo file) {
+		return path.toLowerCase(Locale.ENGLISH).compareTo(file.path.toLowerCase(Locale.ENGLISH));
 	}
 
 	public static String[] getPaths(FileInfo[] files, Side side) {

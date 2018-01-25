@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft;
 
 import java.net.URL;
+import java.util.Locale;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseProject;
 import com.therandomlabs.curseapi.util.CloneException;
@@ -52,7 +53,7 @@ public class Mod implements Cloneable, Comparable<Mod> {
 			}
 		}
 
-		return title.compareTo(mod.title);
+		return title.toLowerCase(Locale.ENGLISH).compareTo(mod.title.toLowerCase(Locale.ENGLISH));
 	}
 
 	public String title() throws CurseException {

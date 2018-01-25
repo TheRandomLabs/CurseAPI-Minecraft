@@ -96,19 +96,10 @@ public class ExtendedCurseManifest implements Cloneable {
 	}
 
 	public void sort() {
-		final Comparator<Mod> modComparator = (mod1, mod2) -> {
-			final String title1 = mod1.title.toLowerCase(Locale.ENGLISH);
-			final String title2 = mod2.title.toLowerCase(Locale.ENGLISH);
-			return title1.compareTo(title2);
-		};
-		Arrays.sort(files, modComparator);
-		Arrays.sort(serverOnlyMods, modComparator);
-		Arrays.sort(alternativeMods, modComparator);
-		Arrays.sort(additionalFiles, (file1, file2) -> {
-			final String path1 = file1.path.toLowerCase(Locale.ENGLISH);
-			final String path2 = file2.path.toLowerCase(Locale.ENGLISH);
-			return path1.compareTo(path2);
-		});
+		Arrays.sort(files);
+		Arrays.sort(serverOnlyMods);
+		Arrays.sort(alternativeMods);
+		Arrays.sort(additionalFiles);
 	}
 
 	public String toJson() {
