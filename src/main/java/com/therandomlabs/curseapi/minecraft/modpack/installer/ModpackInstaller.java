@@ -44,6 +44,7 @@ import net.lingala.zip4j.exception.ZipException;
 
 //https://github.com/google/gson/issues/395 may occur
 //TODO iterateModSources, installOptiFine, installForge, createEULAAndServerStarters
+//TODO update modpack data AFTER file is copied/deleted - AtomicBoolean?
 public final class ModpackInstaller {
 	public static final URL LIGHTCHOCOLATE;
 

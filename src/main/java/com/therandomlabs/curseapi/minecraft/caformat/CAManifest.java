@@ -17,6 +17,7 @@ import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseFileList;
 import com.therandomlabs.curseapi.CurseProject;
+import com.therandomlabs.curseapi.RelationInfo;
 import com.therandomlabs.curseapi.RelationType;
 import com.therandomlabs.curseapi.curseforge.CurseForge;
 import com.therandomlabs.curseapi.minecraft.FileInfo;
@@ -626,11 +627,11 @@ public class CAManifest {
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), dependents.size(), index -> {
 			final ModData dependent = dependents.get(index);
-			final List<URL> dependencies = CurseProject.fromID(dependent.projectID).
+			final List<RelationInfo> dependencies = CurseProject.fromID(dependent.projectID).
 					dependencies(RelationType.REQUIRED_LIBRARY);
 
-			for(URL dependency : dependencies) {
-				final int id = CurseForge.getID(dependency);
+			for(RelationInfo dependency : dependencies) {
+				final int id = CurseForge.getID(dependency.url);
 
 				for(ModData mod : CAManifest.this.mods) {
 					if(mod.projectID != id) {
