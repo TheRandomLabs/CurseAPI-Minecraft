@@ -1,7 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.modpack.installer;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import com.therandomlabs.curseapi.util.CloneException;
 
 public final class InstallerData implements Cloneable {
@@ -26,8 +27,8 @@ public final class InstallerData implements Cloneable {
 
 	public String minecraftVersion;
 	public String forgeVersion;
-	public List<ModData> mods = new ArrayList<>();
-	public List<String> installedFiles = new ArrayList<>();
+	public Set<ModData> mods = ConcurrentHashMap.newKeySet();
+	public Set<String> installedFiles = ConcurrentHashMap.newKeySet();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -36,8 +37,10 @@ public final class InstallerData implements Cloneable {
 
 		data.minecraftVersion = minecraftVersion;
 		data.forgeVersion = forgeVersion;
-		data.mods = CloneException.tryClone(mods);
-		data.installedFiles = (ArrayList<String>) ((ArrayList<String>) installedFiles).clone();
+		data.mods = CloneException.tryDeepCloneKeySet(
+				(KeySetView<InstallerData.ModData, Boolean>) mods);
+		data.installedFiles = CloneException.tryCloneKeySet(
+				(KeySetView<String, Boolean>) installedFiles);
 
 		return data;
 	}
