@@ -750,13 +750,16 @@ public class CAManifest {
 			final CurseProject project = CurseProject.fromID(mod.projectID);
 
 			if(mod.fileID == 0) {
-				final CurseFileList files = project.files().
-						filterVersions(variables.mcVersionGroup()).
-						filterMinimumStability(variables.minimumStability());
+				final CurseFileList files = project.files();
+
+				files.filterVersions(variables.mcVersionGroup());
+				files.filterMinimumStability(variables.minimumStability());
+
 				if(files.isEmpty()) {
 					MCEventHandling.forEach(handler -> handler.noFilesFound(mod.projectID));
 					return;
 				}
+
 				mod.fileID = files.get(0).id();
 			}
 
