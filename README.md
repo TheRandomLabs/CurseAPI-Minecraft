@@ -42,8 +42,8 @@ Example Gradle buildscript:
 Features (not all done yet - this is way more WIP than CurseAPI):
 * The CurseAPI Manifest Format (CAManifest), which CurseAPI can generate Curse manifests from.
 I haven't written any documentation for it yet, but you can see an example
-[here](https://github.com/TheRandomLabs/LightChocolate)
-* The extended Curse manifest format. You can see an example at the above link (look at manifest.json)
+[here](https://github.com/TheRandomLabs/LightChocolate) at manifest.txt
+* The extended Curse manifest format. You can see an example at the above link (look in manifest.json)
 * Modpack installation, which doesn't redownload files that are already there (or in other places)
 * Parsing Curse manifests
 * Manifest comparisons (which can be used to
