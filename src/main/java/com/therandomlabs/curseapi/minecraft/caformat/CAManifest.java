@@ -778,7 +778,7 @@ public class CAManifest {
 		});
 	}
 
-	private ExtendedCurseManifest toManifest() throws CurseException {
+	private ExtendedCurseManifest toManifest() throws CurseException, IOException {
 		final ExtendedCurseManifest manifest = new ExtendedCurseManifest();
 
 		manifest.name = variables.get("name");

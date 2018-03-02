@@ -1,5 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.caformat;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.Predicate;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -51,14 +52,18 @@ public class Variable {
 
 				try {
 					return MinecraftForge.isValidVersion(version);
-				} catch(CurseException ex) {}
+				} catch(CurseException | IOException ex) {}
 
 				return false;
 			},
 			(manifest, variables, value) -> {
 				final String mcVersion = variables.get(MINECRAFT);
-				manifest.minecraft = new MinecraftInfo(mcVersion,
-						MinecraftForge.get(mcVersion, value));
+				try {
+					manifest.minecraft =
+							new MinecraftInfo(mcVersion, MinecraftForge.get(mcVersion, value));
+				} catch(IOException ex) {
+					throw new CurseException(ex);
+				}
 			}
 	);
 

@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseFile;
 import com.therandomlabs.curseapi.CurseFileList;
@@ -15,6 +16,7 @@ import com.therandomlabs.curseapi.MemberType;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
+import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.StringUtils;
 
@@ -86,6 +88,8 @@ public final class ManifestComparer {
 	public static class VersionChange implements Serializable {
 		private static final long serialVersionUID = 1789316477374597287L;
 
+		public static final String ARCHIVED_FILE = "[Archived file]";
+
 		private CurseProject project;
 
 		private final String mcVersion;
@@ -124,11 +128,12 @@ public final class ManifestComparer {
 			return oldFile;
 		}
 
-		public String getOldModName() throws CurseException {
-			if(getOldFile().equals(getNewFile())) {
-				return "[Archived file]";
-			}
-			return getOldFile().name();
+		public String getOldFileName() throws CurseException {
+			return isOldFileArchived() ? ARCHIVED_FILE : getOldFile().name();
+		}
+
+		public boolean isOldFileArchived() throws CurseException {
+			return getOldFile().id() != oldMod.fileID;
 		}
 
 		public Mod getNewMod() {
@@ -142,8 +147,12 @@ public final class ManifestComparer {
 			return newFile;
 		}
 
-		public String getNewModName() throws CurseException {
-			return getNewFile().name();
+		public String getNewFileName() throws CurseException {
+			return isNewFileArchived() ? ARCHIVED_FILE : getNewFile().name();
+		}
+
+		public boolean isNewFileArchived() throws CurseException {
+			return getNewFile().id() != newMod.fileID;
 		}
 
 		public boolean isDowngrade() {
@@ -173,6 +182,50 @@ public final class ManifestComparer {
 			return files;
 		}
 
+		private static boolean needsCurseFiles(CurseProject project) throws CurseException {
+			final int id = project.id();
+			final String owner = project.members(MemberType.OWNER).get(0).username;
+			return id != BIOMES_O_PLENTY_ID && id != ACTUALLY_ADDITIONS_ID &&
+					!owner.equals("TeamCoFH") && !owner.equals("bre21") &&
+					!owner.equals("zmaster587");
+		}
+
+		void preload() throws CurseException {
+			final CurseProject project = getProject();
+			if(needsCurseFiles(project)) {
+				project.files();
+			}
+		}
+
+		List<String> getURLsToPreload() throws CurseException {
+			final CurseProject project = getProject();
+			final int id = project.id();
+
+			final CurseFile oldFile = isDowngrade() ? getNewFile() : getOldFile();
+			final CurseFile newFile = isDowngrade() ? getOldFile() : getNewFile();
+
+			if(id == BIOMES_O_PLENTY_ID) {
+				return new ImmutableList<>(newFile.urlString());
+			}
+
+			if(id == ACTUALLY_ADDITIONS_ID) {
+				return new ImmutableList<>(ACTUALLY_ADDITIONS_CHANGELOG);
+			}
+
+			final String owner = project.members(MemberType.OWNER).get(0).username;
+
+			if(owner.equals("TeamCoFH")) {
+				return new ImmutableList<>(getCoFHURL(newFile));
+			}
+
+			if(owner.equals("bre2l") || owner.equals("zmaster587")) {
+				return new ImmutableList<>(newFile.urlString(), oldFile.urlString());
+			}
+
+			return getChangelogFiles().stream().map(file -> file.urlString()).
+					collect(Collectors.toList());
+		}
+
 		public Map<String, String> getChangelogs() throws CurseException, IOException {
 			return getChangelogs(false);
 		}
@@ -184,38 +237,35 @@ public final class ManifestComparer {
 			final CurseFile newFile = isDowngrade() ? getOldFile() : getNewFile();
 
 			final CurseFileList files = getChangelogFiles();
-			final Map<String, String> changelogs = new HashMap<>(files.size());
+			final Map<String, String> changelogs = new LinkedHashMap<>(files.size());
 
 			if(id == BIOMES_O_PLENTY_ID) {
-				final Map.Entry<String, String> entry = getBoPChangelog(oldFile, newFile, urls);
-				changelogs.put(entry.getKey(), entry.getValue());
-				return changelogs;
+				return getBoPChangelog(oldFile, newFile, urls);
 			}
 
 			if(id == ACTUALLY_ADDITIONS_ID) {
-				final Map.Entry<String, String> entry = getAAChangelog(oldFile, newFile, urls);
-				changelogs.put(entry.getKey(), entry.getValue());
-				return changelogs;
+				return getAAChangelog(oldFile, newFile, urls);
 			}
 
 			final String owner = project.members(MemberType.OWNER).get(0).username;
 
 			if(owner.equals("TeamCoFH")) {
-				final Map.Entry<String, String> entry = getCoFHChangelog(oldFile, newFile, urls);
-				changelogs.put(entry.getKey(), entry.getValue());
-				return changelogs;
+				return getCoFHChangelog(oldFile, newFile, urls);
 			}
 
 			if(owner.equals("bre2l") || owner.equals("zmaster587")) {
-				final Map.Entry<String, String> entry =
-						getChangelogFromOldAndNew(oldFile, newFile, urls);
-				changelogs.put(entry.getKey(), entry.getValue());
+				final String changelog = getChangelogByComparison(oldFile, newFile, urls);
+				changelogs.put(changelog, null);
 				return changelogs;
 			}
 
 			for(CurseFile file : files) {
 				if(file.changelogProvided()) {
-					changelogs.put(file.name(), file.changelog());
+					if(urls) {
+						changelogs.put(file.name(), file.urlString());
+					} else {
+						changelogs.put(file.name(), file.changelog());
+					}
 				} else {
 					changelogs.put(file.name(), NO_CHANGELOG_PROVIDED);
 				}
@@ -227,7 +277,6 @@ public final class ManifestComparer {
 
 	private static final String NO_CHANGELOG_PROVIDED = "No changelog provided.";
 	private static final String VIEW_CHANGELOG_AT = "View changelog at";
-	private static final String RETRIEVED_FROM = "Retrieved from";
 
 	private static final int SERVEROBSERVER_ID = 279375;
 	private static final int BIOMES_O_PLENTY_ID = 220318;
@@ -266,12 +315,14 @@ public final class ManifestComparer {
 		return url;
 	}
 
-	static Map.Entry<String, String> getCoFHChangelog(CurseFile oldFile, CurseFile newFile,
+	static Map<String, String> getCoFHChangelog(CurseFile oldFile, CurseFile newFile,
 			boolean url) throws CurseException, IOException {
 		final String changelogURL = getCoFHURL(newFile);
+		final Map<String, String> changelog = new LinkedHashMap<>();
 
 		if(url) {
-			return new SimpleEntry<>(VIEW_CHANGELOG_AT, changelogURL);
+			changelog.put(VIEW_CHANGELOG_AT, changelogURL);
+			return changelog;
 		}
 
 		String oldVersion = oldFile.name().split("-")[2];
@@ -283,88 +334,106 @@ public final class ManifestComparer {
 		newVersion = newVersion.substring(0, newVersion.length() - lengthToRemove);
 
 		final String[] lines = StringUtils.splitNewline(DocumentUtils.read(changelogURL));
-		final StringBuilder parsed = new StringBuilder();
+		final StringBuilder entry = new StringBuilder();
+		String version = null;
 
 		boolean checkVersion = false;
 		boolean changelogStarted = false;
+		boolean entryStarted = false;
 
 		for(String line : lines) {
 			if(checkVersion) {
 				checkVersion = false;
 
-				line = line.trim();
 				if(line.isEmpty()) {
 					continue;
 				}
 
+				version = StringUtils.removeLastChar(line);
+
 				if(changelogStarted) {
-					if(StringUtils.removeLastChar(line).equals(oldVersion)) {
+					if(version.equals(oldVersion)) {
 						break;
 					}
-				} else if(StringUtils.removeLastChar(line).equals(newVersion)) {
+				} else if(version.equals(newVersion)) {
 					changelogStarted = true;
+				}
+
+				if(changelogStarted) {
+					entryStarted = true;
 				}
 			}
 
 			if(line.startsWith("======") || line.startsWith("------")) {
 				checkVersion = true;
+				if(entryStarted) {
+					String entryString = entry.toString();
+					entryString = StringUtils.removeLastChars(entryString,
+							System.lineSeparator().length());
+
+					changelog.put(version, entryString);
+					entry.setLength(0);
+					entryStarted = false;
+				}
 				continue;
 			}
 
-			if(changelogStarted) {
-				parsed.append(line).append(System.lineSeparator());
+			if(entryStarted) {
+				entry.append(line).append(System.lineSeparator());
 			}
 		}
 
-		return new SimpleEntry<>(RETRIEVED_FROM + ": " + url, parsed.toString());
+		return changelog;
 	}
 
-	static Map.Entry<String, String> getBoPChangelog(CurseFile oldFile, CurseFile newFile,
+	static Map<String, String> getBoPChangelog(CurseFile oldFile, CurseFile newFile,
 			boolean url) throws CurseException {
+		final Map<String, String> changelog = new LinkedHashMap<>();
+
 		if(url) {
-			return new SimpleEntry<>(VIEW_CHANGELOG_AT, newFile.urlString());
+			changelog.put(VIEW_CHANGELOG_AT, newFile.urlString());
+			return changelog;
 		}
 
-		String[] split = oldFile.name().split("-");
+		final String[] split = oldFile.name().split("-");
 		final String oldVersion = split[1] + '-' + split[2];
 
-		split = newFile.name().split("-");
-		final String newVersion = split[1] + '-' + split[2];
-
 		final String[] lines = StringUtils.splitNewline(newFile.changelog());
-		final StringBuilder parsed = new StringBuilder();
 
-		boolean changelogStarted = false;
+		final StringBuilder entry = new StringBuilder();
+		String version = null;
 
-		for(String line : lines) {
-			if(line.equals("Changelog:")) {
-				continue;
-			}
-
+		for(int i = 1; i < lines.length; i++) {
+			final String line = lines[i];
 			if(line.startsWith("Build ")) {
-				final String version = StringUtils.removeLastChar(line.split(" ")[1]);
-				if(!changelogStarted) {
-					if(version.equals(newVersion)) {
-						changelogStarted = true;
-					}
-				} else if(version.equals(oldVersion)) {
-					break;
-				}
+				version = StringUtils.removeLastChar(line.split(" ")[1]);
 			}
 
-			if(changelogStarted) {
-				parsed.append(line).append(System.lineSeparator());
+			if(version.equals(oldVersion)) {
+				break;
+			}
+
+			if(line.isEmpty()) {
+				changelog.put(version, entry.toString());
+				entry.setLength(0);
+				version = null;
+			}
+
+			if(version != null) {
+				entry.append(line.substring(1)).append(System.lineSeparator());
 			}
 		}
 
-		return new SimpleEntry<>(RETRIEVED_FROM + " " + newFile.name() + "'s changelog",
-				parsed.toString());
+		return changelog;
 	}
 
-	static Map.Entry<String, String> getAAChangelog(CurseFile oldFile, CurseFile newFile,
+	static Map<String, String> getAAChangelog(CurseFile oldFile, CurseFile newFile,
 			boolean url) throws CurseException, IOException {
+		final Map<String, String> changelog = new LinkedHashMap<>();
+
 		if(url) {
-			return new SimpleEntry<>(VIEW_CHANGELOG_AT, ACTUALLY_ADDITIONS_CHANGELOG);
+			changelog.put(VIEW_CHANGELOG_AT, ACTUALLY_ADDITIONS_CHANGELOG);
+			return changelog;
 		}
 
 		String[] split = oldFile.name().split("-");
@@ -377,13 +446,15 @@ public final class ManifestComparer {
 
 		final String[] lines =
 				StringUtils.splitNewline(DocumentUtils.read(ACTUALLY_ADDITIONS_CHANGELOG));
-		final StringBuilder parsed = new StringBuilder();
+		final StringBuilder entry = new StringBuilder();
+		String version = null;
 
 		boolean changelogStarted = false;
+		boolean entryStarted = false;
 
 		for(String line : lines) {
 			if(line.startsWith("# ")) {
-				final String version = line.split(" ")[1];
+				version = line.split(" ")[1];
 				if(!changelogStarted) {
 					if(version.equals(newVersion)) {
 						changelogStarted = true;
@@ -391,21 +462,30 @@ public final class ManifestComparer {
 				} else if(version.equals(oldVersion)) {
 					break;
 				}
+
+				if(changelogStarted) {
+					entryStarted = true;
+				}
 			}
 
-			if(changelogStarted) {
-				parsed.append(line).append(System.lineSeparator());
+			if(line.isEmpty()) {
+				changelog.put(version, entry.toString());
+				entry.setLength(0);
+				entryStarted = false;
+			}
+
+			if(entryStarted) {
+				entry.append(line).append(System.lineSeparator());
 			}
 		}
 
-		return new SimpleEntry<>(RETRIEVED_FROM + ": " + ACTUALLY_ADDITIONS_CHANGELOG,
-				parsed.toString());
+		return changelog;
 	}
 
-	static Map.Entry<String, String> getChangelogFromOldAndNew(CurseFile oldFile, CurseFile newFile,
-			boolean url) throws CurseException {
+	static String getChangelogByComparison(CurseFile oldFile, CurseFile newFile, boolean url)
+			throws CurseException {
 		if(url) {
-			return new SimpleEntry<>(VIEW_CHANGELOG_AT, newFile.urlString());
+			return newFile.urlString();
 		}
 
 		String changelog = newFile.changelog().replace(oldFile.changelog(), "");
@@ -413,6 +493,6 @@ public final class ManifestComparer {
 			changelog = StringUtils.removeLastChar(changelog);
 		}
 
-		return new SimpleEntry<>(RETRIEVED_FROM + " " + newFile.name() + "'s changelog", changelog);
+		return changelog;
 	}
 }
