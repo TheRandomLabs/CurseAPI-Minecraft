@@ -122,7 +122,7 @@ public final class ManifestComparer {
 
 		public CurseFile getOldFile() throws CurseException {
 			if(oldFile == null) {
-				oldFile = getProject().closestFileToID(oldMod.fileID, false);
+				oldFile = getProject().fileClosestToID(oldMod.fileID, false);
 			}
 			return oldFile;
 		}
@@ -141,7 +141,7 @@ public final class ManifestComparer {
 
 		public CurseFile getNewFile() throws CurseException {
 			if(newFile == null) {
-				newFile = getProject().closestFileToID(newMod.fileID, true);
+				newFile = getProject().fileClosestToID(newMod.fileID, true);
 			}
 			return newFile;
 		}

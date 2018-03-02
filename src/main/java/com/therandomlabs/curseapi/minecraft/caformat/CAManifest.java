@@ -764,7 +764,7 @@ public class CAManifest {
 			}
 
 			mod.title = project.title();
-			mod.url = project.fileFromID(mod.fileID).fileURL();
+			mod.url = project.fileWithID(mod.fileID).fileURL();
 
 			if(modData.isAlternative) {
 				alternativeMods.add(mod);

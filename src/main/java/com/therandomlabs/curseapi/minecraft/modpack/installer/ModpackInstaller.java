@@ -276,7 +276,7 @@ public final class ModpackInstaller {
 	public void install(int projectID, int fileID)
 			throws CurseException, IOException, ZipException {
 		ensureNotRunning();
-		install(CurseProject.fromID(projectID).fileFromID(fileID));
+		install(CurseProject.fromID(projectID).fileWithID(fileID));
 	}
 
 	public void install(CurseProject project) throws CurseException, IOException, ZipException {
