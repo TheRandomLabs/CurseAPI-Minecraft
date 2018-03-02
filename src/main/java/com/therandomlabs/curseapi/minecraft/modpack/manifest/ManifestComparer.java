@@ -13,7 +13,6 @@ import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
-import com.therandomlabs.curseapi.project.MemberType;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
