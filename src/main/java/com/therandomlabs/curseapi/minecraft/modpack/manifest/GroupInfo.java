@@ -1,11 +1,14 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLList;
 
-public class GroupInfo implements Cloneable {
+public class GroupInfo implements Cloneable, Serializable {
+	private static final long serialVersionUID = -571637128949272670L;
+
 	public String primary;
 	public String[] alternatives;
 

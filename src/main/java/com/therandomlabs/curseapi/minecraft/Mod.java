@@ -1,13 +1,16 @@
 package com.therandomlabs.curseapi.minecraft;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Locale;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.CurseProject;
+import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
-public class Mod implements Cloneable, Comparable<Mod> {
+public class Mod implements Cloneable, Comparable<Mod>, Serializable {
+	private static final long serialVersionUID = -3120215335212824363L;
+
 	public static final String UNKNOWN_NAME = "Unknown Name";
 
 	public String title = UNKNOWN_NAME;

@@ -2,7 +2,7 @@ package com.therandomlabs.curseapi.minecraft.caformat;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.therandomlabs.curseapi.ReleaseType;
+import com.therandomlabs.curseapi.file.ReleaseType;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 
 public class VariableMap extends HashMap<Variable, String> {

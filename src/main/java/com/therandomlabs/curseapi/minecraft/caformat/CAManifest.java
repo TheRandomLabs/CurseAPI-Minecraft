@@ -15,11 +15,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.CurseFileList;
-import com.therandomlabs.curseapi.CurseProject;
-import com.therandomlabs.curseapi.RelationInfo;
-import com.therandomlabs.curseapi.RelationType;
 import com.therandomlabs.curseapi.curseforge.CurseForge;
+import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.FileInfo;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
@@ -31,6 +28,9 @@ import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.GroupInfo;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
+import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.Relation;
+import com.therandomlabs.curseapi.project.RelationType;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
@@ -627,11 +627,11 @@ public class CAManifest {
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), dependents.size(), index -> {
 			final ModData dependent = dependents.get(index);
-			final List<RelationInfo> dependencies = CurseProject.fromID(dependent.projectID).
+			final List<Relation> dependencies = CurseProject.fromID(dependent.projectID).
 					dependencies(RelationType.REQUIRED_LIBRARY);
 
-			for(RelationInfo dependency : dependencies) {
-				final int id = CurseForge.getID(dependency.url);
+			for(Relation dependency : dependencies) {
+				final int id = CurseForge.getID(dependency.url());
 
 				for(ModData mod : CAManifest.this.mods) {
 					if(mod.projectID != id) {

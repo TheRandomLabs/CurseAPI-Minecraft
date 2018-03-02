@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.ReleaseType;
+import com.therandomlabs.curseapi.file.ReleaseType;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;

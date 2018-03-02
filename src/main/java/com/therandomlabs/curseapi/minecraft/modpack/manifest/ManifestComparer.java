@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.CurseFile;
-import com.therandomlabs.curseapi.CurseFileList;
-import com.therandomlabs.curseapi.CurseProject;
-import com.therandomlabs.curseapi.MemberType;
+import com.therandomlabs.curseapi.file.CurseFile;
+import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.MemberType;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
@@ -90,15 +90,15 @@ public final class ManifestComparer {
 
 		public static final String ARCHIVED_FILE = "[Archived file]";
 
-		private CurseProject project;
+		private transient CurseProject project;
 
 		private final String mcVersion;
 
 		private final Mod oldMod;
-		private CurseFile oldFile;
+		private transient CurseFile oldFile;
 
 		private final Mod newMod;
-		private CurseFile newFile;
+		private transient CurseFile newFile;
 
 		VersionChange(String mcVersion, Mod oldMod, Mod newMod) {
 			this.mcVersion = mcVersion;
@@ -182,9 +182,9 @@ public final class ManifestComparer {
 			return files;
 		}
 
-		private static boolean needsCurseFiles(CurseProject project) throws CurseException {
+		private static boolean needsCurseFiles(CurseProject project) {
 			final int id = project.id();
-			final String owner = project.members(MemberType.OWNER).get(0).username;
+			final String owner = project.owner().username();
 			return id != BIOMES_O_PLENTY_ID && id != ACTUALLY_ADDITIONS_ID &&
 					!owner.equals("TeamCoFH") && !owner.equals("bre21") &&
 					!owner.equals("zmaster587");
@@ -212,7 +212,7 @@ public final class ManifestComparer {
 				return new ImmutableList<>(ACTUALLY_ADDITIONS_CHANGELOG);
 			}
 
-			final String owner = project.members(MemberType.OWNER).get(0).username;
+			final String owner = project.owner().username();
 
 			if(owner.equals("TeamCoFH")) {
 				return new ImmutableList<>(getCoFHURL(newFile));
@@ -247,7 +247,7 @@ public final class ManifestComparer {
 				return getAAChangelog(oldFile, newFile, urls);
 			}
 
-			final String owner = project.members(MemberType.OWNER).get(0).username;
+			final String owner = project.owner().username();
 
 			if(owner.equals("TeamCoFH")) {
 				return getCoFHChangelog(oldFile, newFile, urls);

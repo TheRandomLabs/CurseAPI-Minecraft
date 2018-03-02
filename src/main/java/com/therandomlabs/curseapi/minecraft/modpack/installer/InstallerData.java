@@ -1,12 +1,15 @@
 package com.therandomlabs.curseapi.minecraft.modpack.installer;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import com.therandomlabs.curseapi.util.CloneException;
 
-public final class InstallerData implements Cloneable {
-	public static class ModData implements Cloneable {
+public final class InstallerData implements Cloneable, Serializable {
+	public static class ModData implements Cloneable, Serializable {
+		private static final long serialVersionUID = -6045718265894030913L;
+
 		public int projectID;
 		public int fileID;
 		public String location;
@@ -24,6 +27,8 @@ public final class InstallerData implements Cloneable {
 			return data;
 		}
 	}
+
+	private static final long serialVersionUID = -2036469017004566167L;
 
 	public String minecraftVersion;
 	public String forgeVersion;

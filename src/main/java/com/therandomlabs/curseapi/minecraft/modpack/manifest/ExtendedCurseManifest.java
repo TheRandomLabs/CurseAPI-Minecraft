@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -24,7 +25,9 @@ import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 
 //TODO validate, esp. groups
-public class ExtendedCurseManifest implements Cloneable {
+public class ExtendedCurseManifest implements Cloneable, Serializable {
+	private static final long serialVersionUID = 6601285145733232922L;
+
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 	public String name;

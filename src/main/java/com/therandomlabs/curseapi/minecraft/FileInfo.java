@@ -1,5 +1,6 @@
 package com.therandomlabs.curseapi.minecraft;
 
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -7,7 +8,9 @@ import java.util.Locale;
 import com.therandomlabs.utils.collection.CollectionUtils;
 import com.therandomlabs.utils.collection.TRLList;
 
-public class FileInfo implements Cloneable, Comparable<FileInfo> {
+public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
+	private static final long serialVersionUID = -3418209854129685785L;
+
 	public String path;
 	public Side side;
 
