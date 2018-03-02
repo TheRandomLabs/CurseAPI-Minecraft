@@ -1,6 +1,6 @@
 # CurseAPI-Minecraft
 An extension of CurseAPI that deals with the creation, parsing, and installation of Minecraft
-modpacks.
+modpacks. Ironically, CurseAPI-Minecraft is larger than CurseAPI.
 
 Example Gradle buildscript:
 
