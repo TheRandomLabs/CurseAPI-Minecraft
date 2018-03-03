@@ -8,7 +8,6 @@ repositories {
 }
 
 dependencies {
-	compile "net.lingala.zip4j:zip4j:1.3.2"
 	compile "com.github.TheRandomLabs:CurseAPI:master-SNAPSHOT"
 }
 

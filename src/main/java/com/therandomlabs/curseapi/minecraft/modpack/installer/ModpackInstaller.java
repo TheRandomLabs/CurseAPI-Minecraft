@@ -39,11 +39,10 @@ import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.io.NIOUtils;
+import com.therandomlabs.utils.io.ZipFile;
 import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.misc.Timer;
 import com.therandomlabs.utils.wrapper.Wrapper;
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 
 //https://github.com/google/gson/issues/395 may occur
 //TODO iterateModSources, installOptiFine, installForge, createEULAAndServerStarters
@@ -273,31 +272,30 @@ public final class ModpackInstaller {
 		return dataAutosaveInterval;
 	}
 
-	public void install(int projectID) throws CurseException, IOException, ZipException {
+	public void install(int projectID) throws CurseException, IOException {
 		ensureNotRunning();
 		install(CurseProject.fromID(projectID).files().get(0));
 	}
 
-	public void install(int projectID, int fileID)
-			throws CurseException, IOException, ZipException {
+	public void install(int projectID, int fileID) throws CurseException, IOException {
 		ensureNotRunning();
 		install(CurseProject.fromID(projectID).fileWithID(fileID));
 	}
 
-	public void install(CurseProject project) throws CurseException, IOException, ZipException {
+	public void install(CurseProject project) throws CurseException, IOException {
 		ensureNotRunning();
 		install(project.files().get(0));
 	}
 
-	public void install(CurseFile file) throws CurseException, IOException, ZipException {
+	public void install(CurseFile file) throws CurseException, IOException {
 		install(file.fileURL());
 	}
 
-	public void install(String url) throws CurseException, IOException, ZipException {
+	public void install(String url) throws CurseException, IOException {
 		install(new URL(url));
 	}
 
-	public void install(URL url) throws CurseException, IOException, ZipException {
+	public void install(URL url) throws CurseException, IOException {
 		ensureNotRunning();
 
 		final Path downloaded = tempPath();
@@ -309,20 +307,16 @@ public final class ModpackInstaller {
 		installFromZip(downloaded);
 	}
 
-	public void installFromZip(Path zip) throws CurseException, IOException, ZipException {
+	public void installFromZip(Path zip) throws CurseException, IOException {
 		Assertions.file(zip);
-		installFromZip(new ZipFile(zip.toFile()));
+		installFromZip(new ZipFile(zip));
 	}
 
-	public void installFromZip(ZipFile zip) throws CurseException, IOException, ZipException {
+	public void installFromZip(ZipFile zip) throws CurseException, IOException {
 		ensureNotRunning();
 
-		if(!zip.isValidZipFile()) {
-			throw new CurseException("Invalid zip file");
-		}
-
 		Path extracted = tempPath();
-		zip.extractAll(extracted.toString());
+		zip.extractAll(extracted);
 
 		//Mainly to support modpacks downloaded directly from GitHub,
 		//where all files are in a parent folder with the name of the repository
