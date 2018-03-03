@@ -8,15 +8,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
+import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.misc.StringUtils;
 
 public final class ManifestComparer {
@@ -59,8 +62,18 @@ public final class ManifestComparer {
 			return updated;
 		}
 
+		public Map<VersionChange, Map<String, String>> getUpdatedChangelogs()
+				throws CurseException, IOException {
+			return VersionChange.getChangelogs(updated);
+		}
+
 		public TRLList<VersionChange> getDowngraded() {
 			return downgraded;
+		}
+
+		public Map<VersionChange, Map<String, String>> getDowngradedChangelogs()
+				throws CurseException, IOException {
+			return VersionChange.getChangelogs(downgraded);
 		}
 
 		public TRLList<Mod> getRemoved() {
@@ -272,6 +285,98 @@ public final class ManifestComparer {
 
 			return changelogs;
 		}
+
+		public static Map<VersionChange, Map<String, String>> getChangelogs(
+				List<VersionChange> versionChanges) throws CurseException, IOException {
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(),
+					versionChanges.size(), index -> {
+				versionChanges.get(index).preload();
+			});
+
+			final List<String> toPreload = new TRLList<>();
+			for(VersionChange versionChange : versionChanges) {
+				toPreload.addAll(versionChange.getURLsToPreload());
+			}
+
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), toPreload.size(), index -> {
+				DocumentUtils.get(toPreload.get(index));
+			});
+
+			final Map<VersionChange, Map<String, String>> changelogs =
+					new LinkedHashMap<>(versionChanges.size());
+
+			for(VersionChange versionChange : versionChanges) {
+				changelogs.put(versionChange, versionChange.getChangelogs());
+			}
+
+			return changelogs;
+		}
+	}
+
+	public static class ForgeVersionChange extends VersionChange {
+		private static final long serialVersionUID = -4645680856319627592L;
+
+		private final String oldVersion;
+		private final String newVersion;
+		private final boolean isDowngrade;
+
+		ForgeVersionChange(String mcVersion, String oldVersion, String newVersion,
+				boolean isDowngrade) {
+			super(mcVersion, null, null);
+			this.oldVersion = oldVersion;
+			this.newVersion = newVersion;
+			this.isDowngrade = isDowngrade;
+		}
+
+		@Override
+		public CurseProject getProject() {
+			return null;
+		}
+
+		@Override
+		public String getModTitle() {
+			return MinecraftForge.TITLE;
+		}
+
+		@Override
+		public Mod getOldMod() {
+			return null;
+		}
+
+		@Override
+		public CurseFile getOldFile() {
+			return null;
+		}
+
+		@Override
+		public String getOldFileName() {
+			return oldVersion;
+		}
+
+		@Override
+		public Mod getNewMod() {
+			return null;
+		}
+
+		@Override
+		public CurseFile getNewFile() {
+			return null;
+		}
+
+		@Override
+		public String getNewFileName() {
+			return newVersion;
+		}
+
+		@Override
+		public boolean isDowngrade() {
+			return isDowngrade;
+		}
+
+		@Override
+		public Map<String, String> getChangelogs() throws CurseException, IOException {
+			return MinecraftForge.getChangelogs(oldVersion, newVersion);
+		}
 	}
 
 	private static final String NO_CHANGELOG_PROVIDED = "No changelog provided.";
@@ -284,6 +389,84 @@ public final class ManifestComparer {
 			"githubusercontent.com/Ellpeck/ActuallyAdditions/master/update/changelog.md";
 
 	private ManifestComparer() {}
+
+	public static Results compare(ExtendedCurseManifest oldManifest,
+			ExtendedCurseManifest newManifest) throws CurseException, IOException {
+		oldManifest.both();
+		oldManifest.moveAlternativeModsToFiles();
+		newManifest.both();
+		newManifest.moveAlternativeModsToFiles();
+
+		final TRLList<Mod> unchanged = new TRLList<>();
+		final TRLList<VersionChange> updated = new TRLList<>();
+		final TRLList<VersionChange> downgraded = new TRLList<>();
+		final TRLList<Mod> removed = new TRLList<>();
+		final TRLList<Mod> added = new TRLList<>();
+
+		final String mcVersion = newManifest.minecraft.version.toString();
+
+		for(Mod oldMod : oldManifest.files) {
+			boolean found = false;
+
+			for(Mod newMod : newManifest.files) {
+				if(oldMod.projectID == newMod.projectID) {
+					found = true;
+
+					if(oldMod.fileID == newMod.fileID) {
+						unchanged.add(newMod);
+						break;
+					}
+
+					if(newMod.fileID > oldMod.fileID) {
+						updated.add(new VersionChange(mcVersion, oldMod, newMod));
+						break;
+					}
+
+					downgraded.add(new VersionChange(mcVersion, newMod, oldMod));
+					break;
+				}
+			}
+
+			if(!found) {
+				removed.add(oldMod);
+			}
+		}
+
+		for(Mod newMod : newManifest.files) {
+			boolean found = false;
+
+			for(Mod oldMod : oldManifest.files) {
+				if(oldMod.projectID == newMod.projectID) {
+					found = true;
+					break;
+				}
+			}
+
+			if(!found) {
+				added.add(newMod);
+			}
+		}
+
+		final String oldForge = oldManifest.minecraft.getForgeVersion();
+		final String newForge = newManifest.minecraft.getForgeVersion();
+
+		final int compare = MinecraftForge.compare(oldForge, newForge);
+
+		if(compare < 0) {
+			updated.add(new ForgeVersionChange(mcVersion, oldForge, newForge, false));
+		} else if(compare > 0) {
+			downgraded.add(new ForgeVersionChange(mcVersion, newForge, oldForge, true));
+		}
+
+		unchanged.sort();
+		updated.sort();
+		downgraded.sort();
+		removed.sort();
+		added.sort();
+
+		return new Results(oldManifest, newManifest, unchanged, updated, downgraded, removed,
+				added);
+	}
 
 	static void filterChangelogFiles(CurseProject project, CurseFile oldFile, CurseFile newFile,
 			CurseFileList files) {

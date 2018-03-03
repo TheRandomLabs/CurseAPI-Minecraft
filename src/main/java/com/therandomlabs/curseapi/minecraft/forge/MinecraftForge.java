@@ -10,10 +10,13 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.curseapi.util.URLUtils;
+import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
 
 public final class MinecraftForge {
+	public static final String TITLE = "Minecraft Forge";
+
 	public static final String URL = "https://files.minecraftforge.net/";
 
 	public static final String MC_VERSION = "::MC_VERSION::";
@@ -30,16 +33,21 @@ public final class MinecraftForge {
 	public static final String RECOMMENDED = "recommended";
 
 	private static final Map<String, String> changelog = new LinkedHashMap<>();
+	private static final TRLList<String> versions = new TRLList<>();
 
 	private MinecraftForge() {}
 
 	public static boolean isValidVersion(String version) throws CurseException, IOException {
-		return getChangelog().keySet().contains(version);
+		if(versions.isEmpty()) {
+			getChangelog();
+		}
+
+		return versions.contains(version);
 	}
 
 	public static String validateVersion(String version) throws CurseException, IOException {
 		if(!isValidVersion(version)) {
-			throw new CurseException("Invalid Forge version: " + version);
+			invalidVersion(version);
 		}
 		return version;
 	}
@@ -64,7 +72,7 @@ public final class MinecraftForge {
 		return DocumentUtils.getValue(url, "class=title;tag=small;text").replaceAll(" - ", "-");
 	}
 
-	public static String getLatestVersion() throws CurseException {
+	public static String getLatestVersionWithoutChangelog() throws CurseException {
 		return getLatestVersion(URLUtils.url(URL));
 	}
 
@@ -140,10 +148,10 @@ public final class MinecraftForge {
 	}
 
 	public static Map<String, String> getChangelog() throws CurseException, IOException {
-		return getChangelog(null, null);
+		return getChangelogs(null, null);
 	}
 
-	public static Map<String, String> getChangelog(String oldVersion, String newVersion)
+	public static Map<String, String> getChangelogs(String oldVersion, String newVersion)
 			throws CurseException, IOException {
 		if(changelog.isEmpty()) {
 			final String[] lines = StringUtils.splitNewline(DocumentUtils.read(getChangelogURL()));
@@ -161,6 +169,7 @@ public final class MinecraftForge {
 				}
 
 				if(line.isEmpty()) {
+					versions.add(version);
 					changelog.put(version, entry.toString());
 					entry.setLength(0);
 					version = null;
@@ -192,7 +201,47 @@ public final class MinecraftForge {
 		return subchangelog;
 	}
 
+	public static TRLList<String> getVersions() throws CurseException, IOException {
+		if(versions.isEmpty()) {
+			getChangelog();
+		}
+
+		return versions.toImmutableList();
+	}
+
+	public static String getLatestVersion() throws CurseException, IOException {
+		if(versions.isEmpty()) {
+			getChangelog();
+		}
+
+		return versions.get(0);
+	}
+
+	public static int compare(String version1, String version2) throws CurseException, IOException {
+		if(versions.isEmpty()) {
+			getChangelog();
+		}
+
+		final int index1 = versions.indexOf(version1);
+		final int index2 = versions.indexOf(version2);
+
+		if(index1 == -1) {
+			invalidVersion(version1);
+		}
+
+		if(index2 == -1) {
+			invalidVersion(version2);
+		}
+
+		return Integer.compare(index1, index2);
+	}
+
 	public static void clearChangelogCache() {
 		changelog.clear();
+		versions.clear();
+	}
+
+	private static void invalidVersion(String version) throws CurseException {
+		throw new CurseException("Invalid Forge version: " + version);
 	}
 }
