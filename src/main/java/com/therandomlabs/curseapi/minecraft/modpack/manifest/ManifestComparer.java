@@ -20,6 +20,7 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
+import com.therandomlabs.utils.collection.ImmutableMap;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.misc.StringUtils;
@@ -40,7 +41,6 @@ public final class ManifestComparer {
 		private boolean unchangedPreloaded;
 		private boolean removedPreloaded;
 		private boolean addedPreloaded;
-		private boolean sorted;
 
 		Results(ExtendedCurseManifest oldManifest, ExtendedCurseManifest newManifest,
 				TRLList<Mod> unchanged, TRLList<VersionChange> updated,
@@ -67,6 +67,7 @@ public final class ManifestComparer {
 				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), unchanged.size(), index -> {
 					unchanged.get(index).title();
 				});
+				unchanged.sort();
 			}
 
 			return unchanged;
@@ -78,10 +79,7 @@ public final class ManifestComparer {
 
 		public Map<VersionChange, Map<String, String>> getUpdatedChangelogs(boolean urls)
 				throws CurseException, IOException {
-			final Map<VersionChange, Map<String, String>> changelogs =
-					VersionChange.getChangelogs(updated, urls);
-			sortLists();
-			return changelogs;
+			return VersionChange.getChangelogs(updated, urls);
 		}
 
 		public TRLList<VersionChange> getDowngraded() {
@@ -90,10 +88,7 @@ public final class ManifestComparer {
 
 		public Map<VersionChange, Map<String, String>> getDowngradedChangelogs(boolean urls)
 				throws CurseException, IOException {
-			final Map<VersionChange, Map<String, String>> changelogs =
-					VersionChange.getChangelogs(downgraded, urls);
-			sortLists();
-			return changelogs;
+			return VersionChange.getChangelogs(downgraded, urls);
 		}
 
 		public TRLList<Mod> getRemoved() throws CurseException {
@@ -101,6 +96,7 @@ public final class ManifestComparer {
 				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), removed.size(), index -> {
 					removed.get(index).title();
 				});
+				removed.sort();
 			}
 
 			return removed;
@@ -111,6 +107,7 @@ public final class ManifestComparer {
 				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), added.size(), index -> {
 					added.get(index).title();
 				});
+				added.sort();
 			}
 
 			return added;
@@ -126,18 +123,6 @@ public final class ManifestComparer {
 
 		public boolean hasForgeVersionChanged() {
 			return !getOldForgeVersion().equals(getNewForgeVersion());
-		}
-
-		public void sortLists() {
-			if(!sorted) {
-				unchanged.sort();
-				updated.sort();
-				downgraded.sort();
-				removed.sort();
-				added.sort();
-
-				sorted = true;
-			}
 		}
 	}
 
@@ -357,7 +342,7 @@ public final class ManifestComparer {
 		}
 
 		public static Map<VersionChange, Map<String, String>> getChangelogs(
-				List<VersionChange> versionChanges, boolean urls)
+				TRLList<VersionChange> versionChanges, boolean urls)
 				throws CurseException, IOException {
 			final Set<String> toPreload = ConcurrentHashMap.newKeySet();
 
@@ -367,6 +352,8 @@ public final class ManifestComparer {
 				versionChange.preload();
 				toPreload.addAll(versionChange.getURLsToPreload());
 			});
+
+			versionChanges.sort();
 
 			final List<String> list = new TRLList<>(toPreload);
 
@@ -446,7 +433,15 @@ public final class ManifestComparer {
 		}
 
 		@Override
-		public Map<String, String> getChangelogs() throws CurseException, IOException {
+		public Map<String, String> getChangelogs(boolean urls) throws CurseException, IOException {
+			if(urls) {
+				return new ImmutableMap<>(
+						new String[] {"View changelog at"},
+						new String[] {MinecraftForge.getChangelogURL(
+								isDowngrade() ? oldVersion : newVersion
+						).toString()}
+				);
+			}
 			return MinecraftForge.getChangelogs(oldVersion, newVersion);
 		}
 
