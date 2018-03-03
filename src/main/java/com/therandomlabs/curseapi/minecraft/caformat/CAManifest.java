@@ -713,11 +713,15 @@ public class CAManifest {
 	}
 
 	private void parsePostprocessors(List<String> lines) throws CurseException {
+		final List<String> toParse = new TRLList<>();
+
 		for(String line : getLines(lines, Postprocessor.CHARACTER)) {
 			final String[] data = getData(line);
 			final Postprocessor postprocessor = Postprocessor.fromName(data[1]);
 			if(postprocessor == null) {
-				throw new ManifestParseException("Invalid postprocessor: " + data[1]);
+				//Invalid postprocessor; just parse as normal
+				toParse.add(join(data, 1));
+				continue;
 			}
 
 			final String value = join(data, 2);
@@ -728,11 +732,13 @@ public class CAManifest {
 						value, postprocessor);
 			}
 
-			final List<String> toParse = postprocessor.apply(variables, mods, value, args);
-			parseModsAndFiles(toParse);
-			parseRemovedMods(toParse);
-			parsePostprocessors(toParse);
+			toParse.addAll(postprocessor.apply(variables, mods, value, args));
+
 		}
+
+		parseModsAndFiles(toParse);
+		parseRemovedMods(toParse);
+		parsePostprocessors(toParse);
 	}
 
 	private void convertModDatas() throws CurseException {
