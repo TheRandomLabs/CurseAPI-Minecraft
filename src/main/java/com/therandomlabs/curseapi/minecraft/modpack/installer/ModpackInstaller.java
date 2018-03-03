@@ -38,8 +38,10 @@ import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
+import com.therandomlabs.utils.io.IOConstants;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.Assertions;
+import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.misc.Timer;
 import com.therandomlabs.utils.wrapper.Wrapper;
 import net.lingala.zip4j.core.ZipFile;
@@ -469,18 +471,16 @@ public final class ModpackInstaller {
 			//Deleting related files
 			for(String relatedFile : mod.relatedFiles) {
 				//Match wildcards (*, ?)
-				try(DirectoryStream<Path> stream =
-						Files.newDirectoryStream(installDir, relatedFile)) {
+				try(DirectoryStream<Path> stream = directoryStream(installDir, relatedFile)) {
 					final Wrapper<IOException> exception = new Wrapper<>();
 
 					stream.forEach(path -> {
 						try {
 							//Related files are the only files here that can be directories
-							final Path toDelete = installDir.resolve(path);
-							if(Files.isDirectory(toDelete)) {
-								NIOUtils.deleteDirectory(toDelete);
+							if(Files.isDirectory(path)) {
+								NIOUtils.deleteDirectory(path);
 							} else {
-								Files.deleteIfExists(toDelete);
+								Files.deleteIfExists(path);
 							}
 						} catch(IOException ex) {
 							exception.set(ex);
@@ -654,24 +654,36 @@ public final class ModpackInstaller {
 		data.installedFiles.add(toString(relativized));
 	}
 
+	private static DirectoryStream<Path> directoryStream(Path directory, String glob)
+			throws IOException {
+		glob = NIOUtils.toStringWithUnixPathSeparators(glob);
+
+		final String[] data = StringUtils.split(glob, IOConstants.PATH_SEPARATOR_UNIX);
+
+		final String parsedGlob = data[data.length - 1];
+
+		final String globParentPath =
+				StringUtils.removeLastChars(glob, glob.length() + 1);
+
+		final Path globParent = directory.resolve(globParentPath);
+
+		return Files.newDirectoryStream(globParent, parsedGlob);
+	}
+
 	private boolean isExcluded(Path overrides, Path path) throws IOException {
 		path = overrides.resolve(path);
 
 		for(String excludedPath : excludedPaths) {
-			getLogger().error(excludedPath);
-
 			//Support wildcards (*, ?)
-			try(DirectoryStream<Path> stream = Files.newDirectoryStream(overrides, excludedPath)) {
+			try(DirectoryStream<Path> stream = directoryStream(overrides, excludedPath)) {
 				final Iterator<Path> it = stream.iterator();
 				while(it.hasNext()) {
-					final Path resolved = overrides.resolve(it.next());
-					getLogger().error(resolved);
-					if(path.equals(resolved) || NIOUtils.isParent(resolved, path)) {
+					final Path matched = it.next();
+					if(path.equals(matched) || NIOUtils.isParent(matched, path)) {
 						return true;
 					}
 				}
 			}
-
 		}
 
 		return false;

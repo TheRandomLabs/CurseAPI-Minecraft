@@ -24,6 +24,11 @@ public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
 	}
 
 	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[path=\"" + path + ",side=" + side + "]";
+	}
+
+	@Override
 	public int compareTo(FileInfo file) {
 		return path.toLowerCase(Locale.ENGLISH).compareTo(file.path.toLowerCase(Locale.ENGLISH));
 	}
