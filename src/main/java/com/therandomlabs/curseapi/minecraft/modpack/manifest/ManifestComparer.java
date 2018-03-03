@@ -320,9 +320,11 @@ public final class ManifestComparer {
 				}
 			}
 
-			if(owner.equals("bre2l") || owner.equals("zmaster587")) {
+			if(owner.equals("bre2l") || owner.equals("zmaster587") ||
+					newFile.uploader().equals("mezz")) {
 				final String changelog = getChangelogByComparison(oldFile, newFile, urls);
-				changelogs.put(changelog, null);
+				changelogs.put("Retrieved from " + getOldFileName() + " and " + getNewFileName() +
+						"'s changelogs", changelog);
 				return changelogs;
 			}
 
@@ -618,19 +620,20 @@ public final class ManifestComparer {
 				if(changelogStarted) {
 					entryStarted = true;
 				}
+
+				continue;
 			}
 
 			if(line.startsWith("======") || line.startsWith("------")) {
 				checkVersion = true;
-				if(entryStarted) {
-					String entryString = entry.toString();
-					entryString = StringUtils.removeLastChars(entryString,
-							System.lineSeparator().length());
 
-					changelog.put(version, entryString);
+				if(entryStarted) {
+					changelog.put(version, entry.toString());
+
 					entry.setLength(0);
 					entryStarted = false;
 				}
+
 				continue;
 			}
 
