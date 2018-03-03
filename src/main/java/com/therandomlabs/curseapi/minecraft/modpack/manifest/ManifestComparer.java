@@ -23,6 +23,7 @@ import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.ImmutableMap;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
+import com.therandomlabs.utils.io.IOConstants;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
@@ -328,12 +329,22 @@ public final class ManifestComparer {
 				return changelogs;
 			}
 
+			final boolean isMcJty = owner.equals("McJty");
+
 			for(CurseFile file : files) {
 				if(file.changelogProvided()) {
 					if(urls) {
 						changelogs.put(file.name(), file.urlString());
 					} else {
-						changelogs.put(file.name(), file.changelog());
+						String changelog = file.changelog();
+
+						if(isMcJty) {
+							//McJty's changelogs' first two lines are not needed
+							final String[] lines = StringUtils.splitNewline(changelog);
+							changelog = ArrayUtils.join(ArrayUtils.subArray(lines, 2), NEWLINE);
+						}
+
+						changelogs.put(file.name(), changelog);
 					}
 				} else {
 					changelogs.put(file.name(), NO_CHANGELOG_PROVIDED);
@@ -455,6 +466,8 @@ public final class ManifestComparer {
 			return ImmutableList.empty();
 		}
 	}
+
+	static final String NEWLINE = IOConstants.LINE_SEPARATOR;
 
 	private static final String NO_CHANGELOG_PROVIDED = "No changelog provided.";
 	private static final String VIEW_CHANGELOG_AT = "View changelog at";
@@ -591,13 +604,13 @@ public final class ManifestComparer {
 		lengthToRemove = ArrayUtils.last(newVersion.split("\\.")).length() + 1;
 		newVersion = newVersion.substring(0, newVersion.length() - lengthToRemove);
 
-		final String[] lines = StringUtils.splitNewline(DocumentUtils.read(changelogURL));
+		final String[] lines =
+				ArrayUtils.subArray(StringUtils.splitNewline(DocumentUtils.read(changelogURL)), 4);
 		final StringBuilder entry = new StringBuilder();
 		String version = null;
 
-		boolean checkVersion = false;
+		boolean checkVersion = true;
 		boolean changelogStarted = false;
-		boolean entryStarted = false;
 
 		for(String line : lines) {
 			if(checkVersion) {
@@ -605,6 +618,14 @@ public final class ManifestComparer {
 
 				if(line.isEmpty()) {
 					continue;
+				}
+
+				if(changelogStarted) {
+					String entryString = entry.toString();
+					entryString = StringUtils.removeLastChars(entryString,
+							NEWLINE.length());
+					changelog.put(version, entryString);
+					entry.setLength(0);
 				}
 
 				version = StringUtils.removeLastChar(line);
@@ -617,29 +638,15 @@ public final class ManifestComparer {
 					changelogStarted = true;
 				}
 
-				if(changelogStarted) {
-					entryStarted = true;
-				}
-
 				continue;
 			}
 
-			if(line.startsWith("======") || line.startsWith("------")) {
+			if(line.startsWith("------")) {
 				checkVersion = true;
-
-				if(entryStarted) {
-					changelog.put(version, entry.toString());
-
-					entry.setLength(0);
-					entryStarted = false;
-				}
-
 				continue;
 			}
 
-			if(entryStarted) {
-				entry.append(line).append(System.lineSeparator());
-			}
+			entry.append(line).append(NEWLINE);
 		}
 
 		return changelog;
@@ -680,7 +687,7 @@ public final class ManifestComparer {
 			}
 
 			if(version != null) {
-				entry.append(line.substring(1)).append(System.lineSeparator());
+				entry.append(line.substring(1)).append(NEWLINE);
 			}
 		}
 
@@ -710,7 +717,6 @@ public final class ManifestComparer {
 		String version = null;
 
 		boolean changelogStarted = false;
-		boolean entryStarted = false;
 
 		for(String line : lines) {
 			if(line.startsWith("# ")) {
@@ -723,20 +729,15 @@ public final class ManifestComparer {
 					break;
 				}
 
-				if(changelogStarted) {
-					entryStarted = true;
-				}
+				continue;
 			}
 
 			if(line.isEmpty()) {
 				changelog.put(version, entry.toString());
 				entry.setLength(0);
-				entryStarted = false;
 			}
 
-			if(entryStarted) {
-				entry.append(line).append(System.lineSeparator());
-			}
+			entry.append(line).append(NEWLINE);
 		}
 
 		return changelog;
