@@ -291,7 +291,10 @@ public final class ManifestComparer {
 			final String owner = project.owner().username();
 
 			if(owner.equals("TeamCoFH")) {
-				return new ImmutableList<>(getCoFHURL(newFile));
+				final String url = getCoFHURL(newFile);
+				if(url != null) {
+					return new ImmutableList<>(url);
+				}
 			}
 
 			if(owner.equals("bre2l") || owner.equals("zmaster587")) {
