@@ -137,7 +137,9 @@ public final class MinecraftForge {
 	}
 
 	public static URL getChangelogURL() throws CurseException, IOException {
-		return getChangelogURL(getLatestVersion());
+		final String latestVersion = versions.isEmpty() ?
+				getLatestVersionWithoutChangelog() : versions.get(0);
+		return getChangelogURL(latestVersion);
 	}
 
 	public static URL getChangelogURL(String version) throws CurseException, IOException {

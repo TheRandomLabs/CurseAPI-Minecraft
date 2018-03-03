@@ -62,18 +62,18 @@ public final class ManifestComparer {
 			return updated;
 		}
 
-		public Map<VersionChange, Map<String, String>> getUpdatedChangelogs()
+		public Map<VersionChange, Map<String, String>> getUpdatedChangelogs(boolean urls)
 				throws CurseException, IOException {
-			return VersionChange.getChangelogs(updated);
+			return VersionChange.getChangelogs(updated, urls);
 		}
 
 		public TRLList<VersionChange> getDowngraded() {
 			return downgraded;
 		}
 
-		public Map<VersionChange, Map<String, String>> getDowngradedChangelogs()
+		public Map<VersionChange, Map<String, String>> getDowngradedChangelogs(boolean urls)
 				throws CurseException, IOException {
-			return VersionChange.getChangelogs(downgraded);
+			return VersionChange.getChangelogs(downgraded, urls);
 		}
 
 		public TRLList<Mod> getRemoved() {
@@ -111,6 +111,8 @@ public final class ManifestComparer {
 
 		private final Mod newMod;
 		private transient CurseFile newFile;
+
+		transient boolean preloaded;
 
 		VersionChange(String mcVersion, Mod oldMod, Mod newMod) {
 			this.mcVersion = mcVersion;
@@ -203,6 +205,10 @@ public final class ManifestComparer {
 		}
 
 		void preload() throws CurseException {
+			if(preloaded) {
+				return;
+			}
+
 			final CurseProject project = getProject();
 			if(needsCurseFiles(project)) {
 				project.files();
@@ -210,6 +216,10 @@ public final class ManifestComparer {
 		}
 
 		List<String> getURLsToPreload() throws CurseException {
+			if(preloaded) {
+				return ImmutableList.empty();
+			}
+
 			final CurseProject project = getProject();
 			final int id = project.id();
 
@@ -287,7 +297,8 @@ public final class ManifestComparer {
 		}
 
 		public static Map<VersionChange, Map<String, String>> getChangelogs(
-				List<VersionChange> versionChanges) throws CurseException, IOException {
+				List<VersionChange> versionChanges, boolean urls)
+				throws CurseException, IOException {
 			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(),
 					versionChanges.size(), index -> {
 				versionChanges.get(index).preload();
@@ -296,6 +307,7 @@ public final class ManifestComparer {
 			final List<String> toPreload = new TRLList<>();
 			for(VersionChange versionChange : versionChanges) {
 				toPreload.addAll(versionChange.getURLsToPreload());
+				versionChange.preloaded = true;
 			}
 
 			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), toPreload.size(), index -> {
@@ -306,7 +318,7 @@ public final class ManifestComparer {
 					new LinkedHashMap<>(versionChanges.size());
 
 			for(VersionChange versionChange : versionChanges) {
-				changelogs.put(versionChange, versionChange.getChangelogs());
+				changelogs.put(versionChange, versionChange.getChangelogs(urls));
 			}
 
 			return changelogs;
