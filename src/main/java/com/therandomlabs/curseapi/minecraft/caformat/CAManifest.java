@@ -427,7 +427,7 @@ public class CAManifest {
 		final String path = StringUtils.replaceAll(ArrayUtils.join(data, " "),
 				SPACE_PLACEHOLDER, ' ');
 
-		if(!IOUtils.isValidPath(path.replaceAll("\\*", "tmp").replaceAll("\\?", "tmp"))) {
+		if(!IOUtils.isValidPath(getPathSafe(path))) {
 			throw new ManifestParseException("Invalid path: " + path);
 		}
 
@@ -465,7 +465,7 @@ public class CAManifest {
 
 			element = StringUtils.replaceAll(element, SPACE_PLACEHOLDER, ' ');
 
-			if(!IOUtils.isValidPath(element.replaceAll("\\*", "tmp").replaceAll("\\?", "tmp"))) {
+			if(!IOUtils.isValidPath(getPathSafe(element))) {
 				throw new ManifestParseException("Invalid path: " + element);
 			}
 
@@ -599,8 +599,8 @@ public class CAManifest {
 
 				final FileInfo file2 = files.get(j);
 
-				final Path path = Paths.get(file.path);
-				final Path path2 = Paths.get(file2.path);
+				final Path path = getPathSafe(file.path);
+				final Path path2 = getPathSafe(file2.path);
 
 				if(path.equals(path2)) {
 					if(i > j) {
@@ -851,6 +851,12 @@ public class CAManifest {
 
 	private static String join(String[] strings, int index) {
 		return ArrayUtils.join(ArrayUtils.subArray(strings, index), " ");
+	}
+
+	private static Path getPathSafe(String path) {
+		final String safe =
+				StringUtils.replaceAll(StringUtils.replaceAll(path, '*', 't'), '?', 't');
+		return Paths.get(safe);
 	}
 
 	public static ExtendedCurseManifest parse(String manifest)
