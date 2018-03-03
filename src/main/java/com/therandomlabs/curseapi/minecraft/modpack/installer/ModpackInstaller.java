@@ -53,6 +53,8 @@ import net.lingala.zip4j.exception.ZipException;
 public final class ModpackInstaller {
 	public static final URL LIGHTCHOCOLATE;
 
+	private static final String FORGECDN_HOST = "media.forgecdn.net";
+
 	private static final List<Path> temporaryFiles = new TRLList<>();
 
 	private Path installDir = Minecraft.getDirectory();
@@ -579,7 +581,17 @@ public final class ModpackInstaller {
 	private void downloadMod(Mod mod, int count, int total) throws CurseException, IOException {
 		MCEventHandling.forEach(handler -> handler.downloadingMod(mod.title, count, total));
 
-		final URL url = CurseForge.getFileURL(mod.projectID, mod.fileID);
+		final URL url;
+		if(mod.url == null) {
+			url = CurseForge.getFileURL(mod.projectID, mod.fileID);
+		} else {
+			url = mod.url;
+			if(!url.getHost().equals(FORGECDN_HOST)) {
+				getLogger().warning("Curse mod with ID %s isn't hosted on %s", mod.projectID,
+						FORGECDN_HOST);
+			}
+		}
+
 		final Path downloaded = NIOUtils.downloadToDirectory(url, installDir.resolve("mods"));
 		final Path relativizedLocation = installDir.relativize(downloaded);
 
