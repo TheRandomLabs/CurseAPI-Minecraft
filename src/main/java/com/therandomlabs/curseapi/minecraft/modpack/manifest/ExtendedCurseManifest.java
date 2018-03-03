@@ -251,8 +251,8 @@ public class ExtendedCurseManifest implements Cloneable, Serializable {
 		files = newMods.toArray(new Mod[0]);
 	}
 
-	public TRLList<Path> getExcludedPaths(Side side) {
-		final TRLList<Path> paths = FileInfo.getExcludedPaths(additionalFiles, side);
+	public TRLList<String> getExcludedPaths(Side side) {
+		final TRLList<String> paths = FileInfo.getExcludedPaths(additionalFiles, side);
 		for(Mod mod : files) {
 			paths.addAll(FileInfo.getExcludedPaths(mod.relatedFiles, side));
 		}

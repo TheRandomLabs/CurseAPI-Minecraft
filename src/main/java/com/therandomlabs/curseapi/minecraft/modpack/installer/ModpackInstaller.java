@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.MalformedInputException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +14,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +41,7 @@ import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.misc.Timer;
+import com.therandomlabs.utils.wrapper.Wrapper;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
@@ -57,7 +60,7 @@ public final class ModpackInstaller {
 	private final HashSet<Path> modSources = new HashSet<>();
 	private final HashSet<String> extensionsWithVariables = new HashSet<>();
 	private final HashSet<Integer> excludedProjects = new HashSet<>();
-	private final HashSet<Path> excludedPaths = new HashSet<>();
+	private final HashSet<String> excludedPaths = new HashSet<>();
 
 	private boolean redownloadMods;
 
@@ -173,19 +176,19 @@ public final class ModpackInstaller {
 		return (Set<Integer>) excludedProjects.clone();
 	}
 
-	public ModpackInstaller excludePath(String... path) {
-		return excludePath(ArrayUtils.convert(new Path[0], path, Paths::get));
-	}
-
-	public ModpackInstaller excludePath(Path... path) {
+	public ModpackInstaller excludePath(String... paths) {
 		ensureNotRunning();
-		excludedPaths.addAll(new ImmutableList<>(path));
+		excludedPaths.addAll(new ImmutableList<>(paths));
 		return this;
 	}
 
+	public ModpackInstaller excludePath(Path... paths) {
+		return excludePath(ArrayUtils.convert(new String[0], paths, path -> path.toString()));
+	}
+
 	@SuppressWarnings("unchecked")
-	public Set<Path> getExcludedPaths() {
-		return (Set<Path>) excludedPaths.clone();
+	public Set<String> getExcludedPaths() {
+		return (Set<String>) excludedPaths.clone();
 	}
 
 	public ModpackInstaller redownloadMods(boolean flag) {
@@ -465,12 +468,28 @@ public final class ModpackInstaller {
 
 			//Deleting related files
 			for(String relatedFile : mod.relatedFiles) {
-				//Related files are the only files here that can be directories
-				final Path toDelete = installDir.resolve(relatedFile);
-				if(Files.isDirectory(toDelete)) {
-					NIOUtils.deleteDirectory(toDelete);
-				} else {
-					Files.deleteIfExists(toDelete);
+				//Match wildcards (*, ?)
+				try(DirectoryStream<Path> stream =
+						Files.newDirectoryStream(installDir, relatedFile)) {
+					final Wrapper<IOException> exception = new Wrapper<>();
+
+					stream.forEach(path -> {
+						try {
+							//Related files are the only files here that can be directories
+							final Path toDelete = installDir.resolve(path);
+							if(Files.isDirectory(toDelete)) {
+								NIOUtils.deleteDirectory(toDelete);
+							} else {
+								Files.deleteIfExists(toDelete);
+							}
+						} catch(IOException ex) {
+							exception.set(ex);
+						}
+					});
+
+					if(exception.hasValue()) {
+						throw exception.get();
+					}
 				}
 			}
 		}
@@ -599,7 +618,7 @@ public final class ModpackInstaller {
 	void copyFile(Path overrides, Path file, ExtendedCurseManifest manifest)
 			throws IOException {
 		final Path relativized = overrides.relativize(file);
-		if(isExcluded(relativized)) {
+		if(isExcluded(overrides, relativized)) {
 			return;
 		}
 
@@ -635,20 +654,29 @@ public final class ModpackInstaller {
 		data.installedFiles.add(toString(relativized));
 	}
 
-	private boolean isExcluded(Path path) {
-		path = installDir.resolve(path);
-		for(Path excludedPath : excludedPaths) {
-			final Path resolved = installDir.resolve(excludedPath);
-			if(path.equals(resolved) || NIOUtils.isParent(resolved, path)) {
-				return true;
+	private boolean isExcluded(Path overrides, Path path) throws IOException {
+		path = overrides.resolve(path);
+
+		for(String excludedPath : excludedPaths) {
+			//Support wildcards (*, ?)
+			try(DirectoryStream<Path> stream = Files.newDirectoryStream(overrides, excludedPath)) {
+				final Iterator<Path> it = stream.iterator();
+				while(it.hasNext()) {
+					final Path resolved = overrides.resolve(it.next());
+					if(path.equals(resolved) || NIOUtils.isParent(resolved, path)) {
+						return true;
+					}
+				}
 			}
+
 		}
+
 		return false;
 	}
 
 	void visitDirectory(Path overrides, Path directory) throws IOException {
 		directory = overrides.relativize(directory);
-		if(isExcluded(directory)) {
+		if(isExcluded(overrides, directory)) {
 			return;
 		}
 
@@ -683,11 +711,10 @@ public final class ModpackInstaller {
 			Assertions.nonEmpty(extensionWithVariable, "extensionWithVariable");
 		}
 
-		for(Path excludedPath : excludedPaths) {
+		for(String excludedPath : excludedPaths) {
 			Assertions.nonNull(excludedPath, "excludedPath");
-			if(excludedPath.getRoot() != null) {
-				throw new IllegalArgumentException("\"" + excludedPath +
-						"\" has a root component");
+			if(hasRoot(excludedPath)) {
+				throw new IllegalArgumentException("\"" + excludedPath + "\" has a root component");
 			}
 		}
 
@@ -762,6 +789,11 @@ public final class ModpackInstaller {
 
 	private static String toString(Path path) {
 		return NIOUtils.toStringWithUnixPathSeparators(path);
+	}
+
+	private static boolean hasRoot(String path) {
+		return Paths.get(path.replaceAll("\\*", "temp").replaceAll("\\?", "temp")).
+				getRoot() != null;
 	}
 
 	public static boolean replaceVariablesAndCopy(Path file, Path newFile,

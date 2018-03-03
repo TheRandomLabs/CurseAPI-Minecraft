@@ -55,7 +55,7 @@ public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
 		return paths.toArray(new String[0]);
 	}
 
-	public static TRLList<Path> getExcludedPaths(FileInfo[] files, Side side) {
+	public static TRLList<String> getExcludedPaths(FileInfo[] files, Side side) {
 		final String[] paths;
 		if(side == Side.CLIENT) {
 			paths = getPaths(files, Side.SERVER);
@@ -64,6 +64,6 @@ public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
 		} else {
 			paths = new String[0];
 		}
-		return CollectionUtils.convert(new TRLList<>(paths), Paths::get);
+		return new TRLList<>(paths);
 	}
 }
