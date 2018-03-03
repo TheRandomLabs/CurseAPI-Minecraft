@@ -663,7 +663,7 @@ public final class ModpackInstaller {
 		final String parsedGlob = data[data.length - 1];
 
 		final String globParentPath =
-				StringUtils.removeLastChars(glob, glob.length() + 1);
+				StringUtils.removeLastChars(glob, parsedGlob.length() + 1);
 
 		final Path globParent = directory.resolve(globParentPath);
 
