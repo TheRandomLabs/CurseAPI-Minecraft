@@ -735,6 +735,7 @@ public final class ManifestComparer {
 			if(line.isEmpty()) {
 				changelog.put(version, entry.toString());
 				entry.setLength(0);
+				continue;
 			}
 
 			entry.append(line).append(NEWLINE);
