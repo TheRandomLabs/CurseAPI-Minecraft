@@ -658,11 +658,14 @@ public final class ModpackInstaller {
 		path = overrides.resolve(path);
 
 		for(String excludedPath : excludedPaths) {
+			getLogger().error(excludedPath);
+
 			//Support wildcards (*, ?)
 			try(DirectoryStream<Path> stream = Files.newDirectoryStream(overrides, excludedPath)) {
 				final Iterator<Path> it = stream.iterator();
 				while(it.hasNext()) {
 					final Path resolved = overrides.resolve(it.next());
+					getLogger().error(resolved);
 					if(path.equals(resolved) || NIOUtils.isParent(resolved, path)) {
 						return true;
 					}
