@@ -150,10 +150,10 @@ public final class MinecraftForge {
 	}
 
 	public static Map<String, String> getChangelog() throws CurseException, IOException {
-		return getChangelogs(null, null);
+		return getChangelog(null, null);
 	}
 
-	public static Map<String, String> getChangelogs(String oldVersion, String newVersion)
+	public static Map<String, String> getChangelog(String oldVersion, String newVersion)
 			throws CurseException, IOException {
 		if(changelog.isEmpty()) {
 			final String[] lines = StringUtils.splitNewline(DocumentUtils.read(getChangelogURL()));
@@ -168,6 +168,7 @@ public final class MinecraftForge {
 					} else {
 						version = StringUtils.removeLastChar(line.split(" ")[1]);
 					}
+					continue;
 				}
 
 				if(line.isEmpty()) {
@@ -181,6 +182,10 @@ public final class MinecraftForge {
 					entry.append(line.substring(1)).append(System.lineSeparator());
 				}
 			}
+		}
+
+		if((oldVersion != null && newVersion != null) && compare(oldVersion, newVersion) >= 0) {
+			throw new IllegalArgumentException("oldVersion must be older than newVersion");
 		}
 
 		final Map<String, String> subchangelog = new LinkedHashMap<>();
@@ -235,7 +240,7 @@ public final class MinecraftForge {
 			invalidVersion(version2);
 		}
 
-		return Integer.compare(index1, index2);
+		return Integer.compare(index2, index1);
 	}
 
 	public static void clearChangelogCache() {

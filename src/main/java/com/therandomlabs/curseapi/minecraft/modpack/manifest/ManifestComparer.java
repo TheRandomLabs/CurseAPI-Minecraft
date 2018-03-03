@@ -442,7 +442,7 @@ public final class ManifestComparer {
 						).toString()}
 				);
 			}
-			return MinecraftForge.getChangelogs(oldVersion, newVersion);
+			return MinecraftForge.getChangelog(oldVersion, newVersion);
 		}
 
 		@Override
@@ -663,6 +663,7 @@ public final class ManifestComparer {
 			final String line = lines[i];
 			if(line.startsWith("Build ")) {
 				version = StringUtils.removeLastChar(line.split(" ")[1]);
+				continue;
 			}
 
 			if(version.equals(oldVersion)) {
