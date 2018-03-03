@@ -323,8 +323,12 @@ public final class ManifestComparer {
 
 			if(owner.equals("zmaster587") || newFile.uploader().equals("mezz")) {
 				final String changelog = getChangelogByComparison(oldFile, newFile, urls);
-				changelogs.put("Retrieved from " + getOldFileName() + " and " + getNewFileName() +
-						"'s changelogs", changelog);
+				if(urls) {
+					changelogs.put(VIEW_CHANGELOG_AT, changelog);
+				} else {
+					changelogs.put("Retrieved from " + getOldFileName() + " and " +
+							getNewFileName() + "'s changelogs", changelog);
+				}
 				return changelogs;
 			}
 
