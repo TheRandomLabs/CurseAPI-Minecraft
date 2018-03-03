@@ -321,12 +321,15 @@ public final class ManifestComparer {
 				}
 			}
 
-			if(owner.equals("bre2el") || owner.equals("zmaster587") ||
-					newFile.uploader().equals("mezz")) {
+			if(owner.equals("zmaster587") || newFile.uploader().equals("mezz")) {
 				final String changelog = getChangelogByComparison(oldFile, newFile, urls);
 				changelogs.put("Retrieved from " + getOldFileName() + " and " + getNewFileName() +
 						"'s changelogs", changelog);
 				return changelogs;
+			}
+
+			if(owner.equals("bre2el")) {
+				return getBre2elChangelog(oldFile, newFile, urls);
 			}
 
 			final boolean isMcJty = owner.equals("McJty");
@@ -721,6 +724,50 @@ public final class ManifestComparer {
 		for(String line : lines) {
 			if(line.startsWith("# ")) {
 				version = line.split(" ")[1];
+				if(!changelogStarted) {
+					if(version.equals(newVersion)) {
+						changelogStarted = true;
+					}
+				} else if(version.equals(oldVersion)) {
+					break;
+				}
+
+				continue;
+			}
+
+			if(line.isEmpty()) {
+				changelog.put(version, entry.toString());
+				entry.setLength(0);
+				continue;
+			}
+
+			entry.append(line).append(NEWLINE);
+		}
+
+		return changelog;
+	}
+
+	static Map<String, String> getBre2elChangelog(CurseFile oldFile, CurseFile newFile, boolean url)
+			throws CurseException {
+		final Map<String, String> changelog = new LinkedHashMap<>();
+
+		if(url) {
+			changelog.put(VIEW_CHANGELOG_AT, newFile.urlString());
+			return changelog;
+		}
+
+		final String oldVersion = oldFile.name().split("-")[2];
+		final String newVersion = newFile.name().split("-")[2];
+
+		final String[] lines = StringUtils.splitNewline(newFile.changelog());
+		final StringBuilder entry = new StringBuilder();
+		String version = null;
+
+		boolean changelogStarted = false;
+
+		for(String line : lines) {
+			if(line.startsWith("v")) {
+				version = line.substring(1);
 				if(!changelogStarted) {
 					if(version.equals(newVersion)) {
 						changelogStarted = true;
