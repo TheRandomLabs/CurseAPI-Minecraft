@@ -164,7 +164,7 @@ public final class MinecraftForge {
 				final String line = lines[i];
 				if(line.startsWith("Build ")) {
 					if(i == 2) {
-						version = getLatestVersion();
+						version = getLatestVersionWithoutChangelog();
 					} else {
 						version = StringUtils.removeLastChar(line.split(" ")[1]);
 					}
