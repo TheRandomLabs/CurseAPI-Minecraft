@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
@@ -21,6 +23,7 @@ import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.misc.StringUtils;
+import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class ManifestComparer {
 	public static class Results implements Serializable {
@@ -33,6 +36,11 @@ public final class ManifestComparer {
 		private final TRLList<VersionChange> downgraded;
 		private final TRLList<Mod> removed;
 		private final TRLList<Mod> added;
+
+		private boolean unchangedPreloaded;
+		private boolean removedPreloaded;
+		private boolean addedPreloaded;
+		private boolean sorted;
 
 		Results(ExtendedCurseManifest oldManifest, ExtendedCurseManifest newManifest,
 				TRLList<Mod> unchanged, TRLList<VersionChange> updated,
@@ -54,7 +62,13 @@ public final class ManifestComparer {
 			return newManifest;
 		}
 
-		public TRLList<Mod> getUnchanged() {
+		public TRLList<Mod> getUnchanged() throws CurseException {
+			if(!unchangedPreloaded) {
+				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), unchanged.size(), index -> {
+					unchanged.get(index).title();
+				});
+			}
+
 			return unchanged;
 		}
 
@@ -64,7 +78,10 @@ public final class ManifestComparer {
 
 		public Map<VersionChange, Map<String, String>> getUpdatedChangelogs(boolean urls)
 				throws CurseException, IOException {
-			return VersionChange.getChangelogs(updated, urls);
+			final Map<VersionChange, Map<String, String>> changelogs =
+					VersionChange.getChangelogs(updated, urls);
+			sortLists();
+			return changelogs;
 		}
 
 		public TRLList<VersionChange> getDowngraded() {
@@ -73,14 +90,29 @@ public final class ManifestComparer {
 
 		public Map<VersionChange, Map<String, String>> getDowngradedChangelogs(boolean urls)
 				throws CurseException, IOException {
-			return VersionChange.getChangelogs(downgraded, urls);
+			final Map<VersionChange, Map<String, String>> changelogs =
+					VersionChange.getChangelogs(downgraded, urls);
+			sortLists();
+			return changelogs;
 		}
 
-		public TRLList<Mod> getRemoved() {
+		public TRLList<Mod> getRemoved() throws CurseException {
+			if(!removedPreloaded) {
+				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), removed.size(), index -> {
+					removed.get(index).title();
+				});
+			}
+
 			return removed;
 		}
 
-		public TRLList<Mod> getAdded() {
+		public TRLList<Mod> getAdded() throws CurseException {
+			if(!addedPreloaded) {
+				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), added.size(), index -> {
+					added.get(index).title();
+				});
+			}
+
 			return added;
 		}
 
@@ -95,9 +127,21 @@ public final class ManifestComparer {
 		public boolean hasForgeVersionChanged() {
 			return !getOldForgeVersion().equals(getNewForgeVersion());
 		}
+
+		public void sortLists() {
+			if(!sorted) {
+				unchanged.sort();
+				updated.sort();
+				downgraded.sort();
+				removed.sort();
+				added.sort();
+
+				sorted = true;
+			}
+		}
 	}
 
-	public static class VersionChange implements Serializable {
+	public static class VersionChange implements Comparable<VersionChange>, Serializable {
 		private static final long serialVersionUID = 1789316477374597287L;
 
 		public static final String ARCHIVED_FILE = "[Archived file]";
@@ -196,6 +240,16 @@ public final class ManifestComparer {
 			return files;
 		}
 
+		@Override
+		public int compareTo(VersionChange versionChange) {
+			try {
+				return getModTitle().compareTo(versionChange.getModTitle());
+			} catch(CurseException ex) {
+				ThrowableHandling.handleUnexpected(ex);
+			}
+			return 0;
+		}
+
 		private static boolean needsCurseFiles(CurseProject project) {
 			final int id = project.id();
 			final String owner = project.owner().username();
@@ -272,7 +326,10 @@ public final class ManifestComparer {
 			final String owner = project.owner().username();
 
 			if(owner.equals("TeamCoFH")) {
-				return getCoFHChangelog(oldFile, newFile, urls);
+				final Map<String, String> changelog = getCoFHChangelog(oldFile, newFile, urls);
+				if(changelog != null) {
+					return changelog;
+				}
 			}
 
 			if(owner.equals("bre2l") || owner.equals("zmaster587")) {
@@ -299,19 +356,19 @@ public final class ManifestComparer {
 		public static Map<VersionChange, Map<String, String>> getChangelogs(
 				List<VersionChange> versionChanges, boolean urls)
 				throws CurseException, IOException {
+			final Set<String> toPreload = ConcurrentHashMap.newKeySet();
+
 			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(),
 					versionChanges.size(), index -> {
-				versionChanges.get(index).preload();
+				final VersionChange versionChange = versionChanges.get(index);
+				versionChange.preload();
+				toPreload.addAll(versionChange.getURLsToPreload());
 			});
 
-			final List<String> toPreload = new TRLList<>();
-			for(VersionChange versionChange : versionChanges) {
-				toPreload.addAll(versionChange.getURLsToPreload());
-				versionChange.preloaded = true;
-			}
+			final List<String> list = new TRLList<>(toPreload);
 
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), toPreload.size(), index -> {
-				DocumentUtils.get(toPreload.get(index));
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(), index -> {
+				DocumentUtils.get(list.get(index));
 			});
 
 			final Map<VersionChange, Map<String, String>> changelogs =
@@ -388,6 +445,14 @@ public final class ManifestComparer {
 		@Override
 		public Map<String, String> getChangelogs() throws CurseException, IOException {
 			return MinecraftForge.getChangelogs(oldVersion, newVersion);
+		}
+
+		@Override
+		void preload() {}
+
+		@Override
+		List<String> getURLsToPreload() {
+			return ImmutableList.empty();
 		}
 	}
 
@@ -470,12 +535,6 @@ public final class ManifestComparer {
 			downgraded.add(new ForgeVersionChange(mcVersion, newForge, oldForge, true));
 		}
 
-		unchanged.sort();
-		updated.sort();
-		downgraded.sort();
-		removed.sort();
-		added.sort();
-
 		return new Results(oldManifest, newManifest, unchanged, updated, downgraded, removed,
 				added);
 	}
@@ -503,7 +562,7 @@ public final class ManifestComparer {
 		try {
 			new URL(url);
 		} catch(MalformedURLException ex) {
-			throw new CurseException(ex);
+			return null;
 		}
 
 		return url;
@@ -512,6 +571,11 @@ public final class ManifestComparer {
 	static Map<String, String> getCoFHChangelog(CurseFile oldFile, CurseFile newFile,
 			boolean url) throws CurseException, IOException {
 		final String changelogURL = getCoFHURL(newFile);
+
+		if(changelogURL == null) {
+			return null;
+		}
+
 		final Map<String, String> changelog = new LinkedHashMap<>();
 
 		if(url) {
