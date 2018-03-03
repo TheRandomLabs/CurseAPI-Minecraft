@@ -158,16 +158,12 @@ public final class MinecraftForge {
 		if(changelog.isEmpty()) {
 			final String[] lines = StringUtils.splitNewline(DocumentUtils.read(getChangelogURL()));
 			final StringBuilder entry = new StringBuilder();
-			String version = null;
+			String version = getLatestVersionWithoutChangelog();
 
-			for(int i = 1; i < lines.length; i++) {
+			for(int i = 2; i < lines.length; i++) {
 				final String line = lines[i];
 				if(line.startsWith("Build ")) {
-					if(i == 2) {
-						version = getLatestVersionWithoutChangelog();
-					} else {
-						version = StringUtils.removeLastChar(line.split(" ")[1]);
-					}
+					version = StringUtils.removeLastChar(line.split(" ")[1]);
 					continue;
 				}
 
