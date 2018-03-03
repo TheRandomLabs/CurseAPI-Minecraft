@@ -27,12 +27,10 @@ public final class ModpackZipper {
 			throw new FileNotFoundException("A manifest is required: " + manifestPath.toString());
 		}
 
-		Files.deleteIfExists(zip);
-
 		final ExtendedCurseManifest manifest = ExtendedCurseManifest.from(manifestPath);
 		final Path overrides = directory.resolve(manifest.overrides);
 
-		try(final ZipFile zipFile = new ZipFile(zip)) {
+		try(final ZipFile zipFile = new ZipFile(zip, true)) {
 			Files.walkFileTree(overrides, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attributes)
@@ -45,13 +43,17 @@ public final class ModpackZipper {
 						}
 					}
 
+					final Path fileToAdd;
+
 					if(shouldReplaceVariables) {
 						final Path tempPath = ModpackInstaller.tempPath();
 						ModpackInstaller.replaceVariablesAndCopy(file, tempPath, manifest);
-						file = tempPath;
+						fileToAdd = tempPath;
+					} else {
+						fileToAdd = file;
 					}
 
-					zipFile.addEntry(file, manifest.overrides + "/" + file.toString());
+					zipFile.addEntry(fileToAdd, file.toString());
 
 					return FileVisitResult.CONTINUE;
 				}
