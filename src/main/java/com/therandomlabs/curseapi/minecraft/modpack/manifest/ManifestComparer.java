@@ -723,6 +723,9 @@ public final class ManifestComparer {
 
 		for(String line : lines) {
 			if(line.startsWith("# ")) {
+				changelog.put(version, entry.toString());
+				entry.setLength(0);
+
 				version = line.split(" ")[1];
 				if(!changelogStarted) {
 					if(version.equals(newVersion)) {
@@ -736,8 +739,6 @@ public final class ManifestComparer {
 			}
 
 			if(line.isEmpty()) {
-				changelog.put(version, entry.toString());
-				entry.setLength(0);
 				continue;
 			}
 
@@ -757,22 +758,19 @@ public final class ManifestComparer {
 		}
 
 		final String oldVersion = oldFile.name().split("-")[2];
-		final String newVersion = newFile.name().split("-")[2];
 
 		final String[] lines = StringUtils.splitNewline(newFile.changelog());
 		final StringBuilder entry = new StringBuilder();
 		String version = null;
 
-		boolean changelogStarted = false;
-
 		for(String line : lines) {
 			if(line.startsWith("v")) {
+				changelog.put(version, entry.toString());
+				entry.setLength(0);
+
 				version = line.substring(1);
-				if(!changelogStarted) {
-					if(version.equals(newVersion)) {
-						changelogStarted = true;
-					}
-				} else if(version.equals(oldVersion)) {
+
+				if(version.equals(oldVersion)) {
 					break;
 				}
 
@@ -780,8 +778,6 @@ public final class ManifestComparer {
 			}
 
 			if(line.isEmpty()) {
-				changelog.put(version, entry.toString());
-				entry.setLength(0);
 				continue;
 			}
 
