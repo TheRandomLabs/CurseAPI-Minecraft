@@ -599,8 +599,8 @@ public class CAManifest {
 
 				final FileInfo file2 = files.get(j);
 
-				final Path path = getPathSafe(file.path);
-				final Path path2 = getPathSafe(file2.path);
+				final Path path = Paths.get(getPathSafe(file.path));
+				final Path path2 = Paths.get(getPathSafe(file2.path));
 
 				if(path.equals(path2)) {
 					if(i > j) {
@@ -853,10 +853,8 @@ public class CAManifest {
 		return ArrayUtils.join(ArrayUtils.subArray(strings, index), " ");
 	}
 
-	private static Path getPathSafe(String path) {
-		final String safe =
-				StringUtils.replaceAll(StringUtils.replaceAll(path, '*', 't'), '?', 't');
-		return Paths.get(safe);
+	private static String getPathSafe(String path) {
+		return StringUtils.replaceAll(StringUtils.replaceAll(path, '*', 't'), '?', 't');
 	}
 
 	public static ExtendedCurseManifest parse(String manifest)
