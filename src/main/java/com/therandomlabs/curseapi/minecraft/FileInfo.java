@@ -1,11 +1,8 @@
 package com.therandomlabs.curseapi.minecraft;
 
 import java.io.Serializable;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
-import com.therandomlabs.utils.collection.CollectionUtils;
 import com.therandomlabs.utils.collection.TRLList;
 
 public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {

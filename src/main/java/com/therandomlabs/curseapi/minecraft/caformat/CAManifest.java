@@ -732,13 +732,14 @@ public class CAManifest {
 						value, postprocessor);
 			}
 
-			toParse.addAll(postprocessor.apply(variables, mods, value, args));
+			final List<String> applied = postprocessor.apply(variables, mods, value, args);
+			toParse.addAll(applied);
 
+			parsePostprocessors(applied);
 		}
 
 		parseModsAndFiles(toParse);
 		parseRemovedMods(toParse);
-		parsePostprocessors(toParse);
 	}
 
 	private void convertModDatas() throws CurseException {
