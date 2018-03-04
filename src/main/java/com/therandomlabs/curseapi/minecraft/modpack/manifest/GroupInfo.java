@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import com.therandomlabs.utils.collection.ArrayUtils;
@@ -20,6 +21,11 @@ public class GroupInfo implements Cloneable, Serializable {
 	@Override
 	public GroupInfo clone() {
 		return new GroupInfo(primary, alternatives);
+	}
+
+	@Override
+	public String toString() {
+		return "[primary=\"" + primary + "\",alternatives=" + Arrays.toString(alternatives) + "]";
 	}
 
 	public TRLList<String> getOtherGroupNames(String toExclude) {

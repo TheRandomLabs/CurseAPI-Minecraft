@@ -65,7 +65,8 @@ public final class ManifestComparer {
 
 		public TRLList<Mod> getUnchanged() throws CurseException {
 			if(!unchangedPreloaded) {
-				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), unchanged.size(), index -> {
+				ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), unchanged.size(),
+						index -> {
 					unchanged.get(index).title();
 				});
 				unchanged.sort();
@@ -754,8 +755,8 @@ public final class ManifestComparer {
 		return changelog;
 	}
 
-	static Map<String, String> getBre2elChangelog(CurseFile oldFile, CurseFile newFile, boolean url)
-			throws CurseException {
+	static Map<String, String> getBre2elChangelog(CurseFile oldFile, CurseFile newFile,
+			boolean url) throws CurseException {
 		final Map<String, String> changelog = new LinkedHashMap<>();
 
 		if(url) {

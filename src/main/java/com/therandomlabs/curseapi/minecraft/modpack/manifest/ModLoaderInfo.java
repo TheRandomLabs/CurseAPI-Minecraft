@@ -23,4 +23,9 @@ public final class ModLoaderInfo implements Cloneable, Serializable {
 
 		return info;
 	}
+
+	@Override
+	public String toString() {
+		return "[id=" + id + ",primary=" + primary + "]";
+	}
 }

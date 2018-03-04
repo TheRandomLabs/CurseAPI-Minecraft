@@ -46,7 +46,6 @@ import com.therandomlabs.utils.wrapper.Wrapper;
 
 //https://github.com/google/gson/issues/395 may occur
 //TODO iterateModSources, installOptiFine, installForge, createEULAAndServerStarters
-//TODO update modpack data AFTER file is copied/deleted - AtomicBoolean?
 public final class ModpackInstaller {
 	public static final URL LIGHTCHOCOLATE;
 
@@ -580,8 +579,8 @@ public final class ModpackInstaller {
 		} else {
 			url = mod.url;
 			if(!url.getHost().equals(FORGECDN_HOST)) {
-				getLogger().warning("Curse mod with ID %s isn't hosted on %s", mod.projectID,
-						FORGECDN_HOST);
+				getLogger().warning("Curse mod with ID %s isn't hosted on %s: %s", mod.projectID,
+						FORGECDN_HOST, url);
 			}
 		}
 
@@ -602,26 +601,43 @@ public final class ModpackInstaller {
 		data.mods.add(modData);
 	}
 
-	private void copyFiles(Path overrides, ExtendedCurseManifest manifest) throws IOException {
+	private void copyFiles(Path overrides, ExtendedCurseManifest manifest)
+			throws CurseException, IOException {
+		final Wrapper<CurseException> exception = new Wrapper<>();
+
 		Files.walkFileTree(overrides, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes)
 					throws IOException {
-				copyFile(overrides, file, manifest);
+				try {
+					copyFile(overrides, file, manifest);
+				} catch(CurseException ex) {
+					exception.set(ex);
+				}
+
 				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
 			public FileVisitResult preVisitDirectory(Path directory,
 					BasicFileAttributes attributes) throws IOException {
-				visitDirectory(overrides, directory);
+				try {
+					visitDirectory(overrides, directory);
+				} catch(CurseException ex) {
+					exception.set(ex);
+				}
+
 				return FileVisitResult.CONTINUE;
 			}
 		});
+
+		if(exception.hasValue()) {
+			throw exception.get();
+		}
 	}
 
 	void copyFile(Path overrides, Path file, ExtendedCurseManifest manifest)
-			throws IOException {
+			throws CurseException, IOException {
 		final Path relativized = overrides.relativize(file);
 		if(isExcluded(overrides, relativized)) {
 			return;
@@ -659,8 +675,12 @@ public final class ModpackInstaller {
 		data.installedFiles.add(toString(relativized));
 	}
 
-	private boolean isExcluded(Path overrides, Path path) throws IOException {
+	private boolean isExcluded(Path overrides, Path path) throws CurseException, IOException {
 		path = overrides.resolve(path);
+
+		if(NIOUtils.isParent(path, overrides)) {
+			throw new CurseException("Invalid path in manifest: " + path);
+		}
 
 		for(String excludedPath : excludedPaths) {
 			//Support wildcards (*, ?)
@@ -679,7 +699,7 @@ public final class ModpackInstaller {
 		return false;
 	}
 
-	void visitDirectory(Path overrides, Path directory) throws IOException {
+	void visitDirectory(Path overrides, Path directory) throws CurseException, IOException {
 		directory = overrides.relativize(directory);
 		if(isExcluded(overrides, directory)) {
 			return;

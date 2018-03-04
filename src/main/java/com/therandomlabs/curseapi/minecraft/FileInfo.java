@@ -25,7 +25,17 @@ public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[path=\"" + path + ",side=" + side + "]";
+		return "[path=\"" + path + ",side=" + side + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		return path.hashCode() + side.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		return object instanceof FileInfo ? ((FileInfo) object).hashCode() == hashCode() : false;
 	}
 
 	@Override

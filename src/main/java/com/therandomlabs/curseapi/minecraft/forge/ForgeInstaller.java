@@ -1,6 +1,5 @@
 package com.therandomlabs.curseapi.minecraft.forge;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import com.therandomlabs.curseapi.CurseException;
@@ -8,10 +7,6 @@ import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 
 public class ForgeInstaller {
 	private final Path path;
-
-	public ForgeInstaller(File file) {
-		this(file.toPath());
-	}
 
 	public ForgeInstaller(Path path) {
 		this.path = path;

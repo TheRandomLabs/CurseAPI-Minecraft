@@ -26,6 +26,22 @@ public final class InstallerData implements Cloneable, Serializable {
 
 			return data;
 		}
+
+		@Override
+		public String toString() {
+			return "[projectID=" + projectID + ",fileID=" + fileID + "]";
+		}
+
+		@Override
+		public int hashCode() {
+			return projectID + fileID;
+		}
+
+		@Override
+		public boolean equals(Object object) {
+			return object instanceof InstallerData ?
+					((InstallerData) object).hashCode() == hashCode() : false;
+		}
 	}
 
 	private static final long serialVersionUID = -2036469017004566167L;
@@ -48,5 +64,11 @@ public final class InstallerData implements Cloneable, Serializable {
 				(KeySetView<String, Boolean>) installedFiles);
 
 		return data;
+	}
+
+	@Override
+	public String toString() {
+		return "[minecraftVersion=\"" + minecraftVersion + "\",forgeVersion=\"" + forgeVersion +
+				"\",mods=" + mods.toString() + ",installedFiles=" + installedFiles.toString() + "]";
 	}
 }

@@ -31,6 +31,22 @@ public class CurseManifest implements Cloneable, Serializable {
 			return new CurseMod(projectID, fileID, required);
 		}
 
+		@Override
+		public String toString() {
+			return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
+		}
+
+		@Override
+		public int hashCode() {
+			return projectID + fileID;
+		}
+
+		@Override
+		public boolean equals(Object object) {
+			return object instanceof CurseMod ?
+					((CurseMod) object).hashCode() == hashCode() : false;
+		}
+
 		public Mod toMod() throws CurseException {
 			final Mod mod = new Mod();
 

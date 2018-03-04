@@ -69,4 +69,19 @@ public class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	public String[] getRelatedFiles(Side side) {
 		return FileInfo.getPaths(relatedFiles, side);
 	}
+
+	@Override
+	public String toString() {
+		return "[projectID=" + projectID + ",fileID=" + fileID + ",title=\"" + title + "\"]";
+	}
+
+	@Override
+	public int hashCode() {
+		return projectID + fileID;
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		return object instanceof Mod ? ((Mod) object).hashCode() == hashCode() : false;
+	}
 }
