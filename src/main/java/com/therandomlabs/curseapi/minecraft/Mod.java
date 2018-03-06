@@ -8,11 +8,9 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
-public class Mod implements Cloneable, Comparable<Mod>, Serializable {
-	private static final long serialVersionUID = -3120215335212824363L;
-
+public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	public static final String UNKNOWN_NAME = "Unknown Name";
-
+	private static final long serialVersionUID = -3120215335212824363L;
 	public String title = UNKNOWN_NAME;
 	public int projectID;
 	public int fileID;
@@ -21,22 +19,6 @@ public class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	public FileInfo[] relatedFiles = new FileInfo[0];
 	public String[] groups = new String[0];
 	public URL url;
-
-	@Override
-	public Mod clone() {
-		final Mod mod = new Mod();
-
-		mod.title = title;
-		mod.projectID = projectID;
-		mod.fileID = fileID;
-		mod.side = side;
-		mod.required = required;
-		mod.relatedFiles = CloneException.tryClone(relatedFiles);
-		mod.groups = groups.clone();
-		mod.url = url;
-
-		return mod;
-	}
 
 	@Override
 	public int compareTo(Mod mod) {
@@ -57,6 +39,20 @@ public class Mod implements Cloneable, Comparable<Mod>, Serializable {
 		}
 
 		return title.toLowerCase(Locale.ENGLISH).compareTo(mod.title.toLowerCase(Locale.ENGLISH));
+	}
+
+	@Override
+	public Mod clone() {
+		try {
+			final Mod mod = (Mod) super.clone();
+
+			mod.relatedFiles = CloneException.tryClone(relatedFiles);
+			mod.groups = groups.clone();
+
+			return mod;
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
 	}
 
 	public String title() throws CurseException {
@@ -82,6 +78,6 @@ public class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 	@Override
 	public boolean equals(Object object) {
-		return object instanceof Mod ? ((Mod) object).hashCode() == hashCode() : false;
+		return object instanceof Mod && object.hashCode() == hashCode();
 	}
 }

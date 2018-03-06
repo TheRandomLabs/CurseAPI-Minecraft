@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import com.therandomlabs.utils.collection.TRLList;
 
-public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
+public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
 	private static final long serialVersionUID = -3418209854129685785L;
 
 	public String path;
@@ -18,29 +18,25 @@ public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
 		this.side = side;
 	}
 
+	public static TRLList<String> getExcludedPaths(FileInfo[] files, Side side) {
+		final String[] paths;
+		if(side == Side.CLIENT) {
+			paths = getPaths(files, Side.SERVER);
+		} else if(side == Side.SERVER) {
+			paths = getPaths(files, Side.CLIENT);
+		} else {
+			paths = new String[0];
+		}
+		return new TRLList<>(paths);
+	}
+
 	@Override
 	public FileInfo clone() {
-		return new FileInfo(path, side);
-	}
+		try {
+			return (FileInfo) super.clone();
+		} catch(CloneNotSupportedException ignored) {}
 
-	@Override
-	public String toString() {
-		return "[path=\"" + path + ",side=" + side + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		return path.hashCode() + side.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		return object instanceof FileInfo ? ((FileInfo) object).hashCode() == hashCode() : false;
-	}
-
-	@Override
-	public int compareTo(FileInfo file) {
-		return path.toLowerCase(Locale.ENGLISH).compareTo(file.path.toLowerCase(Locale.ENGLISH));
+		return null;
 	}
 
 	public static String[] getPaths(FileInfo[] files, Side side) {
@@ -67,15 +63,23 @@ public class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
 		return paths.toArray(new String[0]);
 	}
 
-	public static TRLList<String> getExcludedPaths(FileInfo[] files, Side side) {
-		final String[] paths;
-		if(side == Side.CLIENT) {
-			paths = getPaths(files, Side.SERVER);
-		} else if(side == Side.SERVER) {
-			paths = getPaths(files, Side.CLIENT);
-		} else {
-			paths = new String[0];
-		}
-		return new TRLList<>(paths);
+	@Override
+	public String toString() {
+		return "[path=\"" + path + ",side=" + side + "]";
+	}
+
+	@Override
+	public int compareTo(FileInfo file) {
+		return path.toLowerCase(Locale.ENGLISH).compareTo(file.path.toLowerCase(Locale.ENGLISH));
+	}
+
+	@Override
+	public int hashCode() {
+		return path.hashCode() + side.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		return object instanceof FileInfo && object.hashCode() == hashCode();
 	}
 }

@@ -107,13 +107,13 @@ public final class MinecraftForge {
 		return NIOUtils.downloadToDirectory(getInstallerURL(forgeVersion), directory);
 	}
 
-	public static String getInstalledDirectoryName(String minecraftVersion, String forgeVersion) {
-		return minecraftVersion + "-forge" + forgeVersion;
-	}
-
 	public static String getInstalledDirectoryName(MinecraftVersion minecraftVersion,
 			String forgeVersion) {
 		return getInstalledDirectoryName(minecraftVersion.toString(), forgeVersion);
+	}
+
+	public static String getInstalledDirectoryName(String minecraftVersion, String forgeVersion) {
+		return minecraftVersion + "-forge" + forgeVersion;
 	}
 
 	public static String get(String minecraftVersion, String forgeVersion)
@@ -220,7 +220,8 @@ public final class MinecraftForge {
 		return versions.get(0);
 	}
 
-	public static int compare(String version1, String version2) throws CurseException, IOException {
+	public static int compare(String version1, String version2) throws CurseException,
+			IOException {
 		if(versions.isEmpty()) {
 			getChangelog();
 		}

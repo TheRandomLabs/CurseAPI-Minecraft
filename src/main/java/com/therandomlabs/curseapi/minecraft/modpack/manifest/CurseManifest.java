@@ -10,77 +10,8 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 
-public class CurseManifest implements Cloneable, Serializable {
-	public static class CurseMod implements Cloneable, Serializable {
-		private static final long serialVersionUID = -6936293567291965636L;
-
-		public int projectID;
-		public int fileID;
-		public boolean required;
-
-		public CurseMod() {}
-
-		public CurseMod(int projectID, int fileID, boolean required) {
-			this.projectID = projectID;
-			this.fileID = fileID;
-			this.required = required;
-		}
-
-		@Override
-		public CurseMod clone() {
-			return new CurseMod(projectID, fileID, required);
-		}
-
-		@Override
-		public String toString() {
-			return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
-		}
-
-		@Override
-		public int hashCode() {
-			return projectID + fileID;
-		}
-
-		@Override
-		public boolean equals(Object object) {
-			return object instanceof CurseMod ?
-					((CurseMod) object).hashCode() == hashCode() : false;
-		}
-
-		public Mod toMod() throws CurseException {
-			final Mod mod = new Mod();
-
-			mod.title = CurseProject.fromID(projectID).title();
-			mod.projectID = projectID;
-			mod.fileID = fileID;
-			mod.required = required;
-
-			return mod;
-		}
-
-		public static Mod[] toMods(CurseMod[] curseMods) throws CurseException {
-			final Mod[] mods = new Mod[curseMods.length];
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), curseMods.length, index -> {
-				mods[index] = curseMods[index].toMod();
-			});
-			return mods;
-		}
-
-		public static CurseMod fromMod(Mod mod) {
-			return new CurseMod(mod.projectID, mod.fileID, mod.required);
-		}
-
-		public static CurseMod[] fromMods(Mod[] mods) {
-			final CurseMod[] curseMods = new CurseMod[mods.length];
-			for(int i = 0; i < mods.length; i++) {
-				curseMods[i] = fromMod(mods[i]);
-			}
-			return curseMods;
-		}
-	}
-
+public final class CurseManifest implements Cloneable, Serializable {
 	private static final long serialVersionUID = -8163938330549340465L;
-
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 	public String name;
@@ -91,24 +22,6 @@ public class CurseManifest implements Cloneable, Serializable {
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
-
-	@Override
-	public CurseManifest clone() {
-		final CurseManifest manifest = new CurseManifest();
-
-		manifest.manifestType = manifestType;
-		manifest.manifestVersion = manifestVersion;
-		manifest.name = name;
-		manifest.version = version;
-		manifest.author = author;
-		manifest.description = description;
-		manifest.files = CloneException.tryClone(files);
-		manifest.overrides = overrides;
-		manifest.minecraft = minecraft.clone();
-		manifest.projectID = projectID;
-
-		return manifest;
-	}
 
 	public ExtendedCurseManifest toExtendedManifest() throws CurseException {
 		final ExtendedCurseManifest manifest = new ExtendedCurseManifest();
@@ -131,12 +44,26 @@ public class CurseManifest implements Cloneable, Serializable {
 		return new Gson().toJson(this);
 	}
 
-	public String toPrettyJson() {
-		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+	@Override
+	public CurseManifest clone() {
+		try {
+			final CurseManifest manifest = (CurseManifest) super.clone();
+
+			manifest.files = CloneException.tryClone(files);
+			manifest.minecraft = minecraft.clone();
+
+			return manifest;
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
 	}
 
 	public String toPrettyJsonWithTabs() {
-		return toPrettyJson().replaceAll("  ", "\t");
+		return toPrettyJson().replaceAll(" [2]", "\t");
+	}
+
+	public String toPrettyJson() {
+		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
 	}
 
 	public boolean containsMod(int projectID, int fileID) {
@@ -146,5 +73,75 @@ public class CurseManifest implements Cloneable, Serializable {
 			}
 		}
 		return false;
+	}
+
+	public static class CurseMod implements Cloneable, Serializable {
+		private static final long serialVersionUID = -6936293567291965636L;
+
+		public int projectID;
+		public int fileID;
+		public boolean required;
+
+		public CurseMod() {}
+
+		public CurseMod(int projectID, int fileID, boolean required) {
+			this.projectID = projectID;
+			this.fileID = fileID;
+			this.required = required;
+		}
+
+		public static Mod[] toMods(CurseMod[] curseMods) throws CurseException {
+			final Mod[] mods = new Mod[curseMods.length];
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), curseMods.length, index ->
+					mods[index] = curseMods[index].toMod());
+			return mods;
+		}
+
+		@Override
+		public CurseMod clone() {
+			try {
+				return (CurseMod) super.clone();
+			} catch(CloneNotSupportedException ignored) {}
+
+			return null;
+		}
+
+		public Mod toMod() throws CurseException {
+			final Mod mod = new Mod();
+
+			mod.title = CurseProject.fromID(projectID).title();
+			mod.projectID = projectID;
+			mod.fileID = fileID;
+			mod.required = required;
+
+			return mod;
+		}
+
+		@Override
+		public String toString() {
+			return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
+		}
+
+		public static CurseMod[] fromMods(Mod[] mods) {
+			final CurseMod[] curseMods = new CurseMod[mods.length];
+			for(int i = 0; i < mods.length; i++) {
+				curseMods[i] = fromMod(mods[i]);
+			}
+			return curseMods;
+		}
+
+		@Override
+		public int hashCode() {
+			return projectID + fileID;
+		}
+
+		public static CurseMod fromMod(Mod mod) {
+			return new CurseMod(mod.projectID, mod.fileID, mod.required);
+		}
+
+		@Override
+		public boolean equals(Object object) {
+			return object instanceof CurseMod && object.hashCode() == hashCode();
+		}
 	}
 }

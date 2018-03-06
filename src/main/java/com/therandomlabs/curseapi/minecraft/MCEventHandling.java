@@ -1,27 +1,54 @@
 package com.therandomlabs.curseapi.minecraft;
 
-import static com.therandomlabs.utils.logging.Logging.getLogger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.utils.runnable.RunnableWithInputAndThrowable;
 import com.therandomlabs.utils.wrapper.Wrapper;
+import static com.therandomlabs.utils.logging.Logging.getLogger;
 
 public class MCEventHandling {
 	public static final MCEventHandler DEFAULT_EVENT_HANDLER = new DefaultMCEventHandler();
 	private static final List<MCEventHandler> eventHandlers = new ArrayList<>(5);
+
+	static {
+		register(DEFAULT_EVENT_HANDLER);
+	}
+
+	private MCEventHandling() {}
+
+	public static void register(MCEventHandler eventHandler) {
+		eventHandlers.add(eventHandler);
+	}
+
+	public static void unregister(MCEventHandler eventHandler) {
+		eventHandlers.remove(eventHandler);
+	}
+
+	public static void forEach(
+			RunnableWithInputAndThrowable<MCEventHandler, CurseException> consumer)
+			throws CurseException {
+		final Wrapper<CurseException> exception = new Wrapper<>();
+
+		for(MCEventHandler eventHandler : eventHandlers) {
+			try {
+				consumer.run(eventHandler);
+			} catch(CurseException ex) {
+				exception.set(ex);
+			}
+		}
+
+		if(exception.hasValue()) {
+			throw exception.get();
+		}
+	}
 
 	public static class DefaultMCEventHandler implements MCEventHandler {
 		@Override
 		public void noFilesFound(int projectID) {
 			getLogger().warning("No files with specified attributes found for project with ID: " +
 					projectID);
-		}
-
-		@Override
-		public void autosavedInstallerData() {
-			getLogger().debug("Autosaved installer data.");
 		}
 
 		@Override
@@ -74,38 +101,6 @@ public class MCEventHandling {
 		@Override
 		public void installingForge(String forgeVersion) {
 			getLogger().info("Installing Forge %s...", forgeVersion);
-		}
-	}
-
-	private MCEventHandling() {}
-
-	static {
-		register(DEFAULT_EVENT_HANDLER);
-	}
-
-	public static void register(MCEventHandler eventHandler) {
-		eventHandlers.add(eventHandler);
-	}
-
-	public static void unregister(MCEventHandler eventHandler) {
-		eventHandlers.remove(eventHandler);
-	}
-
-	public static void forEach(
-			RunnableWithInputAndThrowable<MCEventHandler, CurseException> consumer)
-			throws CurseException {
-		final Wrapper<CurseException> exception = new Wrapper<>();
-
-		for(MCEventHandler eventHandler : eventHandlers) {
-			try {
-				consumer.run(eventHandler);
-			} catch(CurseException ex) {
-				exception.set(ex);
-			}
-		}
-
-		if(exception.hasValue()) {
-			throw exception.get();
 		}
 	}
 }

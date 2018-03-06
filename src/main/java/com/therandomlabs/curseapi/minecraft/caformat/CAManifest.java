@@ -6,22 +6,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.curseforge.CurseForge;
 import com.therandomlabs.curseapi.file.CurseFileList;
-import com.therandomlabs.curseapi.minecraft.FileInfo;
-import com.therandomlabs.curseapi.minecraft.MCEventHandling;
-import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
-import com.therandomlabs.curseapi.minecraft.Mod;
-import com.therandomlabs.curseapi.minecraft.Side;
+import com.therandomlabs.curseapi.minecraft.*;
 import com.therandomlabs.curseapi.minecraft.caformat.post.Postprocessor;
 import com.therandomlabs.curseapi.minecraft.caformat.pre.Preprocessor;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
@@ -90,7 +81,7 @@ import com.therandomlabs.utils.wrapper.BooleanWrapper;
  * - Additional files
  * - ExtendedCurseManifest.sort
  */
-public class CAManifest {
+public final class CAManifest {
 	// [ Primary Mod Group ] [ Some Other Mod That Does Something Similar ]
 	public static final char GROUP_DEFINER_OPENER = '[';
 	public static final char GROUP_DEFINER_CLOSER = ']';
@@ -110,8 +101,6 @@ public class CAManifest {
 			Postprocessor.CHARACTER,
 			REMOVE_PROJECT
 	);
-
-	private List<String> lines;
 	private final VariableMap variables = new VariableMap();
 	private final List<GroupInfo> groups = new TRLList<>();
 	private final List<ModData> mods = new TRLList<>();
@@ -119,23 +108,190 @@ public class CAManifest {
 	private final List<Mod> serverOnlyMods = new TRLList<>();
 	private final List<Mod> alternativeMods = new TRLList<>();
 	private final List<FileInfo> additionalFiles = new TRLList<>();
-
-	public static class ModData {
-		public int projectID;
-		public int fileID;
-		public Side side;
-		public boolean required;
-		public FileInfo[] relatedFiles;
-		public String[] groups;
-		public URL url;
-		public boolean isAlternative;
-		public boolean getDependencies;
-
-		public ModData() {}
-	}
+	private List<String> lines;
 
 	private CAManifest(List<String> lines) {
 		this.lines = lines;
+	}
+
+	private static List<String> getModAndFileLines(List<String> lines) {
+		final List<String> filtered = new TRLList<>();
+		for(String line : lines) {
+			boolean shouldAdd = true;
+			for(char character : NON_MOD_CHARACTERS) {
+				if(line.startsWith(character + " ")) {
+					shouldAdd = false;
+				}
+			}
+
+			if(shouldAdd) {
+				filtered.add(line);
+			}
+		}
+		return filtered;
+	}
+
+	private static void parseMarker(String line, char marker, BooleanWrapper client,
+			BooleanWrapper server, BooleanWrapper both, BooleanWrapper optional,
+			BooleanWrapper getDependencies)
+			throws ManifestParseException {
+		switch(marker) {
+			case Marker.CLIENT:
+				if(client.get() || server.get() || both.get()) {
+					throw new ManifestParseException(
+							"A mod or file definition may only have one side marker: " + line);
+				}
+
+				client.set(true);
+				break;
+			case Marker.SERVER:
+				if(client.get() || server.get() || both.get()) {
+					throw new ManifestParseException(
+							"A mod or file definition may only have one side marker: " + line);
+				}
+
+				server.set(true);
+				break;
+			case Marker.BOTH:
+				if(client.get() || server.get() || both.get()) {
+					throw new ManifestParseException(
+							"A mod or file definition may only have one side marker: " + line);
+				}
+
+				both.set(true);
+				break;
+
+			case Marker.OPTIONAL:
+				if(optional.get()) {
+					throw new ManifestParseException(
+							"A mod definition may only be marked as optional once: " + line);
+				}
+
+				optional.set(true);
+				break;
+			case Marker.GET_DEPENDENCIES:
+				if(getDependencies.get()) {
+					throw new ManifestParseException(
+							"A mod definition may only be marked to get dependencies once: " +
+									line);
+				}
+
+				getDependencies.set(true);
+				break;
+			default:
+				throw new ManifestParseException("Invalid marker: " + marker);
+		}
+	}
+
+	private static FileInfo[] parseRelatedFiles(Side side, String[] data, String line)
+			throws ManifestParseException {
+		final List<FileInfo> relatedFiles = new TRLList<>();
+
+		final BooleanWrapper client = new BooleanWrapper();
+		final BooleanWrapper server = new BooleanWrapper();
+		final BooleanWrapper both = new BooleanWrapper();
+		final BooleanWrapper optional = new BooleanWrapper();
+		final BooleanWrapper getDependencies = new BooleanWrapper();
+
+		for(String element : data) {
+			if(element.length() > 1 && element.charAt(0) == Marker.CHARACTER) {
+				if(element.length() != 2) {
+					throw new ManifestParseException("Invalid marker: " + element.substring(1));
+				}
+
+				parseMarker(line, element.charAt(1), client, server, both, optional,
+						getDependencies);
+
+				if(optional.get() || getDependencies.get()) {
+					throw new ManifestParseException("Files cannot be defined as optional or " +
+							"marked to get dependencies: " + line);
+				}
+
+				side = Side.fromBooleans(client.get(), server.get(), both.get());
+
+				continue;
+			}
+
+			element = StringUtils.replaceAll(element, SPACE_PLACEHOLDER, ' ');
+
+			if(!IOUtils.isValidPath(getPathSafe(element))) {
+				throw new ManifestParseException("Invalid path: " + element);
+			}
+
+			relatedFiles.add(new FileInfo(element, side));
+
+			client.set(false);
+			server.set(false);
+			both.set(false);
+			optional.set(false);
+		}
+
+		removeDuplicateFiles(relatedFiles);
+		return relatedFiles.toArray(new FileInfo[0]);
+	}
+
+	private static void removeDuplicateFiles(List<FileInfo> files) {
+		for(int i = 0; i < files.size(); i++) {
+			final FileInfo file = files.get(i);
+
+			for(int j = 0; j < files.size(); j++) {
+				if(i == j) {
+					continue;
+				}
+
+				final FileInfo file2 = files.get(j);
+
+				final Path path = Paths.get(getPathSafe(file.path));
+				final Path path2 = Paths.get(getPathSafe(file2.path));
+
+				if(path.equals(path2)) {
+					if(i > j) {
+						files.remove(j--);
+						continue;
+					}
+
+					files.remove(i--);
+					break;
+				}
+			}
+		}
+	}
+
+	private static List<String> getLines(List<String> lines, char character) {
+		final List<String> filtered = new TRLList<>();
+		for(String line : lines) {
+			if(line.startsWith(character + " ")) {
+				filtered.add(line);
+			}
+		}
+		return filtered;
+	}
+
+	private static String[] getData(String line) {
+		return StringUtils.splitWhitespace(line);
+	}
+
+	private static String join(String[] strings, int index) {
+		return ArrayUtils.join(ArrayUtils.subArray(strings, index), " ");
+	}
+
+	private static String getPathSafe(String path) {
+		return StringUtils.replaceAll(StringUtils.replaceAll(path, '*', 't'), '?', 't');
+	}
+
+	public static ExtendedCurseManifest parse(String manifest)
+			throws CurseException, IOException {
+		return parse(Paths.get(manifest));
+	}
+
+	public static ExtendedCurseManifest parse(Path manifest)
+			throws CurseException, IOException {
+		return new CAManifest(Files.readAllLines(manifest)).parse();
+	}
+
+	public static ExtendedCurseManifest parse(List<String> lines)
+			throws CurseException, IOException {
+		return new CAManifest(lines).parse();
 	}
 
 	private ExtendedCurseManifest parse() throws CurseException, IOException {
@@ -317,74 +473,6 @@ public class CAManifest {
 		}
 	}
 
-	private static List<String> getModAndFileLines(List<String> lines) {
-		final List<String> filtered = new TRLList<>();
-		for(String line : lines) {
-			boolean shouldAdd = true;
-			for(char character : NON_MOD_CHARACTERS) {
-				if(line.startsWith(character + " ")) {
-					shouldAdd = false;
-				}
-			}
-
-			if(shouldAdd) {
-				filtered.add(line);
-			}
-		}
-		return filtered;
-	}
-
-	private static void parseMarker(String line, char marker, BooleanWrapper client,
-			BooleanWrapper server, BooleanWrapper both, BooleanWrapper optional,
-			BooleanWrapper getDependencies)
-			throws ManifestParseException {
-		switch(marker) {
-		case Marker.CLIENT:
-			if(client.get() || server.get() || both.get()) {
-				throw new ManifestParseException(
-						"A mod or file definition may only have one side marker: " + line);
-			}
-
-			client.set(true);
-			break;
-		case Marker.SERVER:
-			if(client.get() || server.get() || both.get()) {
-				throw new ManifestParseException(
-						"A mod or file definition may only have one side marker: " + line);
-			}
-
-			server.set(true);
-			break;
-		case Marker.BOTH:
-			if(client.get() || server.get() || both.get()) {
-				throw new ManifestParseException(
-						"A mod or file definition may only have one side marker: " + line);
-			}
-
-			both.set(true);
-			break;
-
-		case Marker.OPTIONAL:
-			if(optional.get()) {
-				throw new ManifestParseException(
-						"A mod definition may only be marked as optional once: " + line);
-			}
-
-			optional.set(true);
-			break;
-		case Marker.GET_DEPENDENCIES:
-			if(getDependencies.get()) {
-				throw new ManifestParseException(
-						"A mod definition may only be marked to get dependencies once: " + line);
-			}
-
-			getDependencies.set(true);
-			break;
-		default:
-			throw new ManifestParseException("Invalid marker: " + marker);
-		}
-	}
-
 	private void parseModOrFileData(String line, String[] data, Side side, String[] groups,
 			boolean optional, boolean getDependencies) throws CurseException {
 		if(data.length == 0) {
@@ -395,7 +483,7 @@ public class CAManifest {
 		URL url = null;
 		try {
 			url = new URL(data[0]);
-		} catch(MalformedURLException ex) {}
+		} catch(MalformedURLException ignored) {}
 
 		final int projectID = url == null ? NumberUtils.parseInt(data[0], 0) : 0;
 		if(url != null || projectID != 0) {
@@ -432,53 +520,6 @@ public class CAManifest {
 		}
 
 		additionalFiles.add(new FileInfo(path, side));
-	}
-
-	private static FileInfo[] parseRelatedFiles(Side side, String[] data, String line)
-			throws ManifestParseException {
-		final List<FileInfo> relatedFiles = new TRLList<>();
-
-		final BooleanWrapper client = new BooleanWrapper();
-		final BooleanWrapper server = new BooleanWrapper();
-		final BooleanWrapper both = new BooleanWrapper();
-		final BooleanWrapper optional = new BooleanWrapper();
-		final BooleanWrapper getDependencies = new BooleanWrapper();
-
-		for(String element : data) {
-			if(element.length() > 1 && element.charAt(0) == Marker.CHARACTER) {
-				if(element.length() != 2) {
-					throw new ManifestParseException("Invalid marker: " + element.substring(1));
-				}
-
-				parseMarker(line, element.charAt(1), client, server, both, optional,
-						getDependencies);
-
-				if(optional.get() || getDependencies.get()) {
-					throw new ManifestParseException("Files cannot be defined as optional or " +
-							"marked to get dependencies: " + line);
-				}
-
-				side = Side.fromBooleans(client.get(), server.get(), both.get());
-
-				continue;
-			}
-
-			element = StringUtils.replaceAll(element, SPACE_PLACEHOLDER, ' ');
-
-			if(!IOUtils.isValidPath(getPathSafe(element))) {
-				throw new ManifestParseException("Invalid path: " + element);
-			}
-
-			relatedFiles.add(new FileInfo(element, side));
-
-			client.set(false);
-			server.set(false);
-			both.set(false);
-			optional.set(false);
-		}
-
-		removeDuplicateFiles(relatedFiles);
-		return relatedFiles.toArray(new FileInfo[0]);
 	}
 
 	private void convertURLs() throws CurseException {
@@ -518,9 +559,11 @@ public class CAManifest {
 			try {
 				//This can potentially slow down parsing because it's not multithreaded
 				projectID = CurseProject.fromURL(new URL(data[1])).id();
-			} catch(MalformedURLException ex) {}
+			} catch(MalformedURLException ignored) {}
 
-			projectID = NumberUtils.parseInt(data[1], 0);
+			if(projectID == 0) {
+				projectID = NumberUtils.parseInt(data[1], 0);
+			}
 
 			if(projectID < CurseAPI.MIN_PROJECT_ID) {
 				throw new ManifestParseException("\"%s\" is not a valid project ID or URL",
@@ -588,33 +631,6 @@ public class CAManifest {
 		}
 	}
 
-	private static void removeDuplicateFiles(List<FileInfo> files) {
-		for(int i = 0; i < files.size(); i++) {
-			final FileInfo file = files.get(i);
-
-			for(int j = 0; j < files.size(); j++) {
-				if(i == j) {
-					continue;
-				}
-
-				final FileInfo file2 = files.get(j);
-
-				final Path path = Paths.get(getPathSafe(file.path));
-				final Path path2 = Paths.get(getPathSafe(file2.path));
-
-				if(path.equals(path2)) {
-					if(i > j) {
-						files.remove(j--);
-						continue;
-					}
-
-					files.remove(i--);
-					break;
-				}
-			}
-		}
-	}
-
 	private void retrieveDependencies() throws CurseException {
 		final List<ModData> dependents =
 				mods.stream().filter(mod -> mod.getDependencies).collect(Collectors.toList());
@@ -644,12 +660,10 @@ public class CAManifest {
 					}
 
 					final Set<String> newGroups = new HashSet<>();
-					for(String group : mod.groups) {
-						newGroups.add(group);
-					}
-					for(String group : dependent.groups) {
-						newGroups.add(group);
-					}
+
+					newGroups.addAll(new ImmutableList<>(mod.groups));
+					newGroups.addAll(new ImmutableList<>(dependent.groups));
+
 					mod.groups = newGroups.toArray(new String[0]);
 
 					if(dependent.side != mod.side) {
@@ -659,6 +673,8 @@ public class CAManifest {
 					if(dependent.required != mod.required) {
 						mod.required = true;
 					}
+
+					break;
 				}
 
 				ModData mod = ids.get(id);
@@ -671,14 +687,10 @@ public class CAManifest {
 				}
 
 				final Set<String> newGroups = new HashSet<>();
-				for(String group : dependent.groups) {
-					newGroups.add(group);
-				}
-				if(mod.groups != null) {
-					for(String group : mod.groups) {
-						newGroups.add(group);
-					}
-				}
+
+				newGroups.addAll(new ImmutableList<>(dependent.groups));
+				newGroups.addAll(new ImmutableList<>(mod.groups));
+
 				mod.groups = newGroups.toArray(new String[0]);
 
 				if(mod.side != dependent.side) {
@@ -835,40 +847,15 @@ public class CAManifest {
 		return getLines(lines, character);
 	}
 
-	private static List<String> getLines(List<String> lines, char character) {
-		final List<String> filtered = new TRLList<>();
-		for(String line : lines) {
-			if(line.startsWith(character + " ")) {
-				filtered.add(line);
-			}
-		}
-		return filtered;
-	}
-
-	private static String[] getData(String line) {
-		return StringUtils.splitWhitespace(line);
-	}
-
-	private static String join(String[] strings, int index) {
-		return ArrayUtils.join(ArrayUtils.subArray(strings, index), " ");
-	}
-
-	private static String getPathSafe(String path) {
-		return StringUtils.replaceAll(StringUtils.replaceAll(path, '*', 't'), '?', 't');
-	}
-
-	public static ExtendedCurseManifest parse(String manifest)
-			throws CurseException, IOException {
-		return parse(Paths.get(manifest));
-	}
-
-	public static ExtendedCurseManifest parse(Path manifest)
-			throws CurseException, IOException {
-		return new CAManifest(Files.readAllLines(manifest)).parse();
-	}
-
-	public static ExtendedCurseManifest parse(List<String> lines)
-			throws CurseException, IOException {
-		return new CAManifest(lines).parse();
+	public static class ModData {
+		public int projectID;
+		public int fileID;
+		public Side side;
+		public boolean required;
+		public FileInfo[] relatedFiles;
+		public String[] groups;
+		public URL url;
+		public boolean isAlternative;
+		public boolean getDependencies;
 	}
 }

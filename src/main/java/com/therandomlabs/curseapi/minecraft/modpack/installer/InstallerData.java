@@ -1,12 +1,19 @@
 package com.therandomlabs.curseapi.minecraft.modpack.installer;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentHashMap.KeySetView;
 import com.therandomlabs.curseapi.util.CloneException;
 
 public final class InstallerData implements Cloneable, Serializable {
+	private static final long serialVersionUID = -2036469017004566167L;
+
+	public String minecraftVersion;
+	public String forgeVersion;
+	public Set<ModData> mods = ConcurrentHashMap.newKeySet();
+	public Set<String> installedFiles = ConcurrentHashMap.newKeySet();
+
 	public static class ModData implements Cloneable, Serializable {
 		private static final long serialVersionUID = -6045718265894030913L;
 
@@ -17,14 +24,11 @@ public final class InstallerData implements Cloneable, Serializable {
 
 		@Override
 		public ModData clone() {
-			final ModData data = new ModData();
+			try {
+				return (ModData) super.clone();
+			} catch(CloneNotSupportedException ignored) {}
 
-			data.projectID = projectID;
-			data.fileID = fileID;
-			data.location = location;
-			data.relatedFiles = relatedFiles;
-
-			return data;
+			return null;
 		}
 
 		@Override
@@ -39,31 +43,24 @@ public final class InstallerData implements Cloneable, Serializable {
 
 		@Override
 		public boolean equals(Object object) {
-			return object instanceof InstallerData ?
-					((InstallerData) object).hashCode() == hashCode() : false;
+			return object instanceof InstallerData && object.hashCode() == hashCode();
 		}
 	}
-
-	private static final long serialVersionUID = -2036469017004566167L;
-
-	public String minecraftVersion;
-	public String forgeVersion;
-	public Set<ModData> mods = ConcurrentHashMap.newKeySet();
-	public Set<String> installedFiles = ConcurrentHashMap.newKeySet();
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public InstallerData clone() {
-		final InstallerData data = new InstallerData();
+		try {
+			final InstallerData data = (InstallerData) super.clone();
 
-		data.minecraftVersion = minecraftVersion;
-		data.forgeVersion = forgeVersion;
-		data.mods = CloneException.tryDeepCloneKeySet(
-				(KeySetView<InstallerData.ModData, Boolean>) mods);
-		data.installedFiles = CloneException.tryCloneKeySet(
-				(KeySetView<String, Boolean>) installedFiles);
+			data.mods = CloneException.tryClone(mods).toHashSet();
+			data.installedFiles = new HashSet<>(installedFiles.size());
+			data.installedFiles.addAll(installedFiles); //TODO TRLUtils.clone(Set<E>)
 
-		return data;
+			return data;
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
 	}
 
 	@Override

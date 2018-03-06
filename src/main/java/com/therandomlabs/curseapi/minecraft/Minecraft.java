@@ -9,12 +9,12 @@ public final class Minecraft {
 
 	public static Path getDirectory() {
 		switch(Platform.getOS()) {
-		case WINDOWS:
-			return Paths.get(System.getenv("APPDATA"), ".minecraft");
-		case MAC_OS_X:
-			return Paths.get("~/Library/Application Support/minecraft");
-		default:
-			return Paths.get("~/.minecraft");
+			case WINDOWS:
+				return Paths.get(System.getenv("APPDATA"), ".minecraft");
+			case MAC_OS_X:
+				return Paths.get("~/Library/Application Support/minecraft");
+			default:
+				return Paths.get("~/.minecraft");
 		}
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLList;
 
-public class GroupInfo implements Cloneable, Serializable {
+public final class GroupInfo implements Cloneable, Serializable {
 	private static final long serialVersionUID = -571637128949272670L;
 
 	public String primary;
@@ -16,32 +16,6 @@ public class GroupInfo implements Cloneable, Serializable {
 	public GroupInfo(String primary, String[] alternatives) {
 		this.primary = primary;
 		this.alternatives = alternatives;
-	}
-
-	@Override
-	public GroupInfo clone() {
-		return new GroupInfo(primary, alternatives);
-	}
-
-	@Override
-	public String toString() {
-		return "[primary=\"" + primary + "\",alternatives=" + Arrays.toString(alternatives) + "]";
-	}
-
-	public TRLList<String> getOtherGroupNames(String toExclude) {
-		final TRLList<String> names = new TRLList<>(alternatives.length);
-
-		if(!primary.equals(toExclude)) {
-			names.add(primary);
-		}
-
-		for(String alternative : alternatives) {
-			if(!alternative.equals(toExclude)) {
-				names.add(alternative);
-			}
-		}
-
-		return names;
 	}
 
 	public static GroupInfo getGroup(Collection<GroupInfo> groups, String groupName) {
@@ -88,5 +62,35 @@ public class GroupInfo implements Cloneable, Serializable {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public GroupInfo clone() {
+		try {
+			return (GroupInfo) super.clone();
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "[primary=\"" + primary + "\",alternatives=" + Arrays.toString(alternatives) + "]";
+	}
+
+	public TRLList<String> getOtherGroupNames(String toExclude) {
+		final TRLList<String> names = new TRLList<>(alternatives.length);
+
+		if(!primary.equals(toExclude)) {
+			names.add(primary);
+		}
+
+		for(String alternative : alternatives) {
+			if(!alternative.equals(toExclude)) {
+				names.add(alternative);
+			}
+		}
+
+		return names;
 	}
 }

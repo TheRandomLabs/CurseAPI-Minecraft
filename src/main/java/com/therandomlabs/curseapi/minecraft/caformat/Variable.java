@@ -18,31 +18,21 @@ public class Variable {
 
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
-
-	static final List<Variable> variables = new TRLList<>();
-
 	public static final Variable NAME = new Variable("name",
 			"My Modpack",
 			name -> true,
-			(manifest, variables, value) -> {
-				manifest.name = value;
-			}
+			(manifest, variables, value) -> manifest.name = value
 	);
-
 	public static final Variable MINECRAFT = new Variable("minecraft",
 			MinecraftVersion.latest().toString(),
 			version -> MinecraftVersion.fromString(version) != null,
 			null //FORGE should set the Minecraft version as well
 	);
-
 	public static final Variable VERSION = new Variable("version",
 			MINECRAFT.defaultValue() + "-1.0.0.0",
 			version -> true,
-			(manifest, variables, value) -> {
-				manifest.version = value;
-			}
+			(manifest, variables, value) -> manifest.version = value
 	);
-
 	public static final Variable FORGE = new Variable("forge",
 			"latest",
 			version -> {
@@ -52,7 +42,7 @@ public class Variable {
 
 				try {
 					return MinecraftForge.isValidVersion(version);
-				} catch(CurseException | IOException ex) {}
+				} catch(CurseException | IOException ignored) {}
 
 				return false;
 			},
@@ -66,90 +56,59 @@ public class Variable {
 				}
 			}
 	);
-
 	public static final Variable MINIMUM_STABILITY = new Variable("minimum_stability",
 			ReleaseType.ALPHA.toString(),
 			releaseType -> ReleaseType.fromName(releaseType) != null,
 			null
 	);
-
 	public static final Variable AUTHOR = new Variable("author",
 			"Me",
 			author -> true,
-			(manifest, variables, value) -> {
-				manifest.author = value;
-			}
+			(manifest, variables, value) -> manifest.author = value
 	);
-
 	public static final Variable DESCRIPTION = new Variable("description",
 			"The coolest modpack!",
 			description -> true,
-			(manifest, variables, value) -> {
-				manifest.description = value;
-			}
+			(manifest, variables, value) -> manifest.description = value
 	);
-
 	public static final Variable PROJECT_ID = new Variable("project_id",
 			"0",
 			string -> {
 				final int id = NumberUtils.parseInt(string, 0);
 				return id == 0 || id >= CurseAPI.MIN_PROJECT_ID;
 			},
-			(manifest, variables, value) -> {
-				manifest.projectID = Integer.parseInt(value);
-			}
+			(manifest, variables, value) -> manifest.projectID = Integer.parseInt(value)
 	);
-
 	public static final Variable OPTIFINE = new Variable("optifine",
 			LATEST,
 			version -> true,
-			(manifest, variables, value) -> {
-				manifest.optifineVersion = value;
-			}
+			(manifest, variables, value) -> manifest.optifineVersion = value
 	);
-
 	public static final Variable MINIMUM_RAM = new Variable("minimum_ram",
 			"3072",
 			NumberUtils::isInteger,
-			(manifest, variables, value) -> {
-				manifest.minimumRam = Integer.parseInt(value);
-			}
+			(manifest, variables, value) -> manifest.minimumRam = Integer.parseInt(value)
 	);
-
 	public static final Variable RECOMMENDED_RAM = new Variable("recommended_ram",
 			"4096",
 			NumberUtils::isInteger,
-			(manifest, variables, value) -> {
-				manifest.recommendedRam = Integer.parseInt(value);
-			}
+			(manifest, variables, value) -> manifest.recommendedRam = Integer.parseInt(value)
 	);
-
 	public static final Variable MINIMUM_SERVER_RAM = new Variable("minimum_server_ram",
 			"2048",
 			NumberUtils::isInteger,
-			(manifest, variables, value) -> {
-				manifest.minimumServerRam = Integer.parseInt(value);
-			}
+			(manifest, variables, value) -> manifest.minimumServerRam = Integer.parseInt(value)
 	);
-
 	public static final Variable RECOMMENDED_SERVER_RAM = new Variable("recommended_server_ram",
 			"3072",
 			NumberUtils::isInteger,
-			(manifest, variables, value) -> {
-				manifest.recommendedServerRam = Integer.parseInt(value);
-			}
+			(manifest, variables, value) -> manifest.recommendedServerRam = Integer.parseInt(value)
 	);
-
+	static final List<Variable> variables = new TRLList<>();
 	private final String name;
 	private final String defaultValue;
 	private final Predicate<String> validator;
 	private final ApplyToManifest applyToManifest;
-
-	@FunctionalInterface
-	public interface ApplyToManifest {
-		void apply(ExtendedCurseManifest manifest, VariableMap variables, String value)
-				throws CurseException;
-	}
 
 	public Variable(String name, String defaultValue, Predicate<String> validator,
 			ApplyToManifest applyToManifest) {
@@ -161,9 +120,23 @@ public class Variable {
 		variables.add(this);
 	}
 
+	public static Variable fromName(String name) {
+		for(Variable variable : variables) {
+			if(variable.toString().equalsIgnoreCase(name)) {
+				return variable;
+			}
+		}
+
+		return null;
+	}
+
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public static Variable[] getVariables() {
+		return variables.toArray(new Variable[0]);
 	}
 
 	public String defaultValue() {
@@ -181,17 +154,9 @@ public class Variable {
 		}
 	}
 
-	public static Variable fromName(String name) {
-		for(Variable variable : variables) {
-			if(variable.toString().equalsIgnoreCase(name)) {
-				return variable;
-			}
-		}
-
-		return null;
-	}
-
-	public static Variable[] getVariables() {
-		return variables.toArray(new Variable[0]);
+	@FunctionalInterface
+	public interface ApplyToManifest {
+		void apply(ExtendedCurseManifest manifest, VariableMap variables, String value)
+				throws CurseException;
 	}
 }

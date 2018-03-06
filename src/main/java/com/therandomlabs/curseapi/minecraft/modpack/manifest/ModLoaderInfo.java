@@ -16,12 +16,11 @@ public final class ModLoaderInfo implements Cloneable, Serializable {
 
 	@Override
 	public ModLoaderInfo clone() {
-		final ModLoaderInfo info = new ModLoaderInfo();
+		try {
+			return (ModLoaderInfo) super.clone();
+		} catch(CloneNotSupportedException ignored) {}
 
-		info.id = id;
-		info.primary = primary;
-
-		return info;
+		return null;
 	}
 
 	@Override

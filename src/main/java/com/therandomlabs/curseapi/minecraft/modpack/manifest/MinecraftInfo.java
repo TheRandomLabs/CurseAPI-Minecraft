@@ -26,13 +26,13 @@ public final class MinecraftInfo implements Cloneable, Serializable {
 
 	@Override
 	public MinecraftInfo clone() {
-		final MinecraftInfo info = new MinecraftInfo();
+		try {
+			final MinecraftInfo info = (MinecraftInfo) super.clone();
+			info.modLoaders = CloneException.tryClone(modLoaders);
+			return info;
+		} catch(CloneNotSupportedException ignored) {}
 
-		info.version = version;
-		info.libraries = libraries;
-		info.modLoaders = CloneException.tryClone(modLoaders);
-
-		return info;
+		return null;
 	}
 
 	@Override

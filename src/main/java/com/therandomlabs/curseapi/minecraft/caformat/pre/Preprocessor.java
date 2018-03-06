@@ -7,22 +7,12 @@ import com.therandomlabs.utils.collection.TRLList;
 
 public abstract class Preprocessor {
 	public static final char CHARACTER = '#';
-
-	private static final List<Preprocessor> preprocessors = new TRLList<>();
-
 	public static final Preprocessor IMPORT = new PreprocessorImport();
+	private static final List<Preprocessor> preprocessors = new TRLList<>();
 
 	protected Preprocessor() {
 		preprocessors.add(this);
 	}
-
-	@Override
-	public abstract String toString();
-
-	public abstract boolean isValid(String value, String[] args);
-
-	public abstract List<String> apply(String value, String[] args)
-			throws CurseException, IOException;
 
 	public static Preprocessor fromName(String name) {
 		for(Preprocessor preprocessor : preprocessors) {
@@ -33,4 +23,12 @@ public abstract class Preprocessor {
 
 		return null;
 	}
+
+	@Override
+	public abstract String toString();
+
+	public abstract boolean isValid(String value, String[] args);
+
+	public abstract List<String> apply(String value, String[] args)
+			throws CurseException, IOException;
 }

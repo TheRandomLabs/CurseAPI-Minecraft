@@ -15,18 +15,6 @@ public class VariableMap extends HashMap<Variable, String> {
 		}
 	}
 
-	public String get(String variable) {
-		return get(Variable.fromName(variable));
-	}
-
-	public String put(String variableName, String value) {
-		final Variable variable = Variable.fromName(variableName);
-		if(variable == null) {
-			throw new IllegalArgumentException("Invalid variable: " + variableName);
-		}
-		return put(variable, value);
-	}
-
 	@Override
 	public String put(Variable variable, String value) {
 		if(variable == null || value == null) {
@@ -50,6 +38,14 @@ public class VariableMap extends HashMap<Variable, String> {
 		super.putAll(map);
 	}
 
+	public String put(String variableName, String value) {
+		final Variable variable = Variable.fromName(variableName);
+		if(variable == null) {
+			throw new IllegalArgumentException("Invalid variable: " + variableName);
+		}
+		return put(variable, value);
+	}
+
 	public MinecraftVersion mcVersion() {
 		return MinecraftVersion.fromString(get(Variable.MINECRAFT));
 	}
@@ -64,6 +60,10 @@ public class VariableMap extends HashMap<Variable, String> {
 
 	public int integer(String variable) {
 		return Integer.parseInt(get(variable));
+	}
+
+	public String get(String variable) {
+		return get(Variable.fromName(variable));
 	}
 
 	public int integer(Variable variable) {

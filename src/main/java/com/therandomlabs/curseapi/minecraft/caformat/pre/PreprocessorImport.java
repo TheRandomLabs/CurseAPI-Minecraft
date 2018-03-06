@@ -22,7 +22,7 @@ public class PreprocessorImport extends Preprocessor {
 	public static final String DARKCHOCOLATE = "darkchocolate";
 	public static final String DARKCHOCOLATE_URL =
 			"https://raw.githubusercontent.com/TheRandomLabs/LightChocolate/master/" +
-			"darkchocolate.txt";
+					"darkchocolate.txt";
 
 	PreprocessorImport() {}
 
