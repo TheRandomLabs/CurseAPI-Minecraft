@@ -36,6 +36,7 @@ public final class ManifestComparer {
 	private static final int ACTUALLY_ADDITIONS_ID = 228404;
 	private static final String ACTUALLY_ADDITIONS_CHANGELOG = "https://raw." +
 			"githubusercontent.com/Ellpeck/ActuallyAdditions/master/update/changelog.md";
+
 	private ManifestComparer() {}
 
 	public static Results compare(ExtendedCurseManifest oldManifest,
@@ -675,10 +676,12 @@ public final class ManifestComparer {
 			final String owner = project.owner().username();
 
 			if(owner.equals("TeamCoFH")) {
-				final Map<String, String> changelog = getCoFHChangelog(oldFile, newFile, urls);
-				if(changelog != null) {
-					return changelog;
-				}
+				try {
+					final Map<String, String> changelog = getCoFHChangelog(oldFile, newFile, urls);
+					if(changelog != null) {
+						return changelog;
+					}
+				} catch(ArrayIndexOutOfBoundsException ignored) {}
 			}
 
 			if(owner.equals("zmaster587") || newFile.uploader().equals("mezz")) {

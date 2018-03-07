@@ -101,6 +101,7 @@ public final class CAManifest {
 			Postprocessor.CHARACTER,
 			REMOVE_PROJECT
 	);
+
 	private final VariableMap variables = new VariableMap();
 	private final List<GroupInfo> groups = new TRLList<>();
 	private final List<ModData> mods = new TRLList<>();

@@ -12,6 +12,7 @@ import com.therandomlabs.utils.concurrent.ThreadUtils;
 
 public final class CurseManifest implements Cloneable, Serializable {
 	private static final long serialVersionUID = -8163938330549340465L;
+
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 	public String name;
@@ -59,7 +60,7 @@ public final class CurseManifest implements Cloneable, Serializable {
 	}
 
 	public String toPrettyJsonWithTabs() {
-		return toPrettyJson().replaceAll(" [2]", "\t");
+		return toPrettyJson().replaceAll(" {2}", "\t");
 	}
 
 	public String toPrettyJson() {

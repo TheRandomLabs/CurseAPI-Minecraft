@@ -9,8 +9,10 @@ import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
-	public static final String UNKNOWN_NAME = "Unknown Name";
 	private static final long serialVersionUID = -3120215335212824363L;
+
+	public static final String UNKNOWN_NAME = "Unknown Name";
+
 	public String title = UNKNOWN_NAME;
 	public int projectID;
 	public int fileID;

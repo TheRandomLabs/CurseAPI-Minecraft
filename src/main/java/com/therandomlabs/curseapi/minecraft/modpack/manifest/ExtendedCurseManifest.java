@@ -243,7 +243,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	}
 
 	public String toPrettyJsonWithTabs() {
-		return toPrettyJson().replaceAll(" [2]", "\t");
+		return toPrettyJson().replaceAll(" {2}", "\t");
 	}
 
 	public String toPrettyJson() {
