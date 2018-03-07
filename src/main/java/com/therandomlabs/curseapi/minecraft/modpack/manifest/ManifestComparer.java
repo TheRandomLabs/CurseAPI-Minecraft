@@ -352,18 +352,19 @@ public final class ManifestComparer {
 		return changelog;
 	}
 
-	static String getChangelogByComparison(CurseFile oldFile, CurseFile newFile, boolean url)
-			throws CurseException {
+	static String getChangelogByComparison(CurseFile oldFile, CurseFile newFile, int startLine,
+			boolean url) throws CurseException {
 		if(url) {
 			return newFile.urlString();
 		}
 
-		String changelog = newFile.changelog().replace(oldFile.changelog(), "");
-		while(changelog.endsWith("\r") || changelog.endsWith("\n")) {
-			changelog = StringUtils.removeLastChar(changelog);
-		}
+		String[] oldChangelogLines = StringUtils.splitNewline(oldFile.changelog());
+		oldChangelogLines = ArrayUtils.subArray(oldChangelogLines, startLine);
 
-		return changelog;
+		final String oldChangelog = ArrayUtils.join(oldChangelogLines, System.lineSeparator());
+
+		final String changelog = newFile.changelog().replace(oldChangelog, "");
+		return StringUtils.removeLastChars(changelog, System.lineSeparator().length());
 	}
 
 	public static class Results implements Serializable {
@@ -662,7 +663,7 @@ public final class ManifestComparer {
 			final CurseFile oldFile = isDowngrade() ? getNewFile() : getOldFile();
 			final CurseFile newFile = isDowngrade() ? getOldFile() : getNewFile();
 
-			final CurseFileList files = getChangelogFiles();
+			CurseFileList files = getChangelogFiles();
 			final Map<String, String> changelogs = new LinkedHashMap<>(files.size());
 
 			if(id == BIOMES_O_PLENTY_ID) {
@@ -684,8 +685,13 @@ public final class ManifestComparer {
 				} catch(ArrayIndexOutOfBoundsException ignored) {}
 			}
 
-			if(owner.equals("zmaster587") || newFile.uploader().equals("mezz")) {
-				final String changelog = getChangelogByComparison(oldFile, newFile, urls);
+			final boolean zmaster = owner.equals("zmaster587");
+			if((zmaster &&
+					getOldFileName().contains("-UNSTABLE") &&
+					getNewFileName().contains("-UNSTABLE")) ||
+					newFile.uploader().equals("mezz")) {
+				final String changelog =
+						getChangelogByComparison(oldFile, newFile, zmaster ? 3 : 2, urls);
 				if(urls) {
 					changelogs.put(VIEW_CHANGELOG_AT, changelog);
 				} else {
