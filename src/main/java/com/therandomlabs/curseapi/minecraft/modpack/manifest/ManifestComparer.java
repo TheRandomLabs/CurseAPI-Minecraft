@@ -352,21 +352,6 @@ public final class ManifestComparer {
 		return changelog;
 	}
 
-	static String getChangelogByComparison(CurseFile oldFile, CurseFile newFile, int startLine,
-			boolean url) throws CurseException {
-		if(url) {
-			return newFile.urlString();
-		}
-
-		String[] oldChangelogLines = StringUtils.splitNewline(oldFile.changelog());
-		oldChangelogLines = ArrayUtils.subArray(oldChangelogLines, startLine);
-
-		final String oldChangelog = ArrayUtils.join(oldChangelogLines, System.lineSeparator());
-
-		final String changelog = newFile.changelog().replace(oldChangelog, "");
-		return StringUtils.removeLastChars(changelog, System.lineSeparator().length());
-	}
-
 	public static class Results implements Serializable {
 		private static final long serialVersionUID = 3470798086960813569L;
 
@@ -685,21 +670,7 @@ public final class ManifestComparer {
 				} catch(ArrayIndexOutOfBoundsException ignored) {}
 			}
 
-			final boolean zmaster = owner.equals("zmaster587");
-			if((zmaster &&
-					getOldFileName().contains("-UNSTABLE") &&
-					getNewFileName().contains("-UNSTABLE")) ||
-					newFile.uploader().equals("mezz")) {
-				final String changelog =
-						getChangelogByComparison(oldFile, newFile, zmaster ? 3 : 2, urls);
-				if(urls) {
-					changelogs.put(VIEW_CHANGELOG_AT, changelog);
-				} else {
-					changelogs.put("Retrieved from " + getOldFileName() + " and " +
-							getNewFileName() + "'s changelogs", changelog);
-				}
-				return changelogs;
-			}
+			//TODO mezz, zmaster587
 
 			if(owner.equals("bre2el")) {
 				return getBre2elChangelog(oldFile, newFile, urls);
