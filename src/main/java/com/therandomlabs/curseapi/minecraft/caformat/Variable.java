@@ -1,8 +1,5 @@
 package com.therandomlabs.curseapi.minecraft.caformat;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.function.Predicate;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.ReleaseType;
@@ -13,11 +10,18 @@ import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.number.NumberUtils;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Predicate;
+
 public class Variable {
 	public static final char CHARACTER = '$';
 
+	static final List<Variable> variables = new TRLList<>();
+
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
+
 	public static final Variable NAME = new Variable("name",
 			"My Modpack",
 			name -> true,
@@ -104,7 +108,7 @@ public class Variable {
 			NumberUtils::isInteger,
 			(manifest, variables, value) -> manifest.recommendedServerRam = Integer.parseInt(value)
 	);
-	static final List<Variable> variables = new TRLList<>();
+
 	private final String name;
 	private final String defaultValue;
 	private final Predicate<String> validator;

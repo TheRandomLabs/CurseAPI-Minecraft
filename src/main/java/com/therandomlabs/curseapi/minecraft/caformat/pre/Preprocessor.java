@@ -7,8 +7,10 @@ import com.therandomlabs.utils.collection.TRLList;
 
 public abstract class Preprocessor {
 	public static final char CHARACTER = '#';
-	public static final Preprocessor IMPORT = new PreprocessorImport();
+
 	private static final List<Preprocessor> preprocessors = new TRLList<>();
+
+	public static final Preprocessor IMPORT = new PreprocessorImport();
 
 	protected Preprocessor() {
 		preprocessors.add(this);

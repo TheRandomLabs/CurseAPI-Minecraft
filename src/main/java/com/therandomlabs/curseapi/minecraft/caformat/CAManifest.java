@@ -853,7 +853,7 @@ public final class CAManifest {
 		public Side side;
 		public boolean required;
 		public FileInfo[] relatedFiles;
-		public String[] groups;
+		public String[] groups = new String[0];
 		public URL url;
 		public boolean isAlternative;
 		public boolean getDependencies;

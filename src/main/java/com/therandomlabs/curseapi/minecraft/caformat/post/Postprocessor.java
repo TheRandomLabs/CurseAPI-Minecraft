@@ -7,6 +7,9 @@ import com.therandomlabs.utils.collection.TRLList;
 
 public abstract class Postprocessor {
 	public static final char CHARACTER = '*';
+
+	private static final List<Postprocessor> postprocessors = new TRLList<>();
+
 	public static final Postprocessor NEWER_THAN =
 			new PostprocessorVersion(">", result -> result > 0);
 	public static final Postprocessor NEWER_THAN_OR_EQUAL_TO =
@@ -20,7 +23,7 @@ public abstract class Postprocessor {
 	public static final Postprocessor EQUAL_TO_VERSION_GROUP =
 			new PostprocessorVersionGroup();
 
-	private static final List<Postprocessor> postprocessors = new TRLList<>();
+
 
 	protected Postprocessor() {
 		postprocessors.add(this);
