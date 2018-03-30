@@ -60,6 +60,7 @@ public final class ModpackInstaller {
 	private final HashSet<String> extensionsWithVariables = new HashSet<>();
 	private final HashSet<Integer> excludedProjects = new HashSet<>();
 	private final HashSet<String> excludedPaths = new HashSet<>();
+
 	private Path installDir = Minecraft.getDirectory();
 	private Path installerData = Paths.get("ca_modpack_data.json");
 	private boolean redownloadMods;
@@ -356,7 +357,7 @@ public final class ModpackInstaller {
 
 		copyFiles(modpack.resolve(manifest.overrides), manifest);
 
-		finish();
+		finish(manifest);
 	}
 
 	public void installFromManifest(URL url) throws CurseException, IOException {
@@ -388,13 +389,10 @@ public final class ModpackInstaller {
 				break;
 		}
 
-		//TODO test
-		manifest.preferGroups(preferredGroups);
-
 		deleteOldFiles(manifest);
 		downloadMods(manifest);
 
-		finish();
+		finish(manifest);
 	}
 
 	private void initialize() throws IOException {
@@ -491,7 +489,6 @@ public final class ModpackInstaller {
 			//Deleting related files
 			for(String relatedFile : mod.relatedFiles) {
 				//Match wildcards (*, ?)
-				//TODO fix StringIndexOutOfBoundsException here
 				try(DirectoryStream<Path> stream =
 							NIOUtils.getDirectoryStream(installDir, relatedFile)) {
 					final Wrapper<IOException> exception = new Wrapper<>();
@@ -550,13 +547,13 @@ public final class ModpackInstaller {
 		}
 	}
 
-	private void finish() throws IOException {
+	private void finish(ExtendedCurseManifest manifest) throws IOException {
 		if(!shouldFinish) {
 			return;
 		}
 
-
-		//TODO copy minified manifest.json
+		//Copy manifest.json to installDir
+		manifest.writeToMinified(installDir.resolve("manifest.json"));
 
 		//Remove empty directories - most of them are probably left over from previous
 		//modpack versions
@@ -637,6 +634,7 @@ public final class ModpackInstaller {
 		oldData.mods.removeAll(modsToKeep);
 		//Remove deleted mods from oldData so deleteOldFiles doesn't try to delete them
 		oldData.mods.removeAll(deletedMods);
+
 		//Remove from modpack so they aren't redownloaded
 		removeModsFromManifest(manifest, modsToKeep);
 	}

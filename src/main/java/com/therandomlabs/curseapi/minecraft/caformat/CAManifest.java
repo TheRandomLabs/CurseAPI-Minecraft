@@ -7,11 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
@@ -26,7 +23,6 @@ import com.therandomlabs.curseapi.minecraft.caformat.post.Postprocessor;
 import com.therandomlabs.curseapi.minecraft.caformat.pre.Preprocessor;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
-import com.therandomlabs.curseapi.minecraft.modpack.manifest.GroupInfo;
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.Relation;
@@ -54,14 +50,10 @@ import com.therandomlabs.utils.wrapper.BooleanWrapper;
  *
  * Lines are pruned again
  *
- * Groups are parsed
- *
  * Mods and additional files are parsed
  * - Filter out all of the other characters - variable, preprocessor, group, remove project,
  *     postprocessor
  * - Mod data stored in a private ModData class
- *   - Boolean 'isAlternative' - defines whether it should be stored in alternativeMods or files
- *     - This is calculated later
  *   - Side should determine whether it should be stored in files or serverOnlyMods
  * - Additional files are stored as FileInfos
  *
@@ -73,7 +65,6 @@ import com.therandomlabs.utils.wrapper.BooleanWrapper;
  *   - e.g. LC has LunatriusCore, DC removes it, but another pack using DC might want it again
  * - Duplicates are removed
  * - Dependencies are retrieved
- * - Groups are checked
  *
  * Postprocessors are run
  *
@@ -86,16 +77,11 @@ import com.therandomlabs.utils.wrapper.BooleanWrapper;
  *
  * Manifest is created
  * - Variable.apply is called for each variable
- * - Mods are put into files, serverOnlyMods and alternativeMods
+ * - Mods are put into files and serverOnlyMods
  * - Additional files
  * - ExtendedCurseManifest.sort
  */
 public final class CAManifest {
-	// [ Primary Mod Group ] [ Some Other Mod That Does Something Similar ]
-	public static final char GROUP_DEFINER_OPENER = '[';
-	public static final char GROUP_DEFINER_CLOSER = ']';
-	public static final char GROUP_MARKER = ';';
-
 	public static final String COMMENT = "//";
 	public static final char COMMENT_CHARACTER = ':';
 
@@ -106,17 +92,14 @@ public final class CAManifest {
 	public static final TRLList<Character> NON_MOD_CHARACTERS = new ImmutableList<>(
 			Variable.CHARACTER,
 			Preprocessor.CHARACTER,
-			GROUP_DEFINER_OPENER,
 			Postprocessor.CHARACTER,
 			REMOVE_PROJECT
 	);
 
 	private final VariableMap variables = new VariableMap();
-	private final List<GroupInfo> groups = new TRLList<>();
 	private final List<ModData> mods = new TRLList<>();
 	private final List<Mod> files = new TRLList<>();
 	private final List<Mod> serverOnlyMods = new TRLList<>();
-	private final List<Mod> alternativeMods = new TRLList<>();
 	private final List<FileInfo> additionalFiles = new TRLList<>();
 	private List<String> lines;
 
@@ -309,7 +292,6 @@ public final class CAManifest {
 
 		parseVariables();
 		parsePreprocessors();
-		parseGroups();
 
 		parseModsAndFiles(lines);
 
@@ -319,8 +301,6 @@ public final class CAManifest {
 		removeDuplicateFiles(additionalFiles);
 
 		retrieveDependencies();
-
-		checkGroups();
 
 		parsePostprocessors(lines);
 
@@ -384,73 +364,11 @@ public final class CAManifest {
 		return filtered;
 	}
 
-	private void parseGroups() throws CurseException {
-		for(String line : getLines(GROUP_DEFINER_OPENER)) {
-			final String[] data = getData(line);
-
-			final Set<String> groupNames = new LinkedHashSet<>();
-			final StringBuilder groupName = new StringBuilder();
-
-			boolean needsOpener = false;
-
-			for(String element : data) {
-				if(needsOpener) {
-					if(element.equals(String.valueOf(GROUP_DEFINER_OPENER))) {
-						needsOpener = false;
-					}
-					continue;
-				}
-
-				if(element.equals(String.valueOf(GROUP_DEFINER_CLOSER))) {
-					if(groupName.length() != 0) {
-						groupNames.add(StringUtils.removeLastChar(groupName.toString()).trim());
-						groupName.setLength(0);
-					}
-
-					needsOpener = true;
-				}
-
-				groupName.append(element).append(' ');
-			}
-
-			if(groupName.length() != 0) {
-				throw new ManifestParseException("Group definition closer (%s) is required: %s",
-						GROUP_DEFINER_CLOSER, line);
-			}
-
-			if(groupNames.size() < 2) {
-				throw new ManifestParseException("At least one alternative must be defined for " +
-						"each group: " + line);
-			}
-
-			for(String name : groupNames) {
-				if(GroupInfo.hasGroup(groups, name)) {
-					throw new ManifestParseException("Duplicate group definition: " + name);
-				}
-			}
-
-			final TRLList<String> list = new TRLList<>(groupNames);
-			final GroupInfo group =
-					new GroupInfo(list.get(0), list.subList(1).toArray(new String[0]));
-			groups.add(group);
-		}
-	}
-
 	private void parseModsAndFiles(List<String> lines) throws CurseException {
 		lines = getModAndFileLines(lines);
-		String[] groups = new String[0];
 
 		for(String line : lines) {
 			String[] data = getData(line);
-
-			//Group marker
-			if(data[0].equals(String.valueOf(GROUP_MARKER))) {
-				groups = StringUtils.split(join(data, 1), (GROUP_MARKER));
-				for(int i = 0; i < groups.length; i++) {
-					groups[i] = groups[i].trim();
-				}
-				continue;
-			}
 
 			//Parse markers
 
@@ -479,12 +397,12 @@ public final class CAManifest {
 			data = ArrayUtils.subArray(data, i);
 
 			//Parse mod/file data
-			parseModOrFileData(line, data, side, groups, optional.get(), getDependencies.get());
+			parseModOrFileData(line, data, side, optional.get(), getDependencies.get());
 		}
 	}
 
-	private void parseModOrFileData(String line, String[] data, Side side, String[] groups,
-			boolean optional, boolean getDependencies) throws CurseException {
+	private void parseModOrFileData(String line, String[] data, Side side, boolean optional,
+			boolean getDependencies) throws CurseException {
 		if(data.length == 0) {
 			throw new ManifestParseException("A project ID, URL or file path must be specified: " +
 					line);
@@ -508,7 +426,6 @@ public final class CAManifest {
 			mod.required = !optional;
 			mod.relatedFiles =
 					parseRelatedFiles(side, ArrayUtils.subArray(data, relatedFilesIndex), line);
-			mod.groups = groups;
 			mod.url = url;
 			mod.getDependencies = getDependencies;
 
@@ -607,18 +524,7 @@ public final class CAManifest {
 				final ModData mod2 = mods.get(j);
 
 				if(mod.projectID == mod2.projectID) {
-					//Prefer whichever one has a group, then the newer version, then the latest
-					//definition
-					if(mod.groups.length != 0 && mod2.groups.length == 0) {
-						mods.remove(j--);
-						continue;
-					}
-
-					if(mod.groups.length == 0 && mod2.groups.length != 0) {
-						mods.remove(i--);
-						break;
-					}
-
+					//Prefer the newer version, then the latest definition
 					if(mod.fileID > mod2.fileID) {
 						mods.remove(j--);
 						continue;
@@ -664,18 +570,6 @@ public final class CAManifest {
 						continue;
 					}
 
-					//If it doesn't have a group, it should always be in files, not alternativeMods
-					if(mod.groups.length == 0) {
-						continue;
-					}
-
-					final Set<String> newGroups = new HashSet<>();
-
-					newGroups.addAll(new ImmutableList<>(mod.groups));
-					newGroups.addAll(new ImmutableList<>(dependent.groups));
-
-					mod.groups = newGroups.toArray(new String[0]);
-
 					if(dependent.side != mod.side) {
 						mod.side = Side.BOTH;
 					}
@@ -696,13 +590,6 @@ public final class CAManifest {
 					ids.put(id, mod);
 				}
 
-				final Set<String> newGroups = new HashSet<>();
-
-				newGroups.addAll(new ImmutableList<>(dependent.groups));
-				newGroups.addAll(new ImmutableList<>(mod.groups));
-
-				mod.groups = newGroups.toArray(new String[0]);
-
 				if(mod.side != dependent.side) {
 					mod.side = Side.BOTH;
 				}
@@ -714,24 +601,6 @@ public final class CAManifest {
 		});
 
 		mods.addAll(ids.values());
-	}
-
-	private void checkGroups() throws CurseException {
-		for(ModData mod : mods) {
-			for(String group : mod.groups) {
-				if(group.isEmpty()) {
-					throw new ManifestParseException("Group may not be empty");
-				}
-
-				if(!GroupInfo.hasGroup(groups, group)) {
-					throw new ManifestParseException("Invalid group: " + group);
-				}
-
-				if(!GroupInfo.isPrimary(groups, group)) {
-					mod.isAlternative = true;
-				}
-			}
-		}
 	}
 
 	private void parsePostprocessors(List<String> lines) throws CurseException {
@@ -774,7 +643,6 @@ public final class CAManifest {
 			mod.side = modData.side;
 			mod.required = modData.required;
 			mod.relatedFiles = modData.relatedFiles;
-			mod.groups = modData.groups;
 
 			final CurseProject project = CurseProject.fromID(mod.projectID);
 
@@ -793,14 +661,10 @@ public final class CAManifest {
 			mod.title = project.title();
 			mod.url = project.fileWithID(mod.fileID).fileURL();
 
-			if(modData.isAlternative) {
-				alternativeMods.add(mod);
+			if(mod.side == Side.SERVER) {
+				serverOnlyMods.add(mod);
 			} else {
-				if(mod.side == Side.SERVER) {
-					serverOnlyMods.add(mod);
-				} else {
-					files.add(mod);
-				}
+				files.add(mod);
 			}
 		});
 	}
@@ -814,8 +678,6 @@ public final class CAManifest {
 		manifest.description = variables.get("description");
 		manifest.files = files.toArray(new Mod[0]);
 		manifest.serverOnlyMods = serverOnlyMods.toArray(new Mod[0]);
-		manifest.alternativeMods = alternativeMods.toArray(new Mod[0]);
-		manifest.groups = groups.toArray(new GroupInfo[0]);
 		manifest.additionalFiles = additionalFiles.toArray(new FileInfo[0]);
 
 		final MinecraftVersion mcVersion = variables.mcVersion();
@@ -861,9 +723,7 @@ public final class CAManifest {
 		public Side side;
 		public boolean required;
 		public FileInfo[] relatedFiles;
-		public String[] groups = new String[0];
 		public URL url;
-		public boolean isAlternative;
 		public boolean getDependencies;
 	}
 }

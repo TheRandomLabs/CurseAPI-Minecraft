@@ -44,9 +44,7 @@ public final class ManifestComparer {
 	public static Results compare(ExtendedCurseManifest oldManifest,
 			ExtendedCurseManifest newManifest) throws CurseException, IOException {
 		oldManifest.both();
-		oldManifest.moveAlternativeModsToFiles();
 		newManifest.both();
-		newManifest.moveAlternativeModsToFiles();
 
 		final TRLList<Mod> unchanged = new TRLList<>();
 		final TRLList<VersionChange> updated = new TRLList<>();
@@ -692,7 +690,7 @@ public final class ManifestComparer {
 				} catch(ArrayIndexOutOfBoundsException ignored) {}
 			}
 
-			//TODO mezz, zmaster587
+			//TODO mezz, zmaster587, IC2
 
 			if(owner.equals("bre2el")) {
 				return getBre2elChangelog(oldFile, newFile, urls);

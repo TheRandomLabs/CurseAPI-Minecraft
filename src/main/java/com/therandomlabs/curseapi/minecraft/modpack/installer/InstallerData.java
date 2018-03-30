@@ -43,7 +43,7 @@ public final class InstallerData implements Cloneable, Serializable {
 
 		@Override
 		public boolean equals(Object object) {
-			return object instanceof InstallerData && object.hashCode() == hashCode();
+			return object instanceof ModData && object.hashCode() == hashCode();
 		}
 	}
 

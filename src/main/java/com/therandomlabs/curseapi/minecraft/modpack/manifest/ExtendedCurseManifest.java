@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,11 +15,9 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.curseapi.util.MiscUtils;
-import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 
-//TODO rewrite group system
 public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	private static final long serialVersionUID = 6601285145733232922L;
 
@@ -30,8 +29,6 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public String description;
 	public Mod[] files;
 	public Mod[] serverOnlyMods = new Mod[0];
-	public Mod[] alternativeMods = new Mod[0];
-	public GroupInfo[] groups = new GroupInfo[0];
 	public FileInfo[] additionalFiles = new FileInfo[0];
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
@@ -86,10 +83,6 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 
 			manifest.files = CloneException.tryClone(files);
 			manifest.serverOnlyMods = CloneException.tryClone(serverOnlyMods);
-			manifest.alternativeMods = CloneException.tryClone(alternativeMods);
-			if(groups != null) {
-				manifest.groups = CloneException.tryClone(groups);
-			}
 			manifest.additionalFiles = CloneException.tryClone(additionalFiles);
 			manifest.minecraft = minecraft.clone();
 
@@ -102,12 +95,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public void sort() {
 		Arrays.sort(files);
 		Arrays.sort(serverOnlyMods);
-		Arrays.sort(alternativeMods);
 		Arrays.sort(additionalFiles);
-	}
-
-	public String toJson() {
-		return new Gson().toJson(this);
 	}
 
 	public boolean containsMod(int projectID, int fileID) {
@@ -148,68 +136,6 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		moveServerOnlyModsToFiles();
 	}
 
-	public void preferGroups(String... groups) {
-		preferGroups(new ImmutableList<>(groups));
-	}
-
-	public void preferGroups(Collection<String> groupNames) {
-		final Map<String, GroupInfo> groups = getGroups(groupNames);
-
-		final List<Mod> moveFiles = new TRLList<>();
-		final List<Mod> moveAlternatives = new TRLList<>();
-
-		for(Mod mod : files) {
-			for(String groupName : mod.groups) {
-				if(groupNames.contains(groupName)) {
-					continue;
-				}
-
-				final Map.Entry<String, GroupInfo> group = GroupInfo.getGroup(groups, groupName);
-				if(group == null) {
-					continue;
-				}
-
-				//group.getKey is the preferred group name
-				//group.getValue is the GroupInfo
-				final List<String> otherGroupNames =
-						group.getValue().getOtherGroupNames(group.getKey());
-				if(otherGroupNames.contains(groupName)) {
-					//This mod should be moved
-					moveFiles.add(mod);
-				}
-			}
-		}
-
-		for(Mod mod : alternativeMods) {
-			for(String groupName : mod.groups) {
-				if(groupNames.contains(groupName)) {
-					moveAlternatives.add(mod);
-				}
-			}
-		}
-
-		final List<Mod> fileList = new TRLList<>(files);
-		fileList.addAll(moveAlternatives);
-		fileList.removeAll(moveFiles);
-		files = fileList.toArray(new Mod[0]);
-
-		final List<Mod> alternativesList = new TRLList<>(alternativeMods);
-		alternativesList.addAll(moveFiles);
-		alternativesList.removeAll(moveAlternatives);
-		alternativeMods = alternativesList.toArray(new Mod[0]);
-	}
-
-	public Map<String, GroupInfo> getGroups(Collection<String> groupNames) {
-		final Map<String, GroupInfo> groups = new HashMap<>(groupNames.size());
-		for(String name : groupNames) {
-			final GroupInfo group = GroupInfo.getGroup(this.groups, name);
-			if(group != null) {
-				groups.put(name, group);
-			}
-		}
-		return groups;
-	}
-
 	public TRLList<Mod> getOptionalMods() {
 		final TRLList<Mod> mods = new TRLList<>();
 		for(Mod mod : files) {
@@ -218,12 +144,6 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 			}
 		}
 		return mods;
-	}
-
-	public void moveAlternativeModsToFiles() {
-		final TRLList<Mod> files = new TRLList<>(this.files);
-		files.addAll(alternativeMods);
-		this.files = files.toArray(new Mod[0]);
 	}
 
 	public TRLList<String> getExcludedPaths(Side side) {
@@ -242,11 +162,19 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		NIOUtils.write(path, toPrettyJsonWithTabs(), true);
 	}
 
-	public String toPrettyJsonWithTabs() {
-		return toPrettyJson().replaceAll(" {2}", "\t");
+	public void writeToMinified(Path path) throws IOException {
+		NIOUtils.write(path, toJson(), true);
+	}
+
+	public String toJson() {
+		return new Gson().toJson(this);
 	}
 
 	public String toPrettyJson() {
 		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+	}
+
+	public String toPrettyJsonWithTabs() {
+		return toPrettyJson().replaceAll(" {2}", "\t");
 	}
 }
