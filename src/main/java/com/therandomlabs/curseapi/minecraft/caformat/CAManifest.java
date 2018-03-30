@@ -6,13 +6,22 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.curseforge.CurseForge;
-import com.therandomlabs.curseapi.file.CurseFileList;
-import com.therandomlabs.curseapi.minecraft.*;
+import com.therandomlabs.curseapi.file.CurseFile;
+import com.therandomlabs.curseapi.minecraft.FileInfo;
+import com.therandomlabs.curseapi.minecraft.MCEventHandling;
+import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
+import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.caformat.post.Postprocessor;
 import com.therandomlabs.curseapi.minecraft.caformat.pre.Preprocessor;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
@@ -770,17 +779,15 @@ public final class CAManifest {
 			final CurseProject project = CurseProject.fromID(mod.projectID);
 
 			if(mod.fileID == 0) {
-				final CurseFileList files = project.files();
+				final CurseFile file = project.latestFile(variables.minimumStability(),
+						variables.mcVersionGroup());
 
-				files.filterVersions(variables.mcVersionGroup());
-				files.filterMinimumStability(variables.minimumStability());
-
-				if(files.isEmpty()) {
+				if(file == null) {
 					MCEventHandling.forEach(handler -> handler.noFilesFound(mod.projectID));
 					return;
 				}
 
-				mod.fileID = files.get(0).id();
+				mod.fileID = file.id();
 			}
 
 			mod.title = project.title();

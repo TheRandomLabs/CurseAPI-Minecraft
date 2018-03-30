@@ -491,6 +491,7 @@ public final class ModpackInstaller {
 			//Deleting related files
 			for(String relatedFile : mod.relatedFiles) {
 				//Match wildcards (*, ?)
+				//TODO fix StringIndexOutOfBoundsException here
 				try(DirectoryStream<Path> stream =
 							NIOUtils.getDirectoryStream(installDir, relatedFile)) {
 					final Wrapper<IOException> exception = new Wrapper<>();
@@ -553,6 +554,9 @@ public final class ModpackInstaller {
 		if(!shouldFinish) {
 			return;
 		}
+
+
+		//TODO copy minified manifest.json
 
 		//Remove empty directories - most of them are probably left over from previous
 		//modpack versions

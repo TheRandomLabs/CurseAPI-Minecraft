@@ -1,5 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -21,6 +22,7 @@ import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.ImmutableMap;
+import com.therandomlabs.utils.collection.ImmutableSet;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.io.IOConstants;
@@ -461,6 +463,7 @@ public final class ManifestComparer {
 		private transient CurseProject project;
 		private transient CurseFile oldFile;
 		private transient CurseFile newFile;
+		private transient CurseFileList files;
 
 		VersionChange(String mcVersion, Mod oldMod, Mod newMod) {
 			this.mcVersion = mcVersion;
@@ -492,8 +495,18 @@ public final class ManifestComparer {
 
 			final List<String> list = new TRLList<>(toPreload);
 
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(), index ->
-					DocumentUtils.get(list.get(index)));
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(),
+					index -> {
+						try {
+							DocumentUtils.get(list.get(index));
+						} catch(CurseException ex) {
+							//FileNotFoundException occurs if a file is archived
+							if(!(ex.getCause() instanceof FileNotFoundException)) {
+								throw ex;
+							}
+						}
+					}
+			);
 
 			final Map<VersionChange, Map<String, String>> changelogs =
 					new LinkedHashMap<>(versionChanges.size());
@@ -516,6 +529,10 @@ public final class ManifestComparer {
 			return oldFile;
 		}
 
+		public CurseFile getOlderFile() throws CurseException {
+			return isDowngrade() ? getNewFile() : getOldFile();
+		}
+
 		public String getOldFileName() throws CurseException {
 			return isOldFileArchived() ? ARCHIVED_FILE : getOldFile().name();
 		}
@@ -535,6 +552,10 @@ public final class ManifestComparer {
 			return newFile;
 		}
 
+		public CurseFile getNewerFile() throws CurseException {
+			return isDowngrade() ? getOldFile() : getNewFile();
+		}
+
 		public String getNewFileName() throws CurseException {
 			return isNewFileArchived() ? ARCHIVED_FILE : getNewFile().name();
 		}
@@ -549,9 +570,10 @@ public final class ManifestComparer {
 
 		public CurseFileList getChangelogFiles() throws CurseException {
 			final CurseProject project = getProject();
-			final CurseFile oldFile = isDowngrade() ? getNewFile() : getOldFile();
-			final CurseFile newFile = isDowngrade() ? getOldFile() : getNewFile();
-			final CurseFileList files = project.files();
+			final CurseFile oldFile = getOlderFile();
+			final CurseFile newFile = getNewerFile();
+			final CurseFileList files = this.files == null ?
+					project.filesBetween(oldFile.id(), newFile.id()) : this.files;
 
 			if(oldFile.minecraftVersion() == newFile.minecraftVersion()) {
 				files.filterVersions(oldFile.minecraftVersion());
@@ -598,7 +620,7 @@ public final class ManifestComparer {
 
 			final CurseProject project = getProject();
 			if(needsCurseFiles(project)) {
-				project.files();
+				files = project.filesBetween(getOlderFile().id(), getNewerFile().id());
 			}
 		}
 
@@ -773,11 +795,11 @@ public final class ManifestComparer {
 		@Override
 		public Map<String, String> getChangelogs(boolean urls) throws CurseException, IOException {
 			if(urls) {
+				final String newerVersion = isDowngrade() ? oldVersion : newVersion;
+				final URL changelogURL = MinecraftForge.getChangelogURL(newerVersion);
 				return new ImmutableMap<>(
-						new String[] {"View changelog at"},
-						new String[] {MinecraftForge.getChangelogURL(
-								isDowngrade() ? oldVersion : newVersion
-						).toString()}
+						new ImmutableSet<>("View changelog at"),
+						new ImmutableList<>(changelogURL.toString())
 				);
 			}
 			return MinecraftForge.getChangelog(oldVersion, newVersion);
