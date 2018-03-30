@@ -366,7 +366,7 @@ public final class ModpackInstaller {
 
 		copyFiles(modpack.resolve(manifest.overrides), manifest);
 
-		finish(manifest);
+		finish();
 	}
 
 	public void installFromManifest(URL url) throws CurseException, IOException {
@@ -386,6 +386,9 @@ public final class ModpackInstaller {
 
 		manifest = ExtendedCurseManifest.ensureExtended(manifest);
 
+		//Copy manifest.json to installDir
+		manifest.writeToMinified(installDir.resolve("manifest.json"));
+
 		switch(side) {
 			case CLIENT:
 				manifest.client();
@@ -401,7 +404,7 @@ public final class ModpackInstaller {
 		deleteOldFiles(manifest);
 		downloadMods(manifest);
 
-		finish(manifest);
+		finish();
 	}
 
 	private void initialize() throws IOException {
@@ -556,13 +559,10 @@ public final class ModpackInstaller {
 		}
 	}
 
-	private void finish(ExtendedCurseManifest manifest) throws IOException {
+	private void finish() throws IOException {
 		if(!shouldFinish) {
 			return;
 		}
-
-		//Copy manifest.json to installDir
-		manifest.writeToMinified(installDir.resolve("manifest.json"));
 
 		//Remove empty directories - most of them are probably left over from previous
 		//modpack versions
