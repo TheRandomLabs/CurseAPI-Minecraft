@@ -738,16 +738,6 @@ public final class ManifestComparer {
 		}
 
 		@Override
-		public CurseProject getProject() {
-			return null;
-		}
-
-		@Override
-		public String getModTitle() {
-			return MinecraftForge.TITLE;
-		}
-
-		@Override
 		public Mod getOldMod() {
 			return null;
 		}
@@ -780,6 +770,16 @@ public final class ManifestComparer {
 		@Override
 		public boolean isDowngrade() {
 			return isDowngrade;
+		}
+
+		@Override
+		public String getModTitle() {
+			return MinecraftForge.TITLE;
+		}
+
+		@Override
+		public CurseProject getProject() {
+			return null;
 		}
 
 		@Override

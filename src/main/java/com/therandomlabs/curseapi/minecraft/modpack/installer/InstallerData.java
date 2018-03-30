@@ -23,6 +23,19 @@ public final class InstallerData implements Cloneable, Serializable {
 		public String[] relatedFiles;
 
 		@Override
+		public int hashCode() {
+			return projectID + fileID;
+		}
+
+		@Override
+		public boolean equals(Object object) {
+			return object instanceof ModData && object.hashCode() == hashCode();
+		}		@Override
+		public String toString() {
+			return "[projectID=" + projectID + ",fileID=" + fileID + "]";
+		}
+
+		@Override
 		public ModData clone() {
 			try {
 				return (ModData) super.clone();
@@ -31,20 +44,7 @@ public final class InstallerData implements Cloneable, Serializable {
 			return null;
 		}
 
-		@Override
-		public String toString() {
-			return "[projectID=" + projectID + ",fileID=" + fileID + "]";
-		}
 
-		@Override
-		public int hashCode() {
-			return projectID + fileID;
-		}
-
-		@Override
-		public boolean equals(Object object) {
-			return object instanceof ModData && object.hashCode() == hashCode();
-		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -24,7 +24,6 @@ public abstract class Postprocessor {
 			new PostprocessorVersionGroup();
 
 
-
 	protected Postprocessor() {
 		postprocessors.add(this);
 	}

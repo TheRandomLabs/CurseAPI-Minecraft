@@ -1,5 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.caformat;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Predicate;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.ReleaseType;
@@ -9,10 +12,6 @@ import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManife
 import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.number.NumberUtils;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.function.Predicate;
 
 public class Variable {
 	public static final char CHARACTER = '$';

@@ -30,15 +30,6 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 		return new TRLList<>(paths);
 	}
 
-	@Override
-	public FileInfo clone() {
-		try {
-			return (FileInfo) super.clone();
-		} catch(CloneNotSupportedException ignored) {}
-
-		return null;
-	}
-
 	public static String[] getPaths(FileInfo[] files, Side side) {
 		final List<String> paths = new TRLList<>(files.length);
 
@@ -64,11 +55,6 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 	}
 
 	@Override
-	public String toString() {
-		return "[path=\"" + path + ",side=" + side + "]";
-	}
-
-	@Override
 	public int compareTo(FileInfo file) {
 		return path.toLowerCase(Locale.ENGLISH).compareTo(file.path.toLowerCase(Locale.ENGLISH));
 	}
@@ -81,5 +67,19 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 	@Override
 	public boolean equals(Object object) {
 		return object instanceof FileInfo && object.hashCode() == hashCode();
+	}
+
+	@Override
+	public FileInfo clone() {
+		try {
+			return (FileInfo) super.clone();
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "[path=\"" + path + ",side=" + side + "]";
 	}
 }

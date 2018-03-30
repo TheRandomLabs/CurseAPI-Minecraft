@@ -43,6 +43,27 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 		return title.toLowerCase(Locale.ENGLISH).compareTo(mod.title.toLowerCase(Locale.ENGLISH));
 	}
 
+	public String title() throws CurseException {
+		if(title.equals(UNKNOWN_NAME)) {
+			title = CurseProject.fromID(projectID).title();
+		}
+		return title;
+	}
+
+	public String[] getRelatedFiles(Side side) {
+		return FileInfo.getPaths(relatedFiles, side);
+	}
+
+	@Override
+	public int hashCode() {
+		return projectID + fileID;
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		return object instanceof Mod && object.hashCode() == hashCode();
+	}
+
 	@Override
 	public Mod clone() {
 		try {
@@ -57,29 +78,8 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 		return null;
 	}
 
-	public String title() throws CurseException {
-		if(title.equals(UNKNOWN_NAME)) {
-			title = CurseProject.fromID(projectID).title();
-		}
-		return title;
-	}
-
-	public String[] getRelatedFiles(Side side) {
-		return FileInfo.getPaths(relatedFiles, side);
-	}
-
 	@Override
 	public String toString() {
 		return "[projectID=" + projectID + ",fileID=" + fileID + ",title=\"" + title + "\"]";
-	}
-
-	@Override
-	public int hashCode() {
-		return projectID + fileID;
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		return object instanceof Mod && object.hashCode() == hashCode();
 	}
 }

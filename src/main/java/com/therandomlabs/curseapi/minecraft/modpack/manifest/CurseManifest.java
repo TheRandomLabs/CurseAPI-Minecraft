@@ -45,7 +45,9 @@ public final class CurseManifest implements Cloneable, Serializable {
 		return new Gson().toJson(this);
 	}
 
-	@Override
+	public String toPrettyJsonWithTabs() {
+		return toPrettyJson().replaceAll(" {2}", "\t");
+	}	@Override
 	public CurseManifest clone() {
 		try {
 			final CurseManifest manifest = (CurseManifest) super.clone();
@@ -57,10 +59,6 @@ public final class CurseManifest implements Cloneable, Serializable {
 		} catch(CloneNotSupportedException ignored) {}
 
 		return null;
-	}
-
-	public String toPrettyJsonWithTabs() {
-		return toPrettyJson().replaceAll(" {2}", "\t");
 	}
 
 	public String toPrettyJson() {
@@ -98,15 +96,6 @@ public final class CurseManifest implements Cloneable, Serializable {
 			return mods;
 		}
 
-		@Override
-		public CurseMod clone() {
-			try {
-				return (CurseMod) super.clone();
-			} catch(CloneNotSupportedException ignored) {}
-
-			return null;
-		}
-
 		public Mod toMod() throws CurseException {
 			final Mod mod = new Mod();
 
@@ -116,11 +105,13 @@ public final class CurseManifest implements Cloneable, Serializable {
 			mod.required = required;
 
 			return mod;
-		}
+		}		@Override
+		public CurseMod clone() {
+			try {
+				return (CurseMod) super.clone();
+			} catch(CloneNotSupportedException ignored) {}
 
-		@Override
-		public String toString() {
-			return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
+			return null;
 		}
 
 		public static CurseMod[] fromMods(Mod[] mods) {
@@ -134,15 +125,24 @@ public final class CurseManifest implements Cloneable, Serializable {
 		@Override
 		public int hashCode() {
 			return projectID + fileID;
-		}
-
-		public static CurseMod fromMod(Mod mod) {
-			return new CurseMod(mod.projectID, mod.fileID, mod.required);
+		}		@Override
+		public String toString() {
+			return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
 		}
 
 		@Override
 		public boolean equals(Object object) {
 			return object instanceof CurseMod && object.hashCode() == hashCode();
 		}
+
+		public static CurseMod fromMod(Mod mod) {
+			return new CurseMod(mod.projectID, mod.fileID, mod.required);
+		}
+
+
+
+
 	}
+
+
 }
