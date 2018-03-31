@@ -599,6 +599,8 @@ public final class CAManifest {
 					mod.required = dependent.required;
 				}
 			}
+
+			dependent.getDependencies = false;
 		});
 
 		mods.addAll(ids.values());
@@ -632,6 +634,7 @@ public final class CAManifest {
 
 		parseModsAndFiles(toParse);
 		parseRemovedMods(toParse);
+		retrieveDependencies();
 	}
 
 	private void convertModDatas() throws CurseException {
