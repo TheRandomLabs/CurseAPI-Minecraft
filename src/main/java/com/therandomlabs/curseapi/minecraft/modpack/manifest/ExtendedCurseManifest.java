@@ -37,6 +37,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
+	public String projectURL = "Unknown project URL";
 	//OptiFine version can be null so it's easier to check whether a manifest is actually
 	//extended
 	public String optifineVersion;
@@ -165,7 +166,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	}
 
 	private boolean isActuallyExtended() {
-		return optifineVersion != null;
+		return !id.isEmpty() && optifineVersion != null;
 	}
 
 	public static ExtendedCurseManifest from(String path) throws IOException {

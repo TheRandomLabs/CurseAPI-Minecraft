@@ -1,6 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.caformat;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.function.Predicate;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -95,6 +97,19 @@ public class Variable {
 				return id == 0 || id >= CurseAPI.MIN_PROJECT_ID;
 			},
 			(manifest, variables, value) -> manifest.projectID = Integer.parseInt(value)
+	);
+	public static final Variable PROJECT_URL = new Variable(
+			"project_url",
+			"",
+			url -> {
+				try {
+					new URL(url);
+				} catch(MalformedURLException ex) {
+					return false;
+				}
+				return true;
+			},
+			(manifest, variables, value) -> manifest.projectURL = value
 	);
 	public static final Variable OPTIFINE = new Variable(
 			"optifine",

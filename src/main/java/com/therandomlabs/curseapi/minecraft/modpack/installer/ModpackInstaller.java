@@ -815,10 +815,6 @@ public final class ModpackInstaller {
 	public static boolean replaceVariablesAndCopy(Path file, Path newFile,
 			ExtendedCurseManifest manifest) throws IOException {
 		try {
-			String curseforgeURL = "Unknown URL";
-			try {
-				curseforgeURL = CurseForge.fromID(manifest.projectID).toString();
-			} catch(CurseException ignored) {}
 			final String toWrite = NIOUtils.readFile(file).
 					replaceAll("::MINECRAFT_VERSION::", manifest.minecraft.version.toString()).
 					replaceAll("::MODPACK_ID::", manifest.id).
@@ -826,7 +822,7 @@ public final class ModpackInstaller {
 					replaceAll("::MODPACK_VERSION::", manifest.version).
 					replaceAll("::FULL_MODPACK_NAME::", manifest.name + ' ' + manifest.version).
 					replaceAll("::MODPACK_AUTHOR::", manifest.author).
-					replaceAll("::CURSEFORGE_URL::", curseforgeURL);
+					replaceAll("::MODPACK_URL::", manifest.projectURL);
 
 			NIOUtils.write(newFile, toWrite, true);
 		} catch(MalformedInputException ex) {

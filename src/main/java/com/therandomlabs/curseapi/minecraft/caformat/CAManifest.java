@@ -685,6 +685,16 @@ public final class CAManifest {
 		manifest.minecraft = new MinecraftInfo(mcVersion, forgeVersion);
 
 		manifest.projectID = variables.integer("project_id");
+
+		manifest.projectURL = variables.get("project_url");
+		if(manifest.projectURL.isEmpty()) {
+			try {
+				manifest.projectURL = CurseForge.fromID(manifest.projectID).toString();
+			} catch(CurseException ex) {
+				manifest.projectURL = "Unknown project URL";
+			}
+		}
+
 		manifest.optifineVersion = variables.get("optifine");
 		manifest.minimumRam = variables.integer("minimum_ram");
 		manifest.recommendedRam = variables.integer("recommended_ram");
