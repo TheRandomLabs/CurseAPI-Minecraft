@@ -102,11 +102,16 @@ public class Variable {
 			"project_url",
 			"",
 			url -> {
+				if(url.isEmpty()) {
+					return true;
+				}
+
 				try {
 					new URL(url);
 				} catch(MalformedURLException ex) {
 					return false;
 				}
+
 				return true;
 			},
 			(manifest, variables, value) -> manifest.projectURL = value
