@@ -30,7 +30,9 @@ public final class InstallerData implements Cloneable, Serializable {
 		@Override
 		public boolean equals(Object object) {
 			return object instanceof ModData && object.hashCode() == hashCode();
-		}		@Override
+		}
+
+		@Override
 		public String toString() {
 			return "[projectID=" + projectID + ",fileID=" + fileID + "]";
 		}
@@ -43,8 +45,6 @@ public final class InstallerData implements Cloneable, Serializable {
 
 			return null;
 		}
-
-
 	}
 
 	@SuppressWarnings("unchecked")

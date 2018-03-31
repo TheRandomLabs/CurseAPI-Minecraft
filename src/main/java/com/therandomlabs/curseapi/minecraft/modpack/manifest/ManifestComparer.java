@@ -690,7 +690,7 @@ public final class ManifestComparer {
 				} catch(ArrayIndexOutOfBoundsException ignored) {}
 			}
 
-			//TODO mezz, zmaster587, IC2
+			//TODO mezz, zmaster587
 
 			if(owner.equals("bre2el")) {
 				return getBre2elChangelog(oldFile, newFile, urls);
