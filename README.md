@@ -39,7 +39,7 @@ Example Gradle buildscript:
 	}
 
 
-Features (not all done yet - this is way more WIP than CurseAPI):
+Features:
 * The CurseAPI Manifest Format (CAManifest), which CurseAPI can generate Curse manifests from
 I haven't written any documentation for it yet, but you can see an example
 [here](https://github.com/TheRandomLabs/LightChocolate) at manifest.txt
@@ -53,6 +53,10 @@ both in installation and in packaging
 * Basic event handling
 
 Planned features:
+* Improved ManifestComparer
+* Improved CAManifest
+* Improved ModpackInstaller
+* Separate modules in different repos (part of ManifestComparer, CAManifest and ModpackInstaller will all be different repos)
 * Documentation and a wiki
 
 Modpack installation example:
