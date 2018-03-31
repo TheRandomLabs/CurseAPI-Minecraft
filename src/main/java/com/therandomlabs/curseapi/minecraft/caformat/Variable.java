@@ -25,7 +25,7 @@ public class Variable {
 
 	public static final Variable ID = new Variable(
 			"id",
-			"my_modpack",
+			"",
 			ExtendedCurseManifest::isValidID,
 			(manifest, variables, value) -> manifest.id = value
 	);

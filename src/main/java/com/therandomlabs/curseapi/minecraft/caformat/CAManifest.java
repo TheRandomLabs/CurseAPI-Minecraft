@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -673,6 +674,13 @@ public final class CAManifest {
 		final ExtendedCurseManifest manifest = new ExtendedCurseManifest();
 
 		manifest.name = variables.get("name");
+
+		manifest.id = variables.get("id");
+		if(manifest.id.isEmpty()) {
+			manifest.id =
+					StringUtils.replaceWhitespace(manifest.name.toLowerCase(Locale.ROOT), "_");
+		}
+
 		manifest.version = variables.get("version");
 		manifest.author = variables.get("author");
 		manifest.description = variables.get("description");

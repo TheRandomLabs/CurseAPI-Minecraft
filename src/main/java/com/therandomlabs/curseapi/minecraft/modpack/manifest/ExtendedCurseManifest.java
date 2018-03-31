@@ -26,8 +26,8 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
-	public String id = "";
 	public String name;
+	public String id = "";
 	public String version;
 	public String author;
 	public String description;
