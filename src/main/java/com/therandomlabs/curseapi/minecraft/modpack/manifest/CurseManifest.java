@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack.manifest;
 
 import java.io.Serializable;
+import java.util.Locale;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -9,6 +10,7 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
+import com.therandomlabs.utils.misc.StringUtils;
 
 public final class CurseManifest implements Cloneable, Serializable {
 	private static final long serialVersionUID = -8163938330549340465L;
@@ -29,6 +31,7 @@ public final class CurseManifest implements Cloneable, Serializable {
 
 		manifest.manifestType = manifestType;
 		manifest.manifestVersion = manifestVersion;
+		manifest.id = StringUtils.replaceWhitespace(name.toLowerCase(Locale.ROOT), "_");
 		manifest.name = name;
 		manifest.version = version;
 		manifest.author = author;
@@ -47,7 +50,9 @@ public final class CurseManifest implements Cloneable, Serializable {
 
 	public String toPrettyJsonWithTabs() {
 		return toPrettyJson().replaceAll(" {2}", "\t");
-	}	@Override
+	}
+
+	@Override
 	public CurseManifest clone() {
 		try {
 			final CurseManifest manifest = (CurseManifest) super.clone();
@@ -105,7 +110,9 @@ public final class CurseManifest implements Cloneable, Serializable {
 			mod.required = required;
 
 			return mod;
-		}		@Override
+		}
+
+		@Override
 		public CurseMod clone() {
 			try {
 				return (CurseMod) super.clone();
@@ -125,7 +132,9 @@ public final class CurseManifest implements Cloneable, Serializable {
 		@Override
 		public int hashCode() {
 			return projectID + fileID;
-		}		@Override
+		}
+
+		@Override
 		public String toString() {
 			return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
 		}
@@ -138,11 +147,5 @@ public final class CurseManifest implements Cloneable, Serializable {
 		public static CurseMod fromMod(Mod mod) {
 			return new CurseMod(mod.projectID, mod.fileID, mod.required);
 		}
-
-
-
-
 	}
-
-
 }

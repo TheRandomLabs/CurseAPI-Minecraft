@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Predicate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,12 +18,15 @@ import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.curseapi.util.MiscUtils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
+import com.therandomlabs.utils.misc.StringUtils;
+import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	private static final long serialVersionUID = 6601285145733232922L;
 
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
+	public String id = "";
 	public String name;
 	public String version;
 	public String author;
@@ -41,16 +45,6 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public int minimumServerRam = 2048;
 	public int recommendedServerRam = 3072;
 
-	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)
-			throws CurseException {
-		return manifest.isActuallyExtended() ?
-				manifest : manifest.toCurseManifest().toExtendedManifest();
-	}
-
-	public boolean isActuallyExtended() {
-		return optifineVersion != null;
-	}
-
 	public CurseManifest toCurseManifest() {
 		final CurseManifest manifest = new CurseManifest();
 
@@ -66,14 +60,6 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		manifest.projectID = projectID;
 
 		return manifest;
-	}
-
-	public static ExtendedCurseManifest from(String path) throws IOException {
-		return from(Paths.get(path));
-	}
-
-	public static ExtendedCurseManifest from(Path path) throws IOException {
-		return MiscUtils.fromJson(path, ExtendedCurseManifest.class);
 	}
 
 	@Override
@@ -176,5 +162,37 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 
 	public String toPrettyJsonWithTabs() {
 		return toPrettyJson().replaceAll(" {2}", "\t");
+	}
+
+	private boolean isActuallyExtended() {
+		return optifineVersion != null;
+	}
+
+	public static ExtendedCurseManifest from(String path) throws IOException {
+		return from(Paths.get(path));
+	}
+
+	public static ExtendedCurseManifest from(Path path) throws IOException {
+		return tryEnsureExtended(MiscUtils.fromJson(path, ExtendedCurseManifest.class));
+	}
+
+	public static boolean isValidID(String id) {
+		return StringUtils.isLowerCase(id, Locale.ROOT) && !StringUtils.containsWhitespace(id);
+	}
+
+	private static ExtendedCurseManifest tryEnsureExtended(ExtendedCurseManifest manifest) {
+		try {
+			return ensureExtended(manifest);
+		} catch(CurseException ex) {
+			//If there's an error, just use the unextended manifest
+			ThrowableHandling.handleWithoutExit(ex);
+		}
+		return manifest;
+	}
+
+	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)
+			throws CurseException {
+		return manifest.isActuallyExtended() ?
+				manifest : manifest.toCurseManifest().toExtendedManifest();
 	}
 }

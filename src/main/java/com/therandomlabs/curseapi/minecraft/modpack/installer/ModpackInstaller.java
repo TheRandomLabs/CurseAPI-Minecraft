@@ -90,36 +90,6 @@ public final class ModpackInstaller {
 		extensionsWithVariables.add("txt");
 	}
 
-	static Path tempPath() {
-		final Path path =
-				NIOUtils.TEMP_DIRECTORY.get().resolve("CurseAPI_Modpack" + System.nanoTime());
-		temporaryFiles.add(path);
-		return path;
-	}
-
-	public static boolean replaceVariablesAndCopy(Path file, Path newFile,
-			ExtendedCurseManifest manifest) throws IOException {
-		try {
-			final String toWrite = NIOUtils.readFile(file).
-					replaceAll("::MINECRAFT_VERSION::", manifest.minecraft.version.toString()).
-					replaceAll("::MODPACK_NAME::", manifest.name).
-					replaceAll("::MODPACK_VERSION::", manifest.version).
-					replaceAll("::FULL_MODPACK_NAME::", manifest.name + ' ' + manifest.version).
-					replaceAll("::MODPACK_AUTHOR::", manifest.author);
-
-			NIOUtils.write(newFile, toWrite, true);
-		} catch(MalformedInputException ex) {
-			ex.printStackTrace();
-			getLogger().error("This exception was caused by the file: " + file);
-			getLogger().error("Make sure the file is encoded in UTF-8!");
-			getLogger().error("Variables in this file will not be processed.");
-
-			return false;
-		}
-
-		return true;
-	}
-
 	public ModpackInstaller installTo(String directory) {
 		return installTo(Paths.get(directory));
 	}
@@ -833,5 +803,41 @@ public final class ModpackInstaller {
 		} catch(IOException ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	static Path tempPath() {
+		final Path path =
+				NIOUtils.TEMP_DIRECTORY.get().resolve("CurseAPI_Modpack" + System.nanoTime());
+		temporaryFiles.add(path);
+		return path;
+	}
+
+	public static boolean replaceVariablesAndCopy(Path file, Path newFile,
+			ExtendedCurseManifest manifest) throws IOException {
+		try {
+			String curseforgeURL = "Unknown URL";
+			try {
+				curseforgeURL = CurseForge.fromID(manifest.projectID).toString();
+			} catch(CurseException ignored) {}
+			final String toWrite = NIOUtils.readFile(file).
+					replaceAll("::MINECRAFT_VERSION::", manifest.minecraft.version.toString()).
+					replaceAll("::MODPACK_ID::", manifest.id).
+					replaceAll("::MODPACK_NAME::", manifest.name).
+					replaceAll("::MODPACK_VERSION::", manifest.version).
+					replaceAll("::FULL_MODPACK_NAME::", manifest.name + ' ' + manifest.version).
+					replaceAll("::MODPACK_AUTHOR::", manifest.author).
+					replaceAll("::CURSEFORGE_URL::", curseforgeURL);
+
+			NIOUtils.write(newFile, toWrite, true);
+		} catch(MalformedInputException ex) {
+			ex.printStackTrace();
+			getLogger().error("This exception was caused by the file: " + file);
+			getLogger().error("Make sure the file is encoded in UTF-8!");
+			getLogger().error("Variables in this file will not be processed.");
+
+			return false;
+		}
+
+		return true;
 	}
 }

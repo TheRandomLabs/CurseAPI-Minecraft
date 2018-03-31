@@ -21,22 +21,32 @@ public class Variable {
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
 
-	public static final Variable NAME = new Variable("name",
+	public static final Variable ID = new Variable(
+			"id",
+			"my_modpack",
+			ExtendedCurseManifest::isValidID,
+			(manifest, variables, value) -> manifest.id = value
+	);
+	public static final Variable NAME = new Variable(
+			"name",
 			"My Modpack",
 			name -> true,
 			(manifest, variables, value) -> manifest.name = value
 	);
-	public static final Variable MINECRAFT = new Variable("minecraft",
+	public static final Variable MINECRAFT = new Variable(
+			"minecraft",
 			MinecraftVersion.latest().toString(),
 			version -> MinecraftVersion.fromString(version) != null,
 			null //FORGE should set the Minecraft version as well
 	);
-	public static final Variable VERSION = new Variable("version",
+	public static final Variable VERSION = new Variable(
+			"version",
 			MINECRAFT.defaultValue() + "-1.0.0.0",
 			version -> true,
 			(manifest, variables, value) -> manifest.version = value
 	);
-	public static final Variable FORGE = new Variable("forge",
+	public static final Variable FORGE = new Variable(
+			"forge",
 			"latest",
 			version -> {
 				if(version.equals(LATEST) || version.equals(RECOMMENDED)) {
@@ -59,22 +69,26 @@ public class Variable {
 				}
 			}
 	);
-	public static final Variable MINIMUM_STABILITY = new Variable("minimum_stability",
+	public static final Variable MINIMUM_STABILITY = new Variable(
+			"minimum_stability",
 			ReleaseType.ALPHA.toString(),
 			releaseType -> ReleaseType.fromName(releaseType) != null,
 			null
 	);
-	public static final Variable AUTHOR = new Variable("author",
+	public static final Variable AUTHOR = new Variable(
+			"author",
 			"Me",
 			author -> true,
 			(manifest, variables, value) -> manifest.author = value
 	);
-	public static final Variable DESCRIPTION = new Variable("description",
+	public static final Variable DESCRIPTION = new Variable(
+			"description",
 			"The coolest modpack!",
 			description -> true,
 			(manifest, variables, value) -> manifest.description = value
 	);
-	public static final Variable PROJECT_ID = new Variable("project_id",
+	public static final Variable PROJECT_ID = new Variable(
+			"project_id",
 			"0",
 			string -> {
 				final int id = NumberUtils.parseInt(string, 0);
@@ -82,27 +96,32 @@ public class Variable {
 			},
 			(manifest, variables, value) -> manifest.projectID = Integer.parseInt(value)
 	);
-	public static final Variable OPTIFINE = new Variable("optifine",
+	public static final Variable OPTIFINE = new Variable(
+			"optifine",
 			LATEST,
 			version -> true,
 			(manifest, variables, value) -> manifest.optifineVersion = value
 	);
-	public static final Variable MINIMUM_RAM = new Variable("minimum_ram",
+	public static final Variable MINIMUM_RAM = new Variable(
+			"minimum_ram",
 			"3072",
 			NumberUtils::isInteger,
 			(manifest, variables, value) -> manifest.minimumRam = Integer.parseInt(value)
 	);
-	public static final Variable RECOMMENDED_RAM = new Variable("recommended_ram",
+	public static final Variable RECOMMENDED_RAM = new Variable(
+			"recommended_ram",
 			"4096",
 			NumberUtils::isInteger,
 			(manifest, variables, value) -> manifest.recommendedRam = Integer.parseInt(value)
 	);
-	public static final Variable MINIMUM_SERVER_RAM = new Variable("minimum_server_ram",
+	public static final Variable MINIMUM_SERVER_RAM = new Variable(
+			"minimum_server_ram",
 			"2048",
 			NumberUtils::isInteger,
 			(manifest, variables, value) -> manifest.minimumServerRam = Integer.parseInt(value)
 	);
-	public static final Variable RECOMMENDED_SERVER_RAM = new Variable("recommended_server_ram",
+	public static final Variable RECOMMENDED_SERVER_RAM = new Variable(
+			"recommended_server_ram",
 			"3072",
 			NumberUtils::isInteger,
 			(manifest, variables, value) -> manifest.recommendedServerRam = Integer.parseInt(value)
