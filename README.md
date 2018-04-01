@@ -56,7 +56,7 @@ Planned features:
 * Improved ManifestComparer
 * Improved CAManifest
 * Improved ModpackInstaller
-* Separate modules in different repos (part of ManifestComparer, CAManifest and ModpackInstaller will all be different repos)
+* Separate parts into different repos (CAManifest and ModpackInstaller will be different projects)
 * Documentation and a wiki
 
 Modpack installation example:
