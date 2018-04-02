@@ -64,7 +64,6 @@ public final class ModpackInstaller {
 		Runtime.getRuntime().addShutdownHook(new Thread(ModpackInstaller::deleteTemporaryFiles));
 	}
 
-	private final HashSet<String> preferredGroups = new HashSet<>();
 	private final HashSet<Path> modSources = new HashSet<>();
 	private final HashSet<String> extensionsWithVariables = new HashSet<>();
 	private final HashSet<Integer> excludedProjects = new HashSet<>();
@@ -122,17 +121,6 @@ public final class ModpackInstaller {
 
 	public Path getInstallerData() {
 		return installerData;
-	}
-
-	public ModpackInstaller withPreferredGroups(String... groups) {
-		ensureNotRunning();
-		preferredGroups.addAll(new ImmutableList<>(groups));
-		return this;
-	}
-
-	@SuppressWarnings("unchecked")
-	public Set<String> getPreferredGroups() {
-		return (Set<String>) preferredGroups.clone();
 	}
 
 	public ModpackInstaller withModSource(String... source) {

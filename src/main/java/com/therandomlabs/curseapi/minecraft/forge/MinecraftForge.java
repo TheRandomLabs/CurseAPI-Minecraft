@@ -237,6 +237,8 @@ public final class MinecraftForge {
 			invalidVersion(version2);
 		}
 
+		//If version2 is older than version1, this will return a positive value,
+		//so if version1 is newer than version2, then a positive value will be returned
 		return Integer.compare(index2, index1);
 	}
 
