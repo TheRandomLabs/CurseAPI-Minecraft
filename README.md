@@ -1,6 +1,6 @@
 # CurseAPI-Minecraft
-An extension of CurseAPI that deals with the creation, parsing, and installation of Minecraft
-modpacks. Ironically, CurseAPI-Minecraft is larger than CurseAPI.
+An extension of CurseAPI that deals with the parsing of Curse manifests. Used by several other
+projects relating to modpack management and installation.
 
 Example Gradle buildscript:
 
@@ -40,29 +40,13 @@ Example Gradle buildscript:
 
 
 Features:
-* The CurseAPI Manifest Format (CAManifest), which CurseAPI can generate Curse manifests from
-I haven't written any documentation for it yet, but you can see an example
-[here](https://github.com/TheRandomLabs/LightChocolate) at manifest.txt
-* The extended Curse manifest format. You can see an example at the above link (look in manifest.json)
-* Modpack installation, which doesn't redownload files that are already there (or in other places)
+* The extended Curse manifest format. You can see an example
+[here](https://github.com/TheRandomLabs/LightChocolate) at manifest.json
 * Parsing Curse manifests
 * Manifest comparisons (which can be used to
 [create changelogs](https://github.com/TheRandomLabs/ChangelogGenerator))
-* Replace variables in configuration files (e.g. modpack name, version) -
-both in installation and in packaging
 * Basic event handling
 
 Planned features:
-* Improved ManifestComparer
-* Improved CAManifest
-* Improved ModpackInstaller
-* Separate parts into different repos (CAManifest and ModpackInstaller will be different projects)
+* Move CAManifest and ForgeInstaller to separate projects/repos
 * Documentation and a wiki
-
-Modpack installation example:
-
-	Logging.<ToggleableLogger>getLogger().disableDebug();
-	new ModpackInstaller().
-			installTo("LightChocolate Server").
-			side(Side.SERVER).
-			install(ModpackInstaller.LIGHTCHOCOLATE);
