@@ -222,6 +222,10 @@ public final class MinecraftForge {
 
 	public static int compare(String version1, String version2) throws CurseException,
 			IOException {
+		if(version1.equals(version2)) {
+			return 0;
+		}
+
 		if(versions.isEmpty()) {
 			getChangelog();
 		}
