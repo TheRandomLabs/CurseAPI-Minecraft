@@ -43,17 +43,12 @@ public final class ModpackZipper {
 						}
 					}
 
-					final Path fileToAdd;
-
 					if(shouldReplaceVariables) {
-						final Path tempPath = ModpackInstaller.tempPath();
-						ModpackInstaller.replaceVariablesAndCopy(file, tempPath, manifest);
-						fileToAdd = tempPath;
+						ModpackInstaller.replaceVariablesAndCopy(file, zipFile.getEntryAsPath(file),
+								manifest);
 					} else {
-						fileToAdd = file;
+						zipFile.addEntry(file, file);
 					}
-
-					zipFile.addEntry(fileToAdd, file.toString());
 
 					return FileVisitResult.CONTINUE;
 				}

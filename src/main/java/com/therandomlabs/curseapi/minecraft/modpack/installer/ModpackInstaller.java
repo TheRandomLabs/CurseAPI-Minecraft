@@ -3,7 +3,6 @@ package com.therandomlabs.curseapi.minecraft.modpack.installer;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.MalformedInputException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -816,28 +815,17 @@ public final class ModpackInstaller {
 		return path;
 	}
 
-	public static boolean replaceVariablesAndCopy(Path file, Path newFile,
+	public static void replaceVariablesAndCopy(Path file, Path newFile,
 			ExtendedCurseManifest manifest) throws IOException {
-		try {
-			final String toWrite = NIOUtils.readFile(file).
-					replaceAll("::MINECRAFT_VERSION::", manifest.minecraft.version.toString()).
-					replaceAll("::MODPACK_ID::", manifest.id).
-					replaceAll("::MODPACK_NAME::", manifest.name).
-					replaceAll("::MODPACK_VERSION::", manifest.version).
-					replaceAll("::FULL_MODPACK_NAME::", manifest.name + ' ' + manifest.version).
-					replaceAll("::MODPACK_AUTHOR::", manifest.author).
-					replaceAll("::MODPACK_URL::", manifest.projectURL);
-
-			NIOUtils.write(newFile, toWrite, true);
-		} catch(MalformedInputException ex) {
-			ex.printStackTrace();
-			getLogger().error("This exception was caused by the file: " + file);
-			getLogger().error("Make sure the file is encoded in UTF-8!");
-			getLogger().error("Variables in this file will not be processed.");
-
-			return false;
-		}
-
-		return true;
+		NIOUtils.ensureParentExists(newFile);
+		final String toWrite = NIOUtils.readFile(file).
+				replaceAll("::MINECRAFT_VERSION::", manifest.minecraft.version.toString()).
+				replaceAll("::MODPACK_ID::", manifest.id).
+				replaceAll("::MODPACK_NAME::", manifest.name).
+				replaceAll("::MODPACK_VERSION::", manifest.version).
+				replaceAll("::FULL_MODPACK_NAME::", manifest.name + ' ' + manifest.version).
+				replaceAll("::MODPACK_AUTHOR::", manifest.author).
+				replaceAll("::MODPACK_URL::", manifest.projectURL);
+		NIOUtils.write(newFile, toWrite, true);
 	}
 }
