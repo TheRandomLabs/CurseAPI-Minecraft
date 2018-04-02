@@ -522,9 +522,9 @@ public final class ModpackInstaller {
 			return;
 		}
 
-		//Remove empty directories - most of them are probably left over from previous
-		//modpack versions
-		NIOUtils.deleteDirectory(installDir, NIOUtils.DELETE_EMPTY_DIRECTORIES);
+		//Empty directories are usually left over from previous modpack versions
+		//Regardless, they're generally not needed
+		NIOUtils.deleteEmptyDirectories(installDir);
 
 		//Last save
 		save();
@@ -719,7 +719,18 @@ public final class ModpackInstaller {
 			return;
 		}
 
-		final Path newFile = installDir.resolve(relativized);
+		final Path newFile;
+		if(NIOUtils.isParent(Paths.get("server-only-mods"), relativized)) {
+			if(side == Side.CLIENT) {
+				return;
+			}
+
+			final Path subpath = relativized.subpath(1, relativized.getNameCount());
+			newFile = Paths.get(installDir.toString(), "server-only-mods", subpath.toString());
+		} else {
+			newFile = installDir.resolve(relativized);
+		}
+
 		if(Files.isDirectory(newFile)) {
 			NIOUtils.deleteDirectory(newFile);
 		}
@@ -778,7 +789,12 @@ public final class ModpackInstaller {
 
 	void visitDirectory(Path overrides, Path directory) throws CurseException, IOException {
 		directory = overrides.relativize(directory);
+
 		if(isExcluded(overrides, directory)) {
+			return;
+		}
+
+		if(side == Side.CLIENT && NIOUtils.isParent(Paths.get("server-only-mods"), directory)) {
 			return;
 		}
 
