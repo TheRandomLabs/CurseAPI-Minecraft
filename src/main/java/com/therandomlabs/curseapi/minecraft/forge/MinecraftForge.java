@@ -220,8 +220,7 @@ public final class MinecraftForge {
 		return versions.get(0);
 	}
 
-	public static int compare(String version1, String version2) throws CurseException,
-			IOException {
+	public static int compare(String version1, String version2) throws CurseException, IOException {
 		if(version1.equals(version2)) {
 			return 0;
 		}
