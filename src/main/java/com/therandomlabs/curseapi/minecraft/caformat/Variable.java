@@ -10,8 +10,8 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.ReleaseType;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
-import com.therandomlabs.curseapi.minecraft.modpack.manifest.ExtendedCurseManifest;
-import com.therandomlabs.curseapi.minecraft.modpack.manifest.MinecraftInfo;
+import com.therandomlabs.curseapi.minecraft.cmanifest.ExtendedCurseManifest;
+import com.therandomlabs.curseapi.minecraft.cmanifest.MinecraftInfo;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.number.NumberUtils;
 

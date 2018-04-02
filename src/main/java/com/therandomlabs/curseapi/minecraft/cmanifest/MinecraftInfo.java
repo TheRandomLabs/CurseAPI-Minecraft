@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.modpack.manifest;
+package com.therandomlabs.curseapi.minecraft.cmanifest;
 
 import java.io.Serializable;
 import java.util.Arrays;
