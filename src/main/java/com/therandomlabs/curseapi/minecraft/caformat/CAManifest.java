@@ -80,7 +80,7 @@ import com.therandomlabs.utils.wrapper.BooleanWrapper;
  * - Variable.apply is called for each variable
  * - Mods are put into files and serverOnlyMods
  * - Additional files
- * - ExtendedCurseManifest.sort
+ * - Manifest is sorted
  */
 public final class CAManifest {
 	public static final String COMMENT = "//";
@@ -96,6 +96,16 @@ public final class CAManifest {
 			Postprocessor.CHARACTER,
 			REMOVE_PROJECT
 	);
+
+	public static class ModData {
+		public int projectID;
+		public int fileID;
+		public Side side;
+		public boolean required;
+		public FileInfo[] relatedFiles;
+		public URL url;
+		public boolean getDependencies;
+	}
 
 	private final VariableMap variables = new VariableMap();
 	private final List<ModData> mods = new TRLList<>();
@@ -736,15 +746,5 @@ public final class CAManifest {
 
 	private List<String> getLines(char character) {
 		return getLines(lines, character);
-	}
-
-	public static class ModData {
-		public int projectID;
-		public int fileID;
-		public Side side;
-		public boolean required;
-		public FileInfo[] relatedFiles;
-		public URL url;
-		public boolean getDependencies;
 	}
 }
