@@ -4,25 +4,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.List;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
+import com.therandomlabs.utils.io.IOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
+import com.therandomlabs.utils.network.NetworkUtils;
 
 public class PreprocessorImport extends Preprocessor {
 	public static final char CHARACTER = '#';
-
-	public static final String LIGHTCHOCOLATE = "lightchocolate";
-	public static final String LIGHTCHOCOLATE_URL =
-			"https://raw.githubusercontent.com/TheRandomLabs/LightChocolate/master/manifest.txt";
-
-	public static final String DARKCHOCOLATE = "darkchocolate";
-	public static final String DARKCHOCOLATE_URL =
-			"https://raw.githubusercontent.com/TheRandomLabs/LightChocolate/master/" +
-					"darkchocolate.txt";
 
 	PreprocessorImport() {}
 
@@ -33,32 +26,20 @@ public class PreprocessorImport extends Preprocessor {
 
 	@Override
 	public boolean isValid(String value, String[] args) {
-		if(value.equalsIgnoreCase(LIGHTCHOCOLATE) || value.equalsIgnoreCase(DARKCHOCOLATE)) {
-			return true;
-		}
-
-		try {
-			new URL(value);
-			return true;
-		} catch(MalformedURLException ex) {}
-
-		try {
-			Paths.get(value);
-			return true;
-		} catch(InvalidPathException ex) {}
-
-		return false;
+		return value.equalsIgnoreCase(CurseAPIMinecraft.LIGHTCHOCOLATE_ID) ||
+				value.equalsIgnoreCase(CurseAPIMinecraft.DARKCHOCOLATE_ID) ||
+				NetworkUtils.isValidURL(value) || IOUtils.isValidPath(value);
 	}
 
 	@Override
 	public List<String> apply(String value, String[] args) throws CurseException, IOException {
-		List<String> linesToImport = null;
+		List<String> linesToImport;
 
 		try {
-			if(value.equalsIgnoreCase(LIGHTCHOCOLATE)) {
-				value = LIGHTCHOCOLATE_URL;
-			} else if(value.equalsIgnoreCase(DARKCHOCOLATE)) {
-				value = DARKCHOCOLATE_URL;
+			if(value.equalsIgnoreCase(CurseAPIMinecraft.LIGHTCHOCOLATE_ID)) {
+				value = CurseAPIMinecraft.LIGHTCHOCOLATE_MANIFEST_TXT;
+			} else if(value.equalsIgnoreCase(CurseAPIMinecraft.DARKCHOCOLATE_ID)) {
+				value = CurseAPIMinecraft.DARKCHOCOLATE_MANIFEST_TXT;
 			}
 
 			final URL url = new URL(value);
