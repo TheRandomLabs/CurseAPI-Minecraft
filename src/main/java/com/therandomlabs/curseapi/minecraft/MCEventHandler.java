@@ -16,9 +16,9 @@ public interface MCEventHandler {
 
 	default void downloadingFromURL(URL url) throws CurseException {}
 
-	default void downloadingMod(String modName, int count, int total) throws CurseException {}
+	default void downloadingFile(String name, int count, int total) throws CurseException {}
 
-	default void downloadedMod(String modName, String fileName, int count) throws CurseException {}
+	default void downloadedFile(String name, String fileName, int count) throws CurseException {}
 
 	default void installingForge(String forgeVersion) throws CurseException {}
 }
