@@ -2,9 +2,20 @@ package com.therandomlabs.curseapi.minecraft;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import com.therandomlabs.utils.collection.ImmutableList;
+import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.platform.Platform;
 
 public final class Minecraft {
+	public static final TRLList<String> CLIENT_ONLY_FILES = new ImmutableList<>(
+			"resourcepacks",
+			"shaderpacks",
+			"options.txt",
+			"optionsof.txt",
+			"realms_persistence.json",
+			"servers.dat"
+	);
+
 	private Minecraft() {}
 
 	public static Path getDirectory() {

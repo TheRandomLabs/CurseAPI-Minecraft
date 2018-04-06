@@ -26,6 +26,7 @@ import com.therandomlabs.curseapi.minecraft.cmanifest.ExtendedCurseManifest;
 import com.therandomlabs.curseapi.minecraft.cmanifest.MinecraftInfo;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.ProjectType;
 import com.therandomlabs.curseapi.project.Relation;
 import com.therandomlabs.curseapi.project.RelationType;
 import com.therandomlabs.utils.collection.ArrayUtils;
@@ -674,6 +675,11 @@ public final class CAManifest {
 
 			mod.title = project.title();
 			mod.url = project.fileWithID(mod.fileID).fileURL();
+
+			if(project.type() == ProjectType.Minecraft.TEXTURE_PACKS) {
+				mod.side = Side.CLIENT;
+				mod.isResourcePack = true;
+			}
 
 			if(mod.side == Side.SERVER) {
 				serverOnlyMods.add(mod);

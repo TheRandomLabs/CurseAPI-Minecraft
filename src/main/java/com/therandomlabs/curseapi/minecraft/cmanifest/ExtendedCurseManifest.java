@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.FileInfo;
+import com.therandomlabs.curseapi.minecraft.Minecraft;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.util.CloneException;
@@ -135,9 +136,15 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 
 	public TRLList<String> getExcludedPaths(Side side) {
 		final TRLList<String> paths = FileInfo.getExcludedPaths(additionalFiles, side);
+
 		for(Mod mod : files) {
 			paths.addAll(FileInfo.getExcludedPaths(mod.relatedFiles, side));
 		}
+
+		if(side == Side.CLIENT) {
+			paths.addAll(Minecraft.CLIENT_ONLY_FILES);
+		}
+
 		return paths;
 	}
 
