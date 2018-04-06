@@ -380,7 +380,7 @@ public final class ManifestComparer {
 			final Map<String, String> changelogs = new LinkedHashMap<>(files.size());
 
 			for(CurseFile file : files) {
-				if(file.changelogProvided()) {
+				if(file.hasChangelog()) {
 					if(urls) {
 						changelogs.put(file.name(), file.urlString());
 					} else {

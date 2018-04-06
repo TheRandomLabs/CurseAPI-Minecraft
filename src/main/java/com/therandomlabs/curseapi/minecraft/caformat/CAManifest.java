@@ -674,7 +674,7 @@ public final class CAManifest {
 			}
 
 			mod.title = project.title();
-			mod.url = project.fileWithID(mod.fileID).fileURL();
+			mod.url = project.fileWithID(mod.fileID).downloadURL();
 
 			if(project.type() == ProjectType.Minecraft.TEXTURE_PACKS) {
 				mod.side = Side.CLIENT;
