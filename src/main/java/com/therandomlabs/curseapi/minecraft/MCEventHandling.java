@@ -1,48 +1,15 @@
 package com.therandomlabs.curseapi.minecraft;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.utils.runnable.RunnableWithInputAndThrowable;
-import com.therandomlabs.utils.wrapper.Wrapper;
+import com.therandomlabs.utils.collection.TRLList;
+import com.therandomlabs.utils.runnable.RunnableWithInput;
 import static com.therandomlabs.utils.logging.Logging.getLogger;
 
 public class MCEventHandling {
 	public static final MCEventHandler DEFAULT_EVENT_HANDLER = new DefaultMCEventHandler();
-	private static final List<MCEventHandler> eventHandlers = new ArrayList<>(5);
 
-	static {
-		register(DEFAULT_EVENT_HANDLER);
-	}
-
-	private MCEventHandling() {}
-
-	public static void register(MCEventHandler eventHandler) {
-		eventHandlers.add(eventHandler);
-	}
-
-	public static void unregister(MCEventHandler eventHandler) {
-		eventHandlers.remove(eventHandler);
-	}
-
-	public static void forEach(
-			RunnableWithInputAndThrowable<MCEventHandler, CurseException> consumer)
-			throws CurseException {
-		final Wrapper<CurseException> exception = new Wrapper<>();
-
-		for(MCEventHandler eventHandler : eventHandlers) {
-			try {
-				consumer.run(eventHandler);
-			} catch(CurseException ex) {
-				exception.set(ex);
-			}
-		}
-
-		if(exception.hasValue()) {
-			throw exception.get();
-		}
-	}
+	private static final List<MCEventHandler> eventHandlers = new TRLList<>(5);
 
 	public static class DefaultMCEventHandler implements MCEventHandler {
 		@Override
@@ -102,5 +69,23 @@ public class MCEventHandling {
 		public void installingForge(String forgeVersion) {
 			getLogger().info("Installing Forge %s...", forgeVersion);
 		}
+	}
+
+	static {
+		register(DEFAULT_EVENT_HANDLER);
+	}
+
+	private MCEventHandling() {}
+
+	public static void register(MCEventHandler eventHandler) {
+		eventHandlers.add(eventHandler);
+	}
+
+	public static void unregister(MCEventHandler eventHandler) {
+		eventHandlers.remove(eventHandler);
+	}
+
+	public static void forEach(RunnableWithInput<MCEventHandler> runnable) {
+		eventHandlers.forEach(runnable::run);
 	}
 }

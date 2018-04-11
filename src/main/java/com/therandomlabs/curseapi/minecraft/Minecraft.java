@@ -9,6 +9,7 @@ import com.therandomlabs.utils.platform.Platform;
 public final class Minecraft {
 	public static final TRLList<String> CLIENT_ONLY_FILES = new ImmutableList<>(
 			"resourcepacks",
+			"server-resource-packs",
 			"shaderpacks",
 			"options.txt",
 			"optionsof.txt",
