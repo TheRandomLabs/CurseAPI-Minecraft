@@ -495,7 +495,8 @@ public final class ManifestComparer {
 		Map<String, String> getChangelogs(CurseFile oldFile, CurseFile newFile, boolean urls)
 				throws CurseException, IOException;
 
-		String modifyChangelog(CurseFile oldFile, CurseFile newFile, String changelog);
+		String modifyChangelog(CurseFile oldFile, CurseFile newFile, String changelog)
+				throws CurseException;
 	}
 
 	public static void registerModSpecificHandler(ModSpecificHandler handler) {
