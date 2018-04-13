@@ -21,16 +21,16 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 	public static TRLList<String> getExcludedPaths(FileInfo[] files, Side side) {
 		final String[] paths;
 		if(side == Side.CLIENT) {
-			paths = getPaths(files, Side.SERVER);
+			paths = getPaths(files, Side.SERVER, true);
 		} else if(side == Side.SERVER) {
-			paths = getPaths(files, Side.CLIENT);
+			paths = getPaths(files, Side.CLIENT, true);
 		} else {
 			paths = new String[0];
 		}
 		return new TRLList<>(paths);
 	}
 
-	public static String[] getPaths(FileInfo[] files, Side side) {
+	public static String[] getPaths(FileInfo[] files, Side side, boolean exclusive) {
 		final List<String> paths = new TRLList<>(files.length);
 
 		for(FileInfo file : files) {
@@ -48,7 +48,9 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 				continue;
 			}
 
-			paths.add(file.path);
+			if(!exclusive) {
+				paths.add(file.path);
+			}
 		}
 
 		return paths.toArray(new String[0]);

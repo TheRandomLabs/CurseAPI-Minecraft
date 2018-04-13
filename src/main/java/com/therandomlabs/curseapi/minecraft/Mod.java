@@ -52,7 +52,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	}
 
 	public String[] getRelatedFiles(Side side) {
-		return FileInfo.getPaths(relatedFiles, side);
+		return FileInfo.getPaths(relatedFiles, side, false);
 	}
 
 	@Override
