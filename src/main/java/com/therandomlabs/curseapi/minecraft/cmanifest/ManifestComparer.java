@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
@@ -341,8 +340,16 @@ public final class ManifestComparer {
 				}
 			}
 
-			return getChangelogFiles().stream().map(CurseFile::urlString).
-					collect(Collectors.toList());
+			final CurseFileList files = getChangelogFiles();
+			final List<String> urls = new TRLList<>(files.size());
+
+			for(CurseFile file : files) {
+				if(file.url() != null) {
+					urls.add(file.urlString());
+				}
+			}
+
+			return urls;
 		}
 
 		public Map<String, String> getChangelogsQuietly() {
