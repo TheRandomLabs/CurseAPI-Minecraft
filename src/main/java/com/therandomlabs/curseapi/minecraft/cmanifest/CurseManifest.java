@@ -8,6 +8,7 @@ import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.misc.StringUtils;
@@ -38,7 +39,11 @@ public final class CurseManifest implements Cloneable, Serializable {
 		public Mod toMod() throws CurseException {
 			final Mod mod = new Mod();
 
-			mod.title = CurseProject.fromID(projectID).title();
+			try {
+				mod.title = CurseProject.fromID(projectID).title();
+			} catch(InvalidProjectIDException ex) {
+				mod.title = Mod.UNKNOWN_NAME;
+			}
 			mod.projectID = projectID;
 			mod.fileID = fileID;
 			mod.required = required;

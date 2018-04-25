@@ -32,6 +32,7 @@ import com.therandomlabs.utils.throwable.ThrowableHandling;
 public final class ManifestComparer {
 	public static final String NO_CHANGELOG_PROVIDED = "No changelog provided.";
 	public static final String VIEW_CHANGELOG_AT = "View changelog at";
+	public static final String UNKNOWN_TITLE = "Unknown Title";
 
 	private static final Set<ModSpecificHandler> handlers = new HashSet<>(2);
 
@@ -160,22 +161,13 @@ public final class ManifestComparer {
 		private transient CurseFile newFile;
 		private transient CurseFileList files;
 
+		transient boolean hasNoProject;
 		transient boolean preloaded;
 
 		VersionChange(String mcVersion, Mod oldMod, Mod newMod) {
 			this.mcVersion = mcVersion;
 			this.oldMod = oldMod;
 			this.newMod = newMod;
-		}
-
-		private static boolean shouldPreloadFiles(CurseProject project) {
-			for(ModSpecificHandler handler : handlers) {
-				if(!handler.shouldPreloadFiles(project)) {
-					return false;
-				}
-			}
-
-			return true;
 		}
 
 		public static Map<VersionChange, Map<String, String>> getChangelogs(
@@ -186,13 +178,8 @@ public final class ManifestComparer {
 			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(),
 					index -> {
 				final VersionChange versionChange = versionChanges.get(index);
-				try {
-					versionChange.preload();
-					toPreload.addAll(versionChange.getURLsToPreload());
-				} catch(InvalidProjectIDException ex) {
-					ex.printStackTrace();
-					versionChanges.set(index, null);
-				}
+				versionChange.preload();
+				toPreload.addAll(versionChange.getURLsToPreload());
 			});
 
 			versionChanges.removeIf(Objects::isNull);
@@ -231,7 +218,10 @@ public final class ManifestComparer {
 
 		public CurseFile getOldFile() throws CurseException {
 			if(oldFile == null) {
-				oldFile = getProject().fileClosestToID(oldMod.fileID, false);
+				if(files == null) {
+					preload();
+				}
+				oldFile = files.fileClosestToID(oldMod.fileID, false);
 			}
 			return oldFile;
 		}
@@ -254,7 +244,10 @@ public final class ManifestComparer {
 
 		public CurseFile getNewFile() throws CurseException {
 			if(newFile == null) {
-				newFile = getProject().fileClosestToID(newMod.fileID, true);
+				if(files == null) {
+					preload();
+				}
+				newFile = files.fileClosestToID(newMod.fileID, true);
 			}
 			return newFile;
 		}
@@ -276,11 +269,12 @@ public final class ManifestComparer {
 		}
 
 		public CurseFileList getChangelogFiles() throws CurseException {
-			final CurseProject project = getProject();
+			if(files == null) {
+				preload();
+			}
+
 			final CurseFile oldFile = getOlderFile();
 			final CurseFile newFile = getNewerFile();
-			final CurseFileList files = this.files == null ?
-					project.filesBetween(oldFile.id(), newFile.id()) : this.files;
 
 			if(oldFile.minecraftVersion() == newFile.minecraftVersion()) {
 				files.filterVersions(oldFile.minecraftVersion());
@@ -295,7 +289,7 @@ public final class ManifestComparer {
 			}
 
 			for(ModSpecificHandler handler : handlers) {
-				handler.filterFileList(files, oldFile, newFile);
+				handler.filterFileList(newMod.projectID, files, oldFile, newFile);
 			}
 
 			return files;
@@ -312,12 +306,16 @@ public final class ManifestComparer {
 		}
 
 		public String getModTitle() throws CurseException {
-			return getProject().title();
+			return getProject() == null ? UNKNOWN_TITLE : getProject().title();
 		}
 
 		public CurseProject getProject() throws CurseException {
-			if(project == null) {
-				project = CurseProject.fromID(newMod.projectID);
+			if(project == null && !hasNoProject) {
+				try {
+					project = CurseProject.fromID(newMod.projectID);
+				} catch(InvalidProjectIDException ex) {
+					hasNoProject = true;
+				}
 			}
 			return project;
 		}
@@ -327,10 +325,8 @@ public final class ManifestComparer {
 				return;
 			}
 
-			final CurseProject project = getProject();
-			if(shouldPreloadFiles(project)) {
-				files = project.filesBetween(getOlderFile().id(), getNewerFile().id());
-			}
+			files = CurseFile.filesFromProjectID(newMod.projectID);
+			files.between(getOlderFile().id(), getNewerFile().id());
 		}
 
 		List<String> getURLsToPreload() throws CurseException {
@@ -339,12 +335,13 @@ public final class ManifestComparer {
 			}
 
 			for(ModSpecificHandler handler : handlers) {
-				final List<String> urls = handler.getURLsToPreload(getOlderFile(), getNewerFile());
+				final List<String> urls = handler.getURLsToPreload(newMod.projectID, getOlderFile(),
+						getNewerFile());
 				if(urls != null) {
 					return urls;
 				}
 
-				if(handler.shouldPreloadOnlyNewFile(getNewerFile().project())) {
+				if(handler.shouldPreloadOnlyNewFile(newMod.projectID, getProject())) {
 					return new ImmutableList<>(getChangelogURLString(newFile));
 				}
 			}
@@ -384,7 +381,7 @@ public final class ManifestComparer {
 
 			for(ModSpecificHandler handler : handlers) {
 				final Map<String, String> changelogs =
-						handler.getChangelogs(oldFile, newFile, urls);
+						handler.getChangelogs(newMod.projectID, oldFile, newFile, urls);
 				if(changelogs != null) {
 					return changelogs;
 				}
@@ -401,7 +398,8 @@ public final class ManifestComparer {
 						String changelog = file.changelog();
 
 						for(ModSpecificHandler handler : handlers) {
-							changelog = handler.modifyChangelog(oldFile, newFile, changelog);
+							changelog = handler.modifyChangelog(newMod.projectID, oldFile, newFile,
+									changelog);
 						}
 
 						changelogs.put(file.name(), changelog);
@@ -498,19 +496,19 @@ public final class ManifestComparer {
 	}
 
 	public interface ModSpecificHandler {
-		boolean shouldPreloadFiles(CurseProject project);
+		boolean shouldPreloadOnlyNewFile(int projectID, CurseProject project);
 
-		boolean shouldPreloadOnlyNewFile(CurseProject project);
-
-		List<String> getURLsToPreload(CurseFile oldFile, CurseFile newFile) throws CurseException;
-
-		void filterFileList(CurseFileList files, CurseFile oldFile, CurseFile newFile);
-
-		Map<String, String> getChangelogs(CurseFile oldFile, CurseFile newFile, boolean urls)
-				throws CurseException, IOException;
-
-		String modifyChangelog(CurseFile oldFile, CurseFile newFile, String changelog)
+		List<String> getURLsToPreload(int projectID, CurseFile oldFile, CurseFile newFile)
 				throws CurseException;
+
+		void filterFileList(int projectID, CurseFileList files, CurseFile oldFile,
+				CurseFile newFile) throws CurseException;
+
+		Map<String, String> getChangelogs(int projectID, CurseFile oldFile, CurseFile newFile,
+				boolean urls) throws CurseException, IOException;
+
+		String modifyChangelog(int projectID, CurseFile oldFile, CurseFile newFile,
+				String changelog) throws CurseException;
 	}
 
 	public static void registerModSpecificHandler(ModSpecificHandler handler) {
