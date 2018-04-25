@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.cursemeta.CurseMeta;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.Mod;
@@ -187,11 +188,11 @@ public final class ManifestComparer {
 				final VersionChange versionChange = versionChanges.get(index);
 				try {
 					versionChange.preload();
+					toPreload.addAll(versionChange.getURLsToPreload());
 				} catch(InvalidProjectIDException ex) {
 					ex.printStackTrace();
 					versionChanges.set(index, null);
 				}
-				toPreload.addAll(versionChange.getURLsToPreload());
 			});
 
 			versionChanges.removeIf(Objects::isNull);
@@ -344,7 +345,7 @@ public final class ManifestComparer {
 				}
 
 				if(handler.shouldPreloadOnlyNewFile(getNewerFile().project())) {
-					return new ImmutableList<>(getNewerFile().urlString());
+					return new ImmutableList<>(getChangelogURLString(newFile));
 				}
 			}
 
@@ -590,5 +591,17 @@ public final class ManifestComparer {
 
 		return new Results(oldManifest, newManifest, unchanged, updated, downgraded, removed,
 				added);
+	}
+
+	public static URL getChangelogURL(CurseFile file) throws CurseException {
+		if(!CurseAPI.isAvoidingCurseMeta() || file.url() == null) {
+			return CurseMeta.getChangelogURL(file.projectID(), file.id());
+		}
+
+		return file.url();
+	}
+
+	public static String getChangelogURLString(CurseFile file) throws CurseException {
+		return getChangelogURL(file).toString();
 	}
 }
