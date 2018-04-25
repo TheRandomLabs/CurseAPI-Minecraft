@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.cursemeta.CurseMeta;
+import com.therandomlabs.curseapi.cursemeta.CurseMetaException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.Mod;
@@ -218,11 +219,9 @@ public final class ManifestComparer {
 
 		public CurseFile getOldFile() throws CurseException {
 			if(oldFile == null) {
-				if(files == null) {
-					preload();
-				}
-				oldFile = files.fileClosestToID(oldMod.fileID, false);
+				oldFile = getFile(oldMod.fileID, false);
 			}
+
 			return oldFile;
 		}
 
@@ -231,10 +230,10 @@ public final class ManifestComparer {
 		}
 
 		public String getOldFileName() throws CurseException {
-			return isOldFileArchived() ? ARCHIVED_FILE : getOldFile().name();
+			return isOldFileUnknown() ? ARCHIVED_FILE : getOldFile().name();
 		}
 
-		public boolean isOldFileArchived() throws CurseException {
+		public boolean isOldFileUnknown() throws CurseException {
 			return getOldFile().id() != oldMod.fileID;
 		}
 
@@ -244,12 +243,22 @@ public final class ManifestComparer {
 
 		public CurseFile getNewFile() throws CurseException {
 			if(newFile == null) {
-				if(files == null) {
-					preload();
-				}
-				newFile = files.fileClosestToID(newMod.fileID, true);
+				newFile = getFile(newMod.fileID, true);
 			}
+
 			return newFile;
+		}
+
+		private CurseFile getFile(int fileID, boolean preferOlder) throws CurseException {
+			try {
+				return CurseFile.fromID(newMod.projectID, fileID);
+			} catch(CurseMetaException ignored) { }
+
+			if(files == null) {
+				preload();
+			}
+
+			return files.fileClosestToID(fileID, preferOlder);
 		}
 
 		public CurseFile getNewerFile() throws CurseException {
@@ -257,10 +266,10 @@ public final class ManifestComparer {
 		}
 
 		public String getNewFileName() throws CurseException {
-			return isNewFileArchived() ? ARCHIVED_FILE : getNewFile().name();
+			return isNewFileUnknown() ? ARCHIVED_FILE : getNewFile().name();
 		}
 
-		public boolean isNewFileArchived() throws CurseException {
+		public boolean isNewFileUnknown() throws CurseException {
 			return getNewFile().id() != newMod.fileID;
 		}
 
