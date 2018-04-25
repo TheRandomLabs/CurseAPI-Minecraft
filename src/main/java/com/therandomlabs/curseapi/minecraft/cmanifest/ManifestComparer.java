@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -18,6 +19,7 @@ import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.util.DocumentUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.ImmutableMap;
@@ -183,10 +185,16 @@ public final class ManifestComparer {
 			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(),
 					index -> {
 				final VersionChange versionChange = versionChanges.get(index);
-				versionChange.preload();
+				try {
+					versionChange.preload();
+				} catch(InvalidProjectIDException ex) {
+					ex.printStackTrace();
+					versionChanges.set(index, null);
+				}
 				toPreload.addAll(versionChange.getURLsToPreload());
 			});
 
+			versionChanges.removeIf(Objects::isNull);
 			versionChanges.sort();
 
 			final List<String> list = new TRLList<>(toPreload);
