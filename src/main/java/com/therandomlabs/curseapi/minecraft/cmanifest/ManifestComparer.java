@@ -353,9 +353,7 @@ public final class ManifestComparer {
 			final List<String> urls = new TRLList<>(files.size());
 
 			for(CurseFile file : files) {
-				if(file.url() != null) {
-					urls.add(file.urlString());
-				}
+				urls.add(getChangelogURLString(file));
 			}
 
 			return urls;
@@ -398,7 +396,7 @@ public final class ManifestComparer {
 			for(CurseFile file : files) {
 				if(file.hasChangelog()) {
 					if(urls) {
-						changelogs.put(file.name(), file.urlString());
+						changelogs.put(file.name(), getChangelogURLString(file));
 					} else {
 						String changelog = file.changelog();
 
