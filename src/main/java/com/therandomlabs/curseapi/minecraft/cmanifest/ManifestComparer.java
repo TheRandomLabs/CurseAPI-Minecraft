@@ -1,6 +1,5 @@
 package com.therandomlabs.curseapi.minecraft.cmanifest;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
@@ -9,7 +8,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -149,9 +147,9 @@ public final class ManifestComparer {
 	}
 
 	public static class VersionChange implements Comparable<VersionChange>, Serializable {
-		public static final String ARCHIVED_FILE = "[Archived file]";
-
 		private static final long serialVersionUID = 1789316477374597287L;
+
+		public static final String ARCHIVED_FILE = "[Archived file]";
 
 		private final String mcVersion;
 		private final Mod oldMod;
@@ -183,21 +181,12 @@ public final class ManifestComparer {
 				toPreload.addAll(versionChange.getURLsToPreload());
 			});
 
-			versionChanges.removeIf(Objects::isNull);
 			versionChanges.sort();
 
 			final List<String> list = new TRLList<>(toPreload);
 
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(), index -> {
-				try {
-					DocumentUtils.get(list.get(index));
-				} catch(CurseException ex) {
-					//FileNotFoundException occurs if a file is archived
-					if(!(ex.getCause() instanceof FileNotFoundException)) {
-						throw ex;
-					}
-				}
-			});
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(),
+					index -> DocumentUtils.get(list.get(index)));
 
 			final Map<VersionChange, Map<String, String>> changelogs =
 					new LinkedHashMap<>(versionChanges.size());
@@ -385,8 +374,8 @@ public final class ManifestComparer {
 		}
 
 		public Map<String, String> getChangelogs(boolean urls) throws CurseException, IOException {
-			final CurseFile oldFile = isDowngrade() ? getNewFile() : getOldFile();
-			final CurseFile newFile = isDowngrade() ? getOldFile() : getNewFile();
+			final CurseFile oldFile = getOlderFile();
+			final CurseFile newFile = getNewerFile();
 
 			for(ModSpecificHandler handler : handlers) {
 				final Map<String, String> changelogs =
@@ -553,12 +542,14 @@ public final class ManifestComparer {
 						break;
 					}
 
+					final VersionChange vc = new VersionChange(mcVersion, oldMod, newMod);
+
 					if(newMod.fileID > oldMod.fileID) {
-						updated.add(new VersionChange(mcVersion, oldMod, newMod));
+						updated.add(vc);
 						break;
 					}
 
-					downgraded.add(new VersionChange(mcVersion, newMod, oldMod));
+					downgraded.add(vc);
 					break;
 				}
 			}
