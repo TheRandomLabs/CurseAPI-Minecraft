@@ -10,8 +10,8 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.util.CloneException;
-import com.therandomlabs.utils.concurrent.ThreadUtils;
 import com.therandomlabs.utils.misc.StringUtils;
+import com.therandomlabs.utils.misc.ThreadUtils;
 
 public final class CurseManifest implements Cloneable, Serializable {
 	public static class CurseMod implements Cloneable, Serializable {

@@ -25,7 +25,7 @@ import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.ImmutableMap;
 import com.therandomlabs.utils.collection.ImmutableSet;
 import com.therandomlabs.utils.collection.TRLList;
-import com.therandomlabs.utils.concurrent.ThreadUtils;
+import com.therandomlabs.utils.misc.ThreadUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class ManifestComparer {
@@ -298,7 +298,7 @@ public final class ManifestComparer {
 			try {
 				return getModTitle().compareTo(versionChange.getModTitle());
 			} catch(CurseException ex) {
-				ThrowableHandling.handleUnexpected(ex);
+				ThrowableHandling.handle(ex);
 			}
 			return 0;
 		}
