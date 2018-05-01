@@ -17,6 +17,7 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.curseapi.util.MiscUtils;
+import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
@@ -100,14 +101,46 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		return false;
 	}
 
+	public void enableDisabledOptionalMod(int projectID) {
+		if(isEnabled(projectID)) {
+			return;
+		}
+
+		Mod toEnable = null;
+
+		for(Mod mod : disabledOptionalMods) {
+			if(mod.projectID == projectID) {
+				toEnable = mod;
+				disabledOptionalMods = ArrayUtils.removeAll(disabledOptionalMods, mod);
+				break;
+			}
+		}
+
+		if(toEnable != null) {
+			files = ArrayUtils.add(files, toEnable);
+		}
+	}
+
 	public void removeModsIf(Predicate<Mod> predicate) {
 		final List<Mod> newMods = new TRLList<>(files.length);
+
 		for(Mod mod : files) {
 			if(!predicate.test(mod)) {
 				newMods.add(mod);
 			}
 		}
+
 		files = newMods.toArray(new Mod[0]);
+
+		final List<Mod> newDisabledOptionalMods = new TRLList<>(disabledOptionalMods.length);
+
+		for(Mod mod : disabledOptionalMods) {
+			if(!predicate.test(mod)) {
+				newDisabledOptionalMods.add(mod);
+			}
+		}
+
+		disabledOptionalMods = newDisabledOptionalMods.toArray(new Mod[0]);
 	}
 
 	public void client() {
