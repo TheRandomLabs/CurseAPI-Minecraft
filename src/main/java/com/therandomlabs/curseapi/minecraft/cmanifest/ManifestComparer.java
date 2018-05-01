@@ -519,8 +519,8 @@ public final class ManifestComparer {
 
 	public static Results compare(ExtendedCurseManifest oldManifest,
 			ExtendedCurseManifest newManifest) throws CurseException, IOException {
-		oldManifest.both();
-		newManifest.both();
+		oldManifest.bothSides();
+		newManifest.bothSides();
 
 		final TRLList<Mod> unchanged = new TRLList<>();
 		final TRLList<VersionChange> updated = new TRLList<>();

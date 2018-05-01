@@ -33,6 +33,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public String author;
 	public String description;
 	public Mod[] files;
+	public Mod[] disabledOptionalMods = new Mod[0];
 	public Mod[] serverOnlyMods = new Mod[0];
 	public FileInfo[] additionalFiles = new FileInfo[0];
 	public String overrides = "Overrides";
@@ -86,17 +87,17 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		Arrays.sort(additionalFiles);
 	}
 
-	public boolean containsMod(int projectID, int fileID) {
+	public boolean isEnabled(int projectID) {
+		return isEnabled(projectID, 0);
+	}
+
+	public boolean isEnabled(int projectID, int fileID) {
 		for(Mod mod : files) {
-			if(mod.projectID == projectID && mod.fileID == fileID) {
+			if(mod.projectID == projectID && (fileID == 0 || mod.fileID == fileID)) {
 				return true;
 			}
 		}
 		return false;
-	}
-
-	public void client() {
-		removeModsIf(mod -> mod.side == Side.SERVER);
 	}
 
 	public void removeModsIf(Predicate<Mod> predicate) {
@@ -109,7 +110,16 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		files = newMods.toArray(new Mod[0]);
 	}
 
-	public void both() {
+	public void client() {
+		removeModsIf(mod -> mod.side == Side.SERVER);
+	}
+
+	public void bothSides() {
+		moveServerOnlyModsToFiles();
+	}
+
+	public void server() {
+		removeModsIf(mod -> mod.side == Side.CLIENT);
 		moveServerOnlyModsToFiles();
 	}
 
@@ -117,11 +127,6 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		final TRLList<Mod> files = new TRLList<>(this.files);
 		files.addAll(serverOnlyMods);
 		this.files = files.toArray(new Mod[0]);
-	}
-
-	public void server() {
-		removeModsIf(mod -> mod.side == Side.CLIENT);
-		moveServerOnlyModsToFiles();
 	}
 
 	public TRLList<Mod> getOptionalMods() {
