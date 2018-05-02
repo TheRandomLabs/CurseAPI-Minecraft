@@ -47,7 +47,3 @@ Features:
 * Manifest comparisons (which can be used to
 [create changelogs](https://github.com/TheRandomLabs/ChangelogGenerator))
 * Basic event handling
-
-Planned features:
-* Move CAManifest and ForgeInstaller to separate projects/repos
-* Documentation and a wiki
