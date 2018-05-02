@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -16,6 +17,7 @@ import com.therandomlabs.curseapi.cursemeta.CurseMeta;
 import com.therandomlabs.curseapi.cursemeta.CurseMetaException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
+import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.project.CurseProject;
@@ -162,44 +164,12 @@ public final class ManifestComparer {
 
 		transient boolean hasNoProject;
 		transient boolean preloaded;
+		transient boolean valid = true;
 
 		VersionChange(String mcVersion, Mod oldMod, Mod newMod) {
 			this.mcVersion = mcVersion;
 			this.oldMod = oldMod;
 			this.newMod = newMod;
-		}
-
-		public static Map<VersionChange, Map<String, String>> getChangelogs(
-				TRLList<VersionChange> versionChanges, boolean urls, boolean quietly)
-				throws CurseException, IOException {
-			final Set<String> toPreload = ConcurrentHashMap.newKeySet();
-
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(),
-					index -> {
-				final VersionChange versionChange = versionChanges.get(index);
-				versionChange.preload();
-				toPreload.addAll(versionChange.getURLsToPreload());
-			});
-
-			versionChanges.sort();
-
-			final List<String> list = new TRLList<>(toPreload);
-
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(),
-					index -> DocumentUtils.get(list.get(index)));
-
-			final Map<VersionChange, Map<String, String>> changelogs =
-					new LinkedHashMap<>(versionChanges.size());
-
-			for(VersionChange versionChange : versionChanges) {
-				if(quietly) {
-					changelogs.put(versionChange, versionChange.getChangelogsQuietly(urls));
-				} else {
-					changelogs.put(versionChange, versionChange.getChangelogs(urls));
-				}
-			}
-
-			return changelogs;
 		}
 
 		public Mod getOldMod() {
@@ -308,7 +278,7 @@ public final class ManifestComparer {
 		}
 
 		public CurseProject getProject() throws CurseException {
-			if(project == null && !hasNoProject) {
+			if(project == null && !hasNoProject && valid) {
 				try {
 					project = CurseProject.fromID(newMod.projectID);
 				} catch(InvalidProjectIDException ex) {
@@ -323,8 +293,18 @@ public final class ManifestComparer {
 				return;
 			}
 
-			files = CurseFile.filesFromProjectID(newMod.projectID);
-			files.between(getOlderFile().id(), getNewerFile().id());
+			try {
+				files = CurseFile.filesFromProjectID(newMod.projectID);
+				valid = !files.isEmpty();
+			} catch(InvalidProjectIDException | CurseMetaException ex) {
+				valid = false;
+			}
+
+			if(valid) {
+				files.between(getOlderFile().id(), getNewerFile().id());
+			} else {
+				MCEventHandling.forEach(handler -> handler.noFilesFound(newMod.projectID));
+			}
 		}
 
 		List<String> getURLsToPreload() throws CurseException {
@@ -404,6 +384,45 @@ public final class ManifestComparer {
 					}
 				} else {
 					changelogs.put(file.name(), NO_CHANGELOG_PROVIDED);
+				}
+			}
+
+			return changelogs;
+		}
+
+		public static Map<VersionChange, Map<String, String>> getChangelogs(
+				TRLList<VersionChange> versionChanges, boolean urls, boolean quietly)
+				throws CurseException, IOException {
+			final Set<String> toPreload = ConcurrentHashMap.newKeySet();
+
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(),
+					index -> {
+				final VersionChange versionChange = versionChanges.get(index);
+				versionChange.preload();
+
+				if(!versionChange.valid) {
+					versionChanges.set(index, null);
+				}
+
+				toPreload.addAll(versionChange.getURLsToPreload());
+			});
+
+			versionChanges.removeIf(Objects::isNull);
+			versionChanges.sort();
+
+			final List<String> list = new TRLList<>(toPreload);
+
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(),
+					index -> DocumentUtils.get(list.get(index)));
+
+			final Map<VersionChange, Map<String, String>> changelogs =
+					new LinkedHashMap<>(versionChanges.size());
+
+			for(VersionChange versionChange : versionChanges) {
+				if(quietly) {
+					changelogs.put(versionChange, versionChange.getChangelogsQuietly(urls));
+				} else {
+					changelogs.put(versionChange, versionChange.getChangelogs(urls));
 				}
 			}
 
