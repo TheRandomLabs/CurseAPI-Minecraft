@@ -1,6 +1,7 @@
 # CurseAPI-Minecraft
-An extension of CurseAPI that deals with the parsing of Curse manifests. Used by several other
-projects relating to modpack management and installation.
+
+An extension of CurseAPI that deals with the parsing of Curse manifests. Used by several other of
+my projects related to modpack management and installation.
 
 Example Gradle buildscript:
 
