@@ -84,8 +84,14 @@ public final class ManifestComparer {
 		}
 
 		private void load(TRLList<Mod> mods) throws CurseException {
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(),
-					index -> mods.get(index).title());
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(), index -> {
+				try {
+					mods.get(index).title();
+				} catch(InvalidProjectIDException ex) {
+					mods.set(index, null);
+				}
+			});
+			mods.removeIf(Objects::isNull);
 			mods.sort();
 		}
 
