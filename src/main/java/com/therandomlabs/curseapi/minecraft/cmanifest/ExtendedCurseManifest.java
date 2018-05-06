@@ -165,6 +165,10 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		disableIf(mod -> mod.side == side);
 	}
 
+	public void enableAll() {
+		enableIf(mod -> true);
+	}
+
 	private boolean move(boolean enable, Predicate<Mod> predicate) {
 		final List<Mod> newMods = new TRLList<>(files.length);
 		final List<Mod> newDisabledMods = new TRLList<>(disabledMods.length);

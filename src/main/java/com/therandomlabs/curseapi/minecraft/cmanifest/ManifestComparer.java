@@ -19,6 +19,7 @@ import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
@@ -544,8 +545,8 @@ public final class ManifestComparer {
 
 	public static Results compare(ExtendedCurseManifest oldManifest,
 			ExtendedCurseManifest newManifest) throws CurseException, IOException {
-		oldManifest.bothSides();
-		newManifest.bothSides();
+		oldManifest.enableAll();
+		newManifest.enableAll();
 
 		final TRLList<Mod> unchanged = new TRLList<>();
 		final TRLList<VersionChange> updated = new TRLList<>();
