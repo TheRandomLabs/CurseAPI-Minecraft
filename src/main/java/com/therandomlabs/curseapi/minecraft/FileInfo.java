@@ -58,7 +58,7 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 
 	@Override
 	public int compareTo(FileInfo file) {
-		return path.toLowerCase(Locale.ENGLISH).compareTo(file.path.toLowerCase(Locale.ENGLISH));
+		return path.toLowerCase(Locale.ROOT).compareTo(file.path.toLowerCase(Locale.ROOT));
 	}
 
 	@Override

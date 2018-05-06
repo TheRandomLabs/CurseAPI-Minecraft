@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.function.Predicate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.FileInfo;
 import com.therandomlabs.curseapi.minecraft.Minecraft;
@@ -17,7 +18,6 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.curseapi.util.MiscUtils;
-import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
@@ -34,8 +34,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public String author;
 	public String description;
 	public Mod[] files;
-	public Mod[] disabledOptionalMods = new Mod[0];
-	public Mod[] serverOnlyMods = new Mod[0];
+	public Mod[] disabledMods = new Mod[0];
 	public FileInfo[] additionalFiles = new FileInfo[0];
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
@@ -72,7 +71,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 			final ExtendedCurseManifest manifest = (ExtendedCurseManifest) super.clone();
 
 			manifest.files = CloneException.tryClone(files);
-			manifest.serverOnlyMods = CloneException.tryClone(serverOnlyMods);
+			manifest.disabledMods = CloneException.tryClone(disabledMods);
 			manifest.additionalFiles = CloneException.tryClone(additionalFiles);
 			manifest.minecraft = minecraft.clone();
 
@@ -82,94 +81,141 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		return null;
 	}
 
+	public void validate() throws CurseException {
+		//TODO
+	}
+
 	public void sort() {
 		Arrays.sort(files);
-		Arrays.sort(serverOnlyMods);
+		Arrays.sort(disabledMods);
 		Arrays.sort(additionalFiles);
 	}
 
-	public boolean isEnabled(int projectID) {
-		return isEnabled(projectID, 0);
+	public int getFileID(int projectID) {
+		CurseAPI.validateID(projectID);
+
+		for(Mod mod : files) {
+			if(mod.projectID == projectID) {
+				return mod.fileID;
+			}
+		}
+
+		for(Mod mod : disabledMods) {
+			if(mod.projectID == projectID) {
+				return mod.fileID;
+			}
+		}
+
+		return 0;
 	}
 
-	public boolean isEnabled(int projectID, int fileID) {
+	public boolean contains(int projectID) {
+		return getFileID(projectID) != 0;
+	}
+
+	public boolean contains(int projectID, int fileID) {
+		return getFileID(projectID) == fileID;
+	}
+
+	public boolean containsAndIsEnabled(int projectID) {
+		CurseAPI.validateID(projectID);
+
+		for(Mod mod : files) {
+			if(mod.projectID == projectID) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public boolean containsAndIsEnabled(int projectID, int fileID) {
+		CurseAPI.validateID(projectID, fileID);
+
 		for(Mod mod : files) {
 			if(mod.projectID == projectID && (fileID == 0 || mod.fileID == fileID)) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
-	public void enableDisabledOptionalMod(int projectID) {
-		if(isEnabled(projectID)) {
-			return;
-		}
-
-		Mod toEnable = null;
-
-		for(Mod mod : disabledOptionalMods) {
-			if(mod.projectID == projectID) {
-				toEnable = mod;
-				disabledOptionalMods = ArrayUtils.removeAll(disabledOptionalMods, mod);
-				break;
-			}
-		}
-
-		if(toEnable != null) {
-			files = ArrayUtils.add(files, toEnable);
-		}
+	public boolean enable(int projectID) {
+		return enableIf(mod -> mod.projectID == projectID);
 	}
 
-	public void removeModsIf(Predicate<Mod> predicate) {
-		final List<Mod> newMods = new TRLList<>(files.length);
+	public boolean disable(int fileID) {
+		return disableIf(mod -> mod.projectID == projectID);
+	}
 
-		for(Mod mod : files) {
-			if(!predicate.test(mod)) {
-				newMods.add(mod);
+	public boolean enableIf(Predicate<Mod> predicate) {
+		return move(true, predicate);
+	}
+
+	public boolean disableIf(Predicate<Mod> predicate) {
+		return move(false, predicate);
+	}
+
+	public void enableMods(Side side) {
+		enableIf(mod -> mod.side == side);
+	}
+
+	public void disableMods(Side side) {
+		disableIf(mod -> mod.side == side);
+	}
+
+	private boolean move(boolean enable, Predicate<Mod> predicate) {
+		final List<Mod> newMods = new TRLList<>(files.length);
+		final List<Mod> newDisabledMods = new TRLList<>(disabledMods.length);
+
+		boolean moved = false;
+
+		for(Mod mod : enable ? disabledMods : files) {
+			if(predicate.test(mod)) {
+				(enable ? newMods : newDisabledMods).add(mod);
+				moved = true;
+			} else {
+				(enable ? newDisabledMods : newMods).add(mod);
 			}
 		}
 
 		files = newMods.toArray(new Mod[0]);
+		disabledMods = newDisabledMods.toArray(new Mod[0]);
 
-		final List<Mod> newDisabledOptionalMods = new TRLList<>(disabledOptionalMods.length);
-
-		for(Mod mod : disabledOptionalMods) {
-			if(!predicate.test(mod)) {
-				newDisabledOptionalMods.add(mod);
-			}
-		}
-
-		disabledOptionalMods = newDisabledOptionalMods.toArray(new Mod[0]);
+		return moved;
 	}
 
-	public void client() {
-		removeModsIf(mod -> mod.side == Side.SERVER);
+	public TRLList<Mod> getAllMods() {
+		final TRLList<Mod> mods = new TRLList<>(files);
+		mods.addAll(disabledMods);
+		return mods;
 	}
 
-	public void bothSides() {
-		moveServerOnlyModsToFiles();
-	}
-
-	public void server() {
-		removeModsIf(mod -> mod.side == Side.CLIENT);
-		moveServerOnlyModsToFiles();
-	}
-
-	public void moveServerOnlyModsToFiles() {
-		final TRLList<Mod> files = new TRLList<>(this.files);
-		files.addAll(serverOnlyMods);
-		this.files = files.toArray(new Mod[0]);
-	}
-
-	public TRLList<Mod> getOptionalMods() {
+	public TRLList<Mod> getMods(Predicate<Mod> predicate) {
 		final TRLList<Mod> mods = new TRLList<>();
+
 		for(Mod mod : files) {
-			if(!mod.required) {
+			if(predicate.test(mod)) {
 				mods.add(mod);
 			}
 		}
+
+		for(Mod mod : disabledMods) {
+			if(predicate.test(mod)) {
+				mods.add(mod);
+			}
+		}
+
 		return mods;
+	}
+
+	public TRLList<Mod> getMods(Side side) {
+		return getMods(mod -> mod.side == side);
+	}
+
+	public TRLList<Mod> getOptionalMods() {
+		return getMods(mod -> !mod.required);
 	}
 
 	public TRLList<String> getExcludedPaths(Side side) {
@@ -179,23 +225,11 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 			paths.addAll(FileInfo.getExcludedPaths(mod.relatedFiles, side));
 		}
 
-		if(side == Side.CLIENT) {
+		if(side == Side.SERVER) {
 			paths.addAll(Minecraft.CLIENT_ONLY_FILES);
 		}
 
 		return paths;
-	}
-
-	public void writeTo(String path) throws IOException {
-		writeTo(Paths.get(path));
-	}
-
-	public void writeTo(Path path) throws IOException {
-		NIOUtils.write(path, toPrettyJsonWithTabs(), true);
-	}
-
-	public void writeToMinified(Path path) throws IOException {
-		NIOUtils.write(path, toJson(), true);
 	}
 
 	public String toJson() {
@@ -210,6 +244,22 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		return toPrettyJson().replaceAll(" {2}", "\t");
 	}
 
+	public void writeTo(String path) throws IOException {
+		writeTo(Paths.get(path));
+	}
+
+	public void writeTo(Path path) throws IOException {
+		NIOUtils.write(path, toJson(), true);
+	}
+
+	public void writeToPretty(String path) throws IOException {
+		writeToPretty(Paths.get(path));
+	}
+
+	public void writeToPretty(Path path) throws IOException {
+		NIOUtils.write(path, toPrettyJsonWithTabs(), true);
+	}
+
 	private boolean isActuallyExtended() {
 		return !id.isEmpty() && optifineVersion != null;
 	}
@@ -222,8 +272,14 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		return tryEnsureExtended(MiscUtils.fromJson(path, ExtendedCurseManifest.class));
 	}
 
-	public static boolean isValidID(String id) {
+	public static boolean isValidStringID(String id) {
 		return StringUtils.isLowerCase(id, Locale.ROOT) && !StringUtils.containsWhitespace(id);
+	}
+
+	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)
+			throws CurseException {
+		return manifest.isActuallyExtended() ?
+				manifest : manifest.toCurseManifest().toExtendedManifest();
 	}
 
 	private static ExtendedCurseManifest tryEnsureExtended(ExtendedCurseManifest manifest) {
@@ -234,11 +290,5 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 			ThrowableHandling.handleWithoutExit(ex);
 		}
 		return manifest;
-	}
-
-	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)
-			throws CurseException {
-		return manifest.isActuallyExtended() ?
-				manifest : manifest.toCurseManifest().toExtendedManifest();
 	}
 }

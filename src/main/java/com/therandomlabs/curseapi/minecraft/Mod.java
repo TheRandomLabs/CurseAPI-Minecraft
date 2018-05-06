@@ -19,6 +19,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	public Side side = Side.BOTH;
 	public boolean required;
 	public boolean isResourcePack;
+	public boolean disabledByDefault;
 	public FileInfo[] relatedFiles = new FileInfo[0];
 	public String[] groups = new String[0];
 	public URL url;

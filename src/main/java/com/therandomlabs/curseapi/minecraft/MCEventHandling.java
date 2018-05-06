@@ -1,75 +1,13 @@
 package com.therandomlabs.curseapi.minecraft;
 
-import java.net.URL;
 import java.util.List;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.runnable.RunnableWithInput;
-import static com.therandomlabs.utils.logging.Logging.getLogger;
 
 public class MCEventHandling {
-	public static final MCEventHandler DEFAULT_EVENT_HANDLER = new DefaultMCEventHandler();
+	public static final MCEventHandler DEFAULT_EVENT_HANDLER = new MCEventHandler() {};
 
 	private static final List<MCEventHandler> eventHandlers = new TRLList<>(5);
-
-	public static class DefaultMCEventHandler implements MCEventHandler {
-		@Override
-		public void noFilesFound(int projectID) {
-			getLogger().warning("No files with specified attributes found for project with ID: " +
-					projectID);
-		}
-
-		@Override
-		public void deleting(String fileName) {
-			getLogger().info("Deleting: " + fileName);
-		}
-
-		@Override
-		public void copying(String fileName) {
-			getLogger().info("Copying: " + fileName);
-		}
-
-		@Override
-		public void downloadingFile(String fileName) {
-			getLogger().info("Downloading: " + fileName);
-		}
-
-		@Override
-		public void extracting(String fileName) {
-			getLogger().info("Extracting: " + fileName);
-		}
-
-		@Override
-		public void downloadingFromURL(URL url) {
-			getLogger().info("Downloading: " + url);
-		}
-
-		@Override
-		public void downloadingFile(String name, int count, int total) {
-			if(name.equals(Mod.UNKNOWN_NAME)) {
-				getLogger().info("Downloading file %s of %s...", count, total, name);
-			} else {
-				getLogger().info("Downloading file %s of %s: %s", count, total, name);
-			}
-
-			getLogger().flush();
-		}
-
-		@Override
-		public void downloadedFile(String name, String fileName, int count) {
-			if(name.equals(Mod.UNKNOWN_NAME)) {
-				getLogger().info("Downloaded mod %s: %s", name, fileName);
-			} else {
-				getLogger().info("Downloaded mod: " + fileName);
-			}
-
-			getLogger().flush();
-		}
-
-		@Override
-		public void installingForge(String forgeVersion) {
-			getLogger().info("Installing Forge %s...", forgeVersion);
-		}
-	}
 
 	static {
 		register(DEFAULT_EVENT_HANDLER);
