@@ -102,7 +102,7 @@ public final class ManifestComparer {
 				added);
 	}
 
-	public static URL getChangelogURL(CurseFile file) throws CurseException {
+	static URL getChangelogURL(CurseFile file) throws CurseException {
 		if(!CurseAPI.isAvoidingCurseMeta() || file.url() == null) {
 			return CurseMeta.getChangelogURL(file.projectID(), file.id());
 		}
@@ -110,7 +110,11 @@ public final class ManifestComparer {
 		return file.url();
 	}
 
-	public static String getChangelogURLString(CurseFile file) throws CurseException {
+	static String getChangelogURLString(CurseFile file) throws CurseException {
 		return getChangelogURL(file).toString();
+	}
+
+	static String getCurseForgeURL(CurseFile file) throws CurseException {
+		return file.url() == null ? getChangelogURLString(file) : file.urlString();
 	}
 }

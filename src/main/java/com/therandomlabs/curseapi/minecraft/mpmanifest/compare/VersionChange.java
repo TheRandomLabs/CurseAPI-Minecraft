@@ -247,7 +247,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		for(CurseFile file : files) {
 			if(file.hasChangelog()) {
 				if(urls) {
-					changelogs.put(file.name(), ManifestComparer.getChangelogURLString(file));
+					changelogs.put(file.name(), ManifestComparer.getCurseForgeURL(file));
 				} else {
 					String changelog = file.changelog();
 
