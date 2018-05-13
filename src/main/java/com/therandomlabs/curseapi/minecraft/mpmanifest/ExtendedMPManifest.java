@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
@@ -249,21 +250,21 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	private boolean move(boolean enable, Predicate<Mod> predicate) {
-		final List<Mod> newMods = new TRLList<>(files.length);
-		final List<Mod> newDisabledMods = new TRLList<>(disabledMods.length);
+		final List<Mod> newMods = new TRLList<>(files);
+		final List<Mod> newDisabledMods = new TRLList<>(disabledMods);
 
-		final Mod[] sourceArray = enable ? disabledMods : files;
 		final List<Mod> source = enable ? newDisabledMods : newMods;
 		final List<Mod> destination = enable ? newMods : newDisabledMods;
 
 		boolean moved = false;
 
-		for(Mod mod : sourceArray) {
+		final Iterator<Mod> it = source.iterator();
+		while(it.hasNext()) {
+			final Mod mod = it.next();
 			if(predicate.test(mod)) {
 				destination.add(mod);
+				it.remove();
 				moved = true;
-			} else {
-				source.add(mod);
 			}
 		}
 
