@@ -92,22 +92,56 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		Assertions.nonEmpty(version, "version");
 		Assertions.nonEmpty(author, "author");
 		Assertions.nonEmpty(description, "description");
+
 		Assertions.nonNull(files, "files");
-		Arrays.stream(files).forEach(Mod::validate);
+		for(Mod mod : files) {
+			mod.validate();
+
+			for(int dependent : mod.dependents) {
+				if(!contains(dependent)) {
+					throw new IllegalStateException("No dependent found with ID: " + dependent);
+				}
+			}
+		}
+
 		Assertions.nonNull(disabledMods, "disabledMods");
-		Arrays.stream(disabledMods).forEach(Mod::validate);
+		for(Mod mod : disabledMods) {
+			mod.validate();
+
+			if(mod.dependents.isEmpty()) {
+				continue;
+			}
+
+			for(int dependent : mod.dependents) {
+				if(!contains(dependent)) {
+					throw new IllegalStateException("No dependent found with ID: " + dependent);
+				}
+
+				if(containsAndIsEnabled(dependent)) {
+					throw new IllegalStateException(String.format("Dependent (%s) is enabled " +
+							"but dependency (%s) isn't", dependent, mod.projectID));
+				}
+			}
+		}
+
 		Assertions.nonNull(additionalFiles, "additionalFiles");
 		Arrays.stream(additionalFiles).forEach(FileInfo::validate);
+
 		Assertions.validPath(overrides);
+
 		minecraft.validate();
+
 		if(projectID != 0) {
 			CurseAPI.validateID(projectID);
 		}
+
 		Assertions.nonNull(projectURL, "projectURL");
 		if(!projectURL.equals(UNKNOWN_PROJECT_URL)) {
 			Assertions.validURL(projectURL);
 		}
+
 		Assertions.nonEmpty(optifineVersion, "optifineVersion");
+
 		Assertions.positive(minimumRam, "minimumRam", false);
 		Assertions.positive(recommendedRam, "recommendedRam", false);
 		Assertions.positive(minimumServerRam, "minimumServerRam", false);
