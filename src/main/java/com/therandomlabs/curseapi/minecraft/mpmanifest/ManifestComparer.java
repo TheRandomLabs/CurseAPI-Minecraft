@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.cmanifest;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,8 +42,8 @@ public final class ManifestComparer {
 	public static class Results implements Serializable {
 		private static final long serialVersionUID = 3470798086960813569L;
 
-		private final ExtendedCurseManifest oldManifest;
-		private final ExtendedCurseManifest newManifest;
+		private final ExtendedMPManifest oldManifest;
+		private final ExtendedMPManifest newManifest;
 		private final TRLList<Mod> unchanged;
 		private final TRLList<VersionChange> updated;
 		private final TRLList<VersionChange> downgraded;
@@ -54,7 +54,7 @@ public final class ManifestComparer {
 		private boolean removedLoaded;
 		private boolean addedLoaded;
 
-		Results(ExtendedCurseManifest oldManifest, ExtendedCurseManifest newManifest,
+		Results(ExtendedMPManifest oldManifest, ExtendedMPManifest newManifest,
 				TRLList<Mod> unchanged, TRLList<VersionChange> updated,
 				TRLList<VersionChange> downgraded, TRLList<Mod> removed, TRLList<Mod> added) {
 			this.oldManifest = oldManifest;
@@ -66,11 +66,11 @@ public final class ManifestComparer {
 			this.added = added;
 		}
 
-		public ExtendedCurseManifest getOldManifest() {
+		public ExtendedMPManifest getOldManifest() {
 			return oldManifest;
 		}
 
-		public ExtendedCurseManifest getNewManifest() {
+		public ExtendedMPManifest getNewManifest() {
 			return newManifest;
 		}
 
@@ -542,8 +542,8 @@ public final class ManifestComparer {
 		handlers.remove(handler);
 	}
 
-	public static Results compare(ExtendedCurseManifest oldManifest,
-			ExtendedCurseManifest newManifest) throws CurseException, IOException {
+	public static Results compare(ExtendedMPManifest oldManifest,
+			ExtendedMPManifest newManifest) throws CurseException, IOException {
 		oldManifest.enableAll();
 		newManifest.enableAll();
 

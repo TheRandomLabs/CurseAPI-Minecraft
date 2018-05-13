@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.cmanifest;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,16 +20,19 @@ import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.curseapi.util.MiscUtils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
+import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
-public final class ExtendedCurseManifest implements Cloneable, Serializable {
+public final class ExtendedMPManifest implements Cloneable, Serializable {
 	private static final long serialVersionUID = 6601285145733232922L;
+
+	public static final String UNKNOWN_PROJECT_URL = "Unknown project URL";
 
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 	public String name;
-	public String id = "";
+	public String id = "unknown";
 	public String version;
 	public String author;
 	public String description;
@@ -39,7 +42,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public String overrides = "Overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
-	public String projectURL = "Unknown project URL";
+	public String projectURL = UNKNOWN_PROJECT_URL;
 	//OptiFine version can be null so it's easier to check whether a manifest is actually
 	//extended
 	public String optifineVersion;
@@ -48,8 +51,8 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	public int minimumServerRam = 2048;
 	public int recommendedServerRam = 3072;
 
-	public CurseManifest toCurseManifest() {
-		final CurseManifest manifest = new CurseManifest();
+	public MPManifest toCurseManifest() {
+		final MPManifest manifest = new MPManifest();
 
 		manifest.manifestType = manifestType;
 		manifest.manifestVersion = manifestVersion;
@@ -57,7 +60,7 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		manifest.version = version;
 		manifest.author = author;
 		manifest.description = description;
-		manifest.files = CurseManifest.CurseMod.fromMods(files);
+		manifest.files = MPManifest.CurseMod.fromMods(files);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
 		manifest.projectID = projectID;
@@ -66,9 +69,9 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 	}
 
 	@Override
-	public ExtendedCurseManifest clone() {
+	public ExtendedMPManifest clone() {
 		try {
-			final ExtendedCurseManifest manifest = (ExtendedCurseManifest) super.clone();
+			final ExtendedMPManifest manifest = (ExtendedMPManifest) super.clone();
 
 			manifest.files = CloneException.tryClone(files);
 			manifest.disabledMods = CloneException.tryClone(disabledMods);
@@ -81,8 +84,38 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		return null;
 	}
 
-	public void validate() throws CurseException {
-		//TODO
+	public void validate() {
+		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
+		Assertions.equals(manifestVersion, "manifestVersion", 1);
+		Assertions.nonEmpty(name, "name");
+		Assertions.nonEmpty(id, "id");
+		Assertions.nonEmpty(version, "version");
+		Assertions.nonEmpty(author, "author");
+		Assertions.nonEmpty(description, "description");
+		Assertions.nonNull(files, "files");
+		Arrays.stream(files).forEach(Mod::validate);
+		Assertions.nonNull(disabledMods, "disabledMods");
+		Arrays.stream(disabledMods).forEach(Mod::validate);
+		Assertions.nonNull(additionalFiles, "additionalFiles");
+		Arrays.stream(additionalFiles).forEach(FileInfo::validate);
+		Assertions.validPath(overrides);
+		minecraft.validate();
+		if(projectID != 0) {
+			CurseAPI.validateID(projectID);
+		}
+		Assertions.nonNull(projectURL, "projectURL");
+		if(!projectURL.equals(UNKNOWN_PROJECT_URL)) {
+			Assertions.validURL(projectURL);
+		}
+		Assertions.nonEmpty(optifineVersion, "optifineVersion");
+		Assertions.positive(minimumRam, "minimumRam", false);
+		Assertions.positive(recommendedRam, "recommendedRam", false);
+		Assertions.positive(minimumServerRam, "minimumServerRam", false);
+		Assertions.positive(recommendedServerRam, "recommendedServerRam", false);
+	}
+
+	public void resetDisabledMods() {
+		disableIf(mod -> mod.side == Side.SERVER || mod.disabledByDefault);
 	}
 
 	public void sort() {
@@ -134,6 +167,18 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 
 		for(Mod mod : files) {
 			if(mod.projectID == projectID && (fileID == 0 || mod.fileID == fileID)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public boolean isDisabled(int projectID) {
+		CurseAPI.validateID(projectID);
+
+		for(Mod mod : disabledMods) {
+			if(mod.projectID == projectID) {
 				return true;
 			}
 		}
@@ -268,25 +313,25 @@ public final class ExtendedCurseManifest implements Cloneable, Serializable {
 		return !id.isEmpty() && optifineVersion != null;
 	}
 
-	public static ExtendedCurseManifest from(String path) throws IOException {
+	public static ExtendedMPManifest from(String path) throws IOException {
 		return from(Paths.get(path));
 	}
 
-	public static ExtendedCurseManifest from(Path path) throws IOException {
-		return tryEnsureExtended(MiscUtils.fromJson(path, ExtendedCurseManifest.class));
+	public static ExtendedMPManifest from(Path path) throws IOException {
+		return tryEnsureExtended(MiscUtils.fromJson(path, ExtendedMPManifest.class));
 	}
 
 	public static boolean isValidStringID(String id) {
 		return StringUtils.isLowerCase(id, Locale.ROOT) && !StringUtils.containsWhitespace(id);
 	}
 
-	public static ExtendedCurseManifest ensureExtended(ExtendedCurseManifest manifest)
+	public static ExtendedMPManifest ensureExtended(ExtendedMPManifest manifest)
 			throws CurseException {
 		return manifest.isActuallyExtended() ?
 				manifest : manifest.toCurseManifest().toExtendedManifest();
 	}
 
-	private static ExtendedCurseManifest tryEnsureExtended(ExtendedCurseManifest manifest) {
+	private static ExtendedMPManifest tryEnsureExtended(ExtendedMPManifest manifest) {
 		try {
 			return ensureExtended(manifest);
 		} catch(CurseException ex) {

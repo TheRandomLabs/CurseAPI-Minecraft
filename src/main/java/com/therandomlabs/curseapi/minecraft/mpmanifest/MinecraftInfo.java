@@ -1,9 +1,10 @@
-package com.therandomlabs.curseapi.minecraft.cmanifest;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.util.CloneException;
+import com.therandomlabs.utils.misc.Assertions;
 
 public final class MinecraftInfo implements Cloneable, Serializable {
 	private static final long serialVersionUID = -5189220713785105134L;
@@ -22,6 +23,30 @@ public final class MinecraftInfo implements Cloneable, Serializable {
 		this.version = version;
 		modLoaders = new ModLoaderInfo[1];
 		modLoaders[0] = new ModLoaderInfo(forgeVersion);
+	}
+
+	public void validate() {
+		Assertions.nonNull(version, "version");
+		Assertions.validPath(libraries);
+		Assertions.nonNull(modLoaders, "modLoaders");
+
+		boolean primaryFound = false;
+
+		for(ModLoaderInfo modLoader : modLoaders) {
+			modLoader.validate();
+
+			if(modLoader.primary) {
+				if(primaryFound) {
+					throw new IllegalStateException("Only one mod loader may be primary");
+				}
+
+				primaryFound = true;
+			}
+		}
+
+		if(!primaryFound) {
+			throw new IllegalStateException("There must be a primary mod loader");
+		}
 	}
 
 	@Override

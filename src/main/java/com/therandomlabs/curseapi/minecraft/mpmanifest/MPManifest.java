@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.cmanifest;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.Serializable;
 import java.util.Locale;
@@ -13,7 +13,7 @@ import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.misc.ThreadUtils;
 
-public final class CurseManifest implements Cloneable, Serializable {
+public final class MPManifest implements Cloneable, Serializable {
 	public static class CurseMod implements Cloneable, Serializable {
 		private static final long serialVersionUID = -6936293567291965636L;
 
@@ -101,8 +101,8 @@ public final class CurseManifest implements Cloneable, Serializable {
 	public MinecraftInfo minecraft;
 	public int projectID;
 
-	public ExtendedCurseManifest toExtendedManifest() throws CurseException {
-		final ExtendedCurseManifest manifest = new ExtendedCurseManifest();
+	public ExtendedMPManifest toExtendedManifest() throws CurseException {
+		final ExtendedMPManifest manifest = new ExtendedMPManifest();
 
 		manifest.manifestType = manifestType;
 		manifest.manifestVersion = manifestVersion;
@@ -128,9 +128,9 @@ public final class CurseManifest implements Cloneable, Serializable {
 	}
 
 	@Override
-	public CurseManifest clone() {
+	public MPManifest clone() {
 		try {
-			final CurseManifest manifest = (CurseManifest) super.clone();
+			final MPManifest manifest = (MPManifest) super.clone();
 
 			manifest.files = CloneException.tryClone(files);
 			manifest.minecraft = minecraft.clone();
