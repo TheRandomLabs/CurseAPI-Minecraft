@@ -252,14 +252,18 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		final List<Mod> newMods = new TRLList<>(files.length);
 		final List<Mod> newDisabledMods = new TRLList<>(disabledMods.length);
 
+		final Mod[] sourceArray = enable ? disabledMods : files;
+		final List<Mod> source = enable ? newDisabledMods : newMods;
+		final List<Mod> destination = enable ? newMods : newDisabledMods;
+
 		boolean moved = false;
 
-		for(Mod mod : enable ? disabledMods : files) {
+		for(Mod mod : sourceArray) {
 			if(predicate.test(mod)) {
-				(enable ? newMods : newDisabledMods).add(mod);
+				destination.add(mod);
 				moved = true;
 			} else {
-				(enable ? newDisabledMods : newMods).add(mod);
+				source.add(mod);
 			}
 		}
 
