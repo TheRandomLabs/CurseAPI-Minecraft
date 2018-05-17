@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
@@ -30,14 +31,11 @@ public final class MPManifest implements Cloneable, Serializable {
 			this.required = required;
 		}
 
-		public static Mod[] toMods(CurseMod[] curseMods) throws CurseException {
-			final Mod[] mods = new Mod[curseMods.length];
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), curseMods.length, index ->
-					mods[index] = curseMods[index].toMod());
-			return mods;
+		public Mod toMod() throws CurseException {
+			return toMod(true);
 		}
 
-		public Mod toMod() throws CurseException {
+		public Mod toMod(boolean downloadExtendedData) throws CurseException {
 			final Mod mod = new Mod();
 
 			mod.projectID = projectID;
@@ -45,9 +43,14 @@ public final class MPManifest implements Cloneable, Serializable {
 			mod.required = required;
 
 			CurseProject project = null;
-			try {
-				project = CurseProject.fromID(projectID);
-			} catch(InvalidProjectIDException ignored) {}
+
+			if(downloadExtendedData) {
+				MCEventHandling.forEach(handler -> handler.downloadingModData(projectID));
+
+				try {
+					project = CurseProject.fromID(projectID);
+				} catch(InvalidProjectIDException ignored) {}
+			}
 
 			if(project == null) {
 				mod.title = Mod.UNKNOWN_NAME;
@@ -66,6 +69,18 @@ public final class MPManifest implements Cloneable, Serializable {
 			} catch(CloneNotSupportedException ignored) {}
 
 			return null;
+		}
+
+		public static Mod[] toMods(CurseMod[] curseMods) throws CurseException {
+			return toMods(curseMods, true);
+		}
+
+		public static Mod[] toMods(CurseMod[] curseMods, boolean downloadModData)
+				throws CurseException {
+			final Mod[] mods = new Mod[curseMods.length];
+			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), curseMods.length,
+					index -> mods[index] = curseMods[index].toMod(downloadModData));
+			return mods;
 		}
 
 		public static CurseMod[] fromMods(Mod[] mods) {
@@ -105,11 +120,15 @@ public final class MPManifest implements Cloneable, Serializable {
 	public String author;
 	public String description;
 	public CurseMod[] files;
-	public String overrides = "Overrides";
+	public String overrides = "overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
 
 	public ExtendedMPManifest toExtendedManifest() throws CurseException {
+		return toExtendedManifest(true);
+	}
+
+	public ExtendedMPManifest toExtendedManifest(boolean downloadModData) throws CurseException {
 		final ExtendedMPManifest manifest = new ExtendedMPManifest();
 
 		manifest.manifestType = manifestType;
@@ -119,7 +138,7 @@ public final class MPManifest implements Cloneable, Serializable {
 		manifest.version = version;
 		manifest.author = author;
 		manifest.description = description;
-		manifest.files = CurseMod.toMods(files);
+		manifest.files = CurseMod.toMods(files, downloadModData);
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
 		manifest.projectID = projectID;

@@ -29,6 +29,10 @@ public interface MCEventHandler {
 		getLogger().info("Extracting: " + fileName);
 	}
 
+	default void downloadingModData(int projectID) {
+		getLogger().info("Downloading data for mod with project ID: " + projectID);
+	}
+
 	default void downloadingFromURL(URL url) {
 		getLogger().info("Downloading: " + url);
 	}

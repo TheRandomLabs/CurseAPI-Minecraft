@@ -40,7 +40,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	public Mod[] files;
 	public Mod[] disabledMods = new Mod[0];
 	public FileInfo[] additionalFiles = new FileInfo[0];
-	public String overrides = "Overrides";
+	public String overrides = "overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
 	public String projectURL = UNKNOWN_PROJECT_URL;
@@ -353,11 +353,20 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public static ExtendedMPManifest from(String path) throws IOException {
-		return from(Paths.get(path));
+		return from(path, true);
+	}
+
+	public static ExtendedMPManifest from(String path, boolean downloadModData) throws IOException {
+		return from(Paths.get(path), downloadModData);
 	}
 
 	public static ExtendedMPManifest from(Path path) throws IOException {
-		return tryEnsureExtended(MiscUtils.fromJson(path, ExtendedMPManifest.class));
+		return from(path, true);
+	}
+
+	public static ExtendedMPManifest from(Path path, boolean downloadModData) throws IOException {
+		return tryEnsureExtended(MiscUtils.fromJson(path, ExtendedMPManifest.class),
+				downloadModData);
 	}
 
 	public static boolean isValidStringID(String id) {
@@ -366,13 +375,19 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 
 	public static ExtendedMPManifest ensureExtended(ExtendedMPManifest manifest)
 			throws CurseException {
-		return manifest.isActuallyExtended() ?
-				manifest : manifest.toCurseManifest().toExtendedManifest();
+		return ensureExtended(manifest, true);
 	}
 
-	private static ExtendedMPManifest tryEnsureExtended(ExtendedMPManifest manifest) {
+	public static ExtendedMPManifest ensureExtended(ExtendedMPManifest manifest,
+			boolean downloadModData) throws CurseException {
+		return manifest.isActuallyExtended() ?
+				manifest : manifest.toCurseManifest().toExtendedManifest(downloadModData);
+	}
+
+	private static ExtendedMPManifest tryEnsureExtended(ExtendedMPManifest manifest,
+			boolean downloadModData) {
 		try {
-			return ensureExtended(manifest);
+			return ensureExtended(manifest, downloadModData);
 		} catch(CurseException ex) {
 			//If there's an error, just use the unextended manifest
 			ThrowableHandling.handleWithoutExit(ex);
