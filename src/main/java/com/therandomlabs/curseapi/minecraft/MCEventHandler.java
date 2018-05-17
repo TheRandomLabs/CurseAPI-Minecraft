@@ -37,11 +37,11 @@ public interface MCEventHandler {
 		getLogger().info("Downloading: " + url);
 	}
 
-	default void downloadingFile(String name, int count, int total) {
-		if(name.equals(Mod.UNKNOWN_NAME)) {
-			getLogger().info("Downloading file %s of %s...", count, total, name);
+	default void downloadingFile(Mod mod, int count, int total) {
+		if(mod.title.equals(Mod.UNKNOWN_NAME)) {
+			getLogger().info("Downloading file %s of %s: ", count, total, mod.projectID);
 		} else {
-			getLogger().info("Downloading file %s of %s: %s", count, total, name);
+			getLogger().info("Downloading file %s of %s: %s", count, total, mod.title);
 		}
 
 		getLogger().flush();
