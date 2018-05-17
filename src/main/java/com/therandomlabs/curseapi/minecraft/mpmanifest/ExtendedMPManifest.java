@@ -329,7 +329,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public String toPrettyJsonWithTabs() {
-		return toPrettyJson().replaceAll(" {2}", "\t");
+		return StringUtils.replaceSpacesWithTabs(toPrettyJson(), 2);
 	}
 
 	public void writeTo(String path) throws IOException {
@@ -337,7 +337,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public void writeTo(Path path) throws IOException {
-		NIOUtils.write(path, toJson(), true);
+		NIOUtils.write(path, toJson());
 	}
 
 	public void writeToPretty(String path) throws IOException {
@@ -345,7 +345,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public void writeToPretty(Path path) throws IOException {
-		NIOUtils.write(path, toPrettyJsonWithTabs(), true);
+		NIOUtils.write(path, toPrettyJsonWithTabs());
 	}
 
 	private boolean isActuallyExtended() {

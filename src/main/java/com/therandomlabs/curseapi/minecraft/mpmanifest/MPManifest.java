@@ -9,6 +9,7 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
+import com.therandomlabs.curseapi.project.ProjectType;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.misc.ThreadUtils;
@@ -39,14 +40,21 @@ public final class MPManifest implements Cloneable, Serializable {
 		public Mod toMod() throws CurseException {
 			final Mod mod = new Mod();
 
-			try {
-				mod.title = CurseProject.fromID(projectID).title();
-			} catch(InvalidProjectIDException ex) {
-				mod.title = Mod.UNKNOWN_NAME;
-			}
 			mod.projectID = projectID;
 			mod.fileID = fileID;
 			mod.required = required;
+
+			CurseProject project = null;
+			try {
+				project = CurseProject.fromID(projectID);
+			} catch(InvalidProjectIDException ignored) {}
+
+			if(project == null) {
+				mod.title = Mod.UNKNOWN_NAME;
+			} else {
+				mod.title = project.title();
+				mod.isResourcePack = project.type() == ProjectType.Minecraft.TEXTURE_PACKS;
+			}
 
 			return mod;
 		}
@@ -115,6 +123,7 @@ public final class MPManifest implements Cloneable, Serializable {
 		manifest.overrides = overrides;
 		manifest.minecraft = minecraft.clone();
 		manifest.projectID = projectID;
+		manifest.optifineVersion = "latest";
 
 		return manifest;
 	}
@@ -124,7 +133,7 @@ public final class MPManifest implements Cloneable, Serializable {
 	}
 
 	public String toPrettyJsonWithTabs() {
-		return toPrettyJson().replaceAll(" {2}", "\t");
+		return StringUtils.replaceSpacesWithTabs(toPrettyJson(), 2);
 	}
 
 	@Override
