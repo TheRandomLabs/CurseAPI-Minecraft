@@ -47,8 +47,9 @@ public final class MinecraftForge {
 
 	public static String validateVersion(String version) throws CurseException, IOException {
 		if(!isValidVersion(version)) {
-			invalidVersion(version);
+			throw new InvalidForgeVersionException(version);
 		}
+
 		return version;
 	}
 
@@ -233,11 +234,11 @@ public final class MinecraftForge {
 		final int index2 = versions.indexOf(version2);
 
 		if(index1 == -1) {
-			invalidVersion(version1);
+			throw new InvalidForgeVersionException(version1);
 		}
 
 		if(index2 == -1) {
-			invalidVersion(version2);
+			throw new InvalidForgeVersionException(version2);
 		}
 
 		//If version2 is older than version1, this will return a positive value,
@@ -245,12 +246,24 @@ public final class MinecraftForge {
 		return Integer.compare(index2, index1);
 	}
 
+	public static MinecraftVersion getMCVersion(String version) {
+		final String[] split = version.split("-");
+
+		if(split.length != 2) {
+			throw new InvalidForgeVersionException(version);
+		}
+
+		final MinecraftVersion mcVersion = MinecraftVersion.fromString(split[0]);
+
+		if(mcVersion == null) {
+			throw new InvalidForgeVersionException(version);
+		}
+
+		return mcVersion;
+	}
+
 	public static void clearChangelogCache() {
 		changelog.clear();
 		versions.clear();
-	}
-
-	private static void invalidVersion(String version) throws CurseException {
-		throw new CurseException("Invalid Forge version: " + version);
 	}
 }

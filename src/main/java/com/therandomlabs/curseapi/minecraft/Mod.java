@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Locale;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.ProjectType;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
@@ -104,5 +106,31 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	@Override
 	public String toString() {
 		return "[projectID=" + projectID + ",fileID=" + fileID + ",title=\"" + title + "\"]";
+	}
+
+	public static Mod fromFile(CurseFile file) throws CurseException {
+		return fromFile(file, false);
+	}
+
+	public static Mod fromFileBasic(CurseFile file) {
+		try {
+			return fromFile(file, true);
+		} catch(CurseException ignored) {}
+
+		return null;
+	}
+
+	private static Mod fromFile(CurseFile file, boolean basic) throws CurseException {
+		final Mod mod = new Mod();
+
+		mod.projectID = file.projectID();
+		mod.fileID = file.id();
+
+		if(!basic) {
+			mod.isResourcePack = file.project().type() == ProjectType.Minecraft.TEXTURE_PACKS;
+			mod.url = file.downloadURL();
+		}
+
+		return mod;
 	}
 }

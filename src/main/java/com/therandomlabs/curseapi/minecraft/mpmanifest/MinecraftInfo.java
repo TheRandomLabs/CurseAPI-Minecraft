@@ -3,6 +3,7 @@ package com.therandomlabs.curseapi.minecraft.mpmanifest;
 import java.io.Serializable;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
+import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.util.CloneException;
 import com.therandomlabs.utils.misc.Assertions;
 
@@ -15,12 +16,8 @@ public final class MinecraftInfo implements Cloneable, Serializable {
 
 	public MinecraftInfo() {}
 
-	public MinecraftInfo(String version, String forgeVersion) {
-		this(MinecraftVersion.fromString(version), forgeVersion);
-	}
-
-	public MinecraftInfo(MinecraftVersion version, String forgeVersion) {
-		this.version = version;
+	public MinecraftInfo(String forgeVersion) {
+		this.version = MinecraftForge.getMCVersion(forgeVersion);
 		modLoaders = new ModLoaderInfo[1];
 		modLoaders[0] = new ModLoaderInfo(forgeVersion);
 	}

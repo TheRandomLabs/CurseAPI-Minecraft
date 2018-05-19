@@ -136,7 +136,7 @@ public final class MPManifest implements Cloneable, Serializable {
 
 		manifest.manifestType = manifestType;
 		manifest.manifestVersion = manifestVersion;
-		manifest.id = StringUtils.replaceWhitespace(name.toLowerCase(Locale.ROOT), "_");
+		manifest.id = ExtendedMPManifest.asID(name);
 		manifest.name = name;
 		manifest.version = version;
 		manifest.author = author;

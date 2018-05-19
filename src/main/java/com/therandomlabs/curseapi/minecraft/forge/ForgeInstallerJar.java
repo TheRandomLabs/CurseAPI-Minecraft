@@ -5,40 +5,40 @@ import java.nio.file.Path;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 
-public final class ForgeInstaller {
+public final class ForgeInstallerJar {
 	private final Path path;
 
-	public ForgeInstaller(Path path) {
+	public ForgeInstallerJar(Path path) {
 		this.path = path;
 	}
 
-	public static ForgeInstaller downloadLatest(MinecraftVersion version, Path location)
+	public static ForgeInstallerJar downloadLatest(MinecraftVersion version, Path location)
 			throws CurseException, IOException {
 		return download(MinecraftForge.getLatestVersion(version), location);
 	}
 
-	public static ForgeInstaller download(String forgeVersion, Path location)
+	public static ForgeInstallerJar download(String forgeVersion, Path location)
 			throws CurseException, IOException {
-		return new ForgeInstaller(MinecraftForge.downloadInstaller(forgeVersion, location));
+		return new ForgeInstallerJar(MinecraftForge.downloadInstaller(forgeVersion, location));
 	}
 
-	public static ForgeInstaller downloadLatestToDirectory(MinecraftVersion version,
+	public static ForgeInstallerJar downloadLatestToDirectory(MinecraftVersion version,
 			Path directory) throws CurseException, IOException {
 		return downloadToDirectory(MinecraftForge.getLatestVersion(version), directory);
 	}
 
-	public static ForgeInstaller downloadToDirectory(String forgeVersion, Path directory)
+	public static ForgeInstallerJar downloadToDirectory(String forgeVersion, Path directory)
 			throws CurseException, IOException {
-		return new ForgeInstaller(MinecraftForge.downloadInstallerToDirectory(forgeVersion,
+		return new ForgeInstallerJar(MinecraftForge.downloadInstallerToDirectory(forgeVersion,
 				directory));
 	}
 
-	public static ForgeInstaller downloadRecommended(MinecraftVersion version, Path location)
+	public static ForgeInstallerJar downloadRecommended(MinecraftVersion version, Path location)
 			throws CurseException, IOException {
 		return download(MinecraftForge.getRecommendedVersion(version), location);
 	}
 
-	public static ForgeInstaller downloadRecommendedToDirectory(MinecraftVersion version,
+	public static ForgeInstallerJar downloadRecommendedToDirectory(MinecraftVersion version,
 			Path directory) throws CurseException, IOException {
 		return downloadToDirectory(MinecraftForge.getRecommendedVersion(version), directory);
 	}
