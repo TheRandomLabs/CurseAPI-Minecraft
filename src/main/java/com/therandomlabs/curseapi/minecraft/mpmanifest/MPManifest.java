@@ -49,6 +49,9 @@ public final class MPManifest implements Cloneable, Serializable {
 
 				try {
 					project = CurseProject.fromID(projectID);
+
+					final CurseProject curseProject = project;
+					MCEventHandling.forEach(handler -> handler.downloadedModData(curseProject));
 				} catch(InvalidProjectIDException ignored) {}
 			}
 

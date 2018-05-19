@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft;
 
 import java.net.URL;
+import com.therandomlabs.curseapi.project.CurseProject;
 import static com.therandomlabs.utils.logging.Logging.getLogger;
 
 public interface MCEventHandler {
@@ -31,6 +32,19 @@ public interface MCEventHandler {
 
 	default void downloadingModData(int projectID) {
 		getLogger().info("Downloading data for mod with project ID: " + projectID);
+	}
+
+	default void downloadedModData(CurseProject project) {
+		getLogger().info("Downloaded data for mod with project ID: " + project.id() +
+				" (" + project.title() + ")");
+	}
+
+	default void downloadingChangelogData(URL url) {
+		getLogger().info("Downloading changelog data from: " + url);
+	}
+
+	default void downloadedChangelogData(URL url) {
+		getLogger().info("Downloaded changelog data from: " + url);
 	}
 
 	default void downloadingFromURL(URL url) {

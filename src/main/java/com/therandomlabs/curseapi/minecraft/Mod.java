@@ -87,12 +87,14 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	public Mod clone() {
 		try {
 			final Mod mod = (Mod) super.clone();
+
 			if(dependents instanceof ArrayList) {
 				mod.dependents = (ArrayList<Integer>) ((ArrayList<Integer>) dependents).clone();
 			} else {
 				mod.dependents = new TRLList<>(dependents);
 			}
 			mod.relatedFiles = CloneException.tryClone(relatedFiles);
+
 			return mod;
 		} catch(CloneNotSupportedException ignored) {}
 

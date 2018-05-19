@@ -2,6 +2,7 @@ package com.therandomlabs.curseapi.minecraft.mpmanifest.compare;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.util.DocumentUtils;
+import com.therandomlabs.curseapi.util.URLUtils;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
@@ -231,7 +233,6 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 
 	public Map<String, String> getChangelogs(boolean urls) throws CurseException, IOException {
 		final CurseFile oldFile = getOlderFile();
-		final CurseFile newFile = getNewerFile();
 
 		for(ModSpecificHandler handler : ManifestComparer.handlers) {
 			final Map<String, String> changelogs =
@@ -288,8 +289,12 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 
 		final List<String> list = new TRLList<>(toPreload);
 
-		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(),
-				index -> DocumentUtils.get(list.get(index)));
+		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(), index -> {
+			final URL url = URLUtils.url(list.get(index));
+			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
+			DocumentUtils.get(url);
+			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
+		});
 
 		final Map<VersionChange, Map<String, String>> changelogs =
 				new LinkedHashMap<>(versionChanges.size());

@@ -115,7 +115,7 @@ public final class ManifestComparer {
 	}
 
 	public static String getCurseForgeURL(CurseFile file) throws CurseException {
-		return file.url() == null ?
-				CurseMeta.getChangelogURLString(file.projectID(), file.id()) : file.urlString();
+		final String url = file.urlString();
+		return url == null ? CurseMeta.getChangelogURLString(file.projectID(), file.id()) : url;
 	}
 }
