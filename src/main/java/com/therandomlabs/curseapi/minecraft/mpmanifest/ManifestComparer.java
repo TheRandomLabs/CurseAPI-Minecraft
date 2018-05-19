@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest.compare;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.IOException;
 import java.net.URL;
@@ -10,7 +10,6 @@ import com.therandomlabs.curseapi.cursemeta.CurseMeta;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
-import com.therandomlabs.curseapi.minecraft.mpmanifest.ExtendedMPManifest;
 import com.therandomlabs.utils.collection.TRLList;
 
 public final class ManifestComparer {

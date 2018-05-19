@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest.compare;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -7,7 +7,6 @@ import java.util.Objects;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.Mod;
-import com.therandomlabs.curseapi.minecraft.mpmanifest.ExtendedMPManifest;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;

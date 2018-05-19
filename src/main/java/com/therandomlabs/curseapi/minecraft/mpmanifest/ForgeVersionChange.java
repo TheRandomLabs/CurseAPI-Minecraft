@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest.compare;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.IOException;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest.compare;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -191,14 +191,14 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		}
 
 		for(ModSpecificHandler handler : ManifestComparer.handlers) {
-			final List<String> urls = handler.getURLsToPreload(newMod.projectID, getOlderFile(),
+			if(handler.shouldPreloadOnlyNewFile(getProject())) {
+				return new ImmutableList<>(ManifestComparer.getChangelogURLString(newFile));
+			}
+
+			final List<String> urls = handler.getURLsToPreload(getProject().id(), getOlderFile(),
 					getNewerFile());
 			if(urls != null) {
 				return urls;
-			}
-
-			if(handler.shouldPreloadOnlyNewFile(newMod.projectID, getProject())) {
-				return new ImmutableList<>(ManifestComparer.getChangelogURLString(newFile));
 			}
 		}
 
