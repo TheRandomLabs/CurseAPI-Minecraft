@@ -71,7 +71,8 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	}
 
 	public boolean isOldFileUnknown() throws CurseException {
-		return getOldFile().id() != oldMod.fileID;
+		final CurseFile oldFile = getOldFile();
+		return oldFile.isNull() || oldFile.id() != oldMod.fileID;
 	}
 
 	public Mod getNewMod() {
@@ -107,7 +108,8 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	}
 
 	public boolean isNewFileUnknown() throws CurseException {
-		return getNewFile().id() != newMod.fileID;
+		final CurseFile newFile = getNewFile();
+		return newFile.isNull() || newFile.id() != newMod.fileID;
 	}
 
 	public boolean isDowngrade() {

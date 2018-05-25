@@ -1,7 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.io.Serializable;
-import java.util.Locale;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -49,7 +48,6 @@ public final class MPManifest implements Cloneable, Serializable {
 
 				try {
 					project = CurseProject.fromID(projectID);
-
 					final CurseProject curseProject = project;
 					MCEventHandling.forEach(handler -> handler.downloadedModData(curseProject));
 				} catch(InvalidProjectIDException ignored) {}
