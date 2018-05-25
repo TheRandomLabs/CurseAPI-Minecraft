@@ -5,9 +5,9 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import static com.therandomlabs.utils.logging.Logging.getLogger;
 
 public interface MCEventHandler {
-	default void noFilesFound(int projectID) {
-		getLogger().warning("No files with specified attributes found for project with ID: " +
-				projectID);
+	default void noFilesFound(CurseProject project) {
+		getLogger().warning("No files with specified attributes found for mod with project ID: " +
+				project.id() + " (" + project.title() + ")");
 	}
 
 	default void deleting(String fileName) {
@@ -36,6 +36,16 @@ public interface MCEventHandler {
 
 	default void downloadedModData(CurseProject project) {
 		getLogger().info("Downloaded data for mod with project ID: " + project.id() +
+				" (" + project.title() + ")");
+	}
+
+	default void downloadingModFileData(CurseProject project) {
+		getLogger().info("Downloading file data for mod with project ID: " + project.id() +
+				" (" + project.title() + ")");
+	}
+
+	default void downloadedModFileData(CurseProject project) {
+		getLogger().info("Downloaded file data for mod with project ID: " + project.id() +
 				" (" + project.title() + ")");
 	}
 

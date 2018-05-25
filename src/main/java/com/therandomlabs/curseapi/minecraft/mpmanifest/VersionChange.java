@@ -162,6 +162,10 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 			} catch(InvalidProjectIDException ex) {
 				hasNoProject = true;
 			}
+
+			if(project.isNull()) {
+				hasNoProject = true;
+			}
 		}
 		return project;
 	}
@@ -171,9 +175,13 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 			return;
 		}
 
+		final CurseProject project = getProject();
+
+		MCEventHandling.forEach(handler -> handler.downloadingModFileData(project));
+
 		if(CurseAPI.isAvoidingCurseMeta()) {
 			try {
-				files = getProject().filesBetween(getOlderFile().id(), getNewerFile().id());
+				files = project.filesBetween(getOlderFile().id(), getNewerFile().id());
 				valid = !files.isEmpty();
 			} catch(InvalidProjectIDException ex) {
 				valid = false;
@@ -191,8 +199,10 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 			}
 		}
 
-		if(!valid) {
-			MCEventHandling.forEach(handler -> handler.noFilesFound(newMod.projectID));
+		if(valid) {
+			MCEventHandling.forEach(handler -> handler.downloadedModFileData(project));
+		} else {
+			MCEventHandling.forEach(handler -> handler.noFilesFound(project));
 		}
 	}
 
