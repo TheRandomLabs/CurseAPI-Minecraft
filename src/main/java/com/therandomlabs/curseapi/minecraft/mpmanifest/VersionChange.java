@@ -171,16 +171,27 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 			return;
 		}
 
-		try {
-			files = CurseFile.filesFromProjectID(newMod.projectID);
-			valid = !files.isEmpty();
-		} catch(InvalidProjectIDException | CurseMetaException ex) {
-			valid = false;
+		if(CurseAPI.isAvoidingCurseMeta()) {
+			try {
+				files = getProject().filesBetween(getOlderFile().id(), getNewerFile().id());
+				valid = !files.isEmpty();
+			} catch(InvalidProjectIDException ex) {
+				valid = false;
+			}
+		} else {
+			try {
+				files = CurseFile.filesFromProjectID(newMod.projectID);
+				valid = !files.isEmpty();
+			} catch(InvalidProjectIDException | CurseMetaException ex) {
+				valid = false;
+			}
+
+			if(valid) {
+				files.between(getOlderFile().id(), getNewerFile().id());
+			}
 		}
 
-		if(valid) {
-			files.between(getOlderFile().id(), getNewerFile().id());
-		} else {
+		if(!valid) {
 			MCEventHandling.forEach(handler -> handler.noFilesFound(newMod.projectID));
 		}
 	}

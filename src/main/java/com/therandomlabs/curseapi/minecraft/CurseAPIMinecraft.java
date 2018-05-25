@@ -37,7 +37,7 @@ public final class CurseAPIMinecraft {
 		try {
 			return new URL(url);
 		} catch(MalformedURLException ignored) {
-			//This will never happen unless I screw up the URLs somehow
+			//This will never happen
 		}
 		return null;
 	}
