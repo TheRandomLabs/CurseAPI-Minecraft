@@ -20,8 +20,7 @@ import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
-import com.therandomlabs.curseapi.util.CloneException;
-import com.therandomlabs.curseapi.util.MiscUtils;
+import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.Assertions;
@@ -77,9 +76,9 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		try {
 			final ExtendedMPManifest manifest = (ExtendedMPManifest) super.clone();
 
-			manifest.files = CloneException.tryClone(files);
-			manifest.disabledMods = CloneException.tryClone(disabledMods);
-			manifest.additionalFiles = CloneException.tryClone(additionalFiles);
+			manifest.files = Utils.tryClone(files);
+			manifest.disabledMods = Utils.tryClone(disabledMods);
+			manifest.additionalFiles = Utils.tryClone(additionalFiles);
 			manifest.minecraft = minecraft.clone();
 
 			return manifest;
@@ -368,7 +367,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public static ExtendedMPManifest from(Path path, boolean downloadModData) throws IOException {
-		return tryEnsureExtended(MiscUtils.fromJson(path, ExtendedMPManifest.class),
+		return tryEnsureExtended(Utils.fromJson(path, ExtendedMPManifest.class),
 				downloadModData);
 	}
 

@@ -11,7 +11,7 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.ProjectType;
-import com.therandomlabs.curseapi.util.CloneException;
+import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
@@ -95,7 +95,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 			} else {
 				mod.dependents = new TRLList<>(dependents);
 			}
-			mod.relatedFiles = CloneException.tryClone(relatedFiles);
+			mod.relatedFiles = Utils.tryClone(relatedFiles);
 
 			return mod;
 		} catch(CloneNotSupportedException ignored) {}

@@ -10,7 +10,7 @@ import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.project.ProjectType;
-import com.therandomlabs.curseapi.util.CloneException;
+import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.misc.ThreadUtils;
 
@@ -168,7 +168,7 @@ public final class MPManifest implements Cloneable, Serializable {
 		try {
 			final MPManifest manifest = (MPManifest) super.clone();
 
-			manifest.files = CloneException.tryClone(files);
+			manifest.files = Utils.tryClone(files);
 			manifest.minecraft = minecraft.clone();
 
 			return manifest;

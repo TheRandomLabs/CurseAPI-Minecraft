@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
-import com.therandomlabs.curseapi.util.CloneException;
+import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.misc.Assertions;
 
 public final class MinecraftInfo implements Cloneable, Serializable {
@@ -50,7 +50,7 @@ public final class MinecraftInfo implements Cloneable, Serializable {
 	public MinecraftInfo clone() {
 		try {
 			final MinecraftInfo info = (MinecraftInfo) super.clone();
-			info.modLoaders = CloneException.tryClone(modLoaders);
+			info.modLoaders = Utils.tryClone(modLoaders);
 			return info;
 		} catch(CloneNotSupportedException ignored) {}
 

@@ -19,8 +19,8 @@ import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
-import com.therandomlabs.curseapi.util.DocumentUtils;
-import com.therandomlabs.curseapi.util.URLUtils;
+import com.therandomlabs.curseapi.util.Documents;
+import com.therandomlabs.curseapi.util.URLs;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
@@ -313,9 +313,9 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		final List<String> list = new TRLList<>(toPreload);
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(), index -> {
-			final URL url = URLUtils.url(list.get(index));
+			final URL url = URLs.url(list.get(index));
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
-			DocumentUtils.get(url);
+			Documents.get(url);
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
 		});
 

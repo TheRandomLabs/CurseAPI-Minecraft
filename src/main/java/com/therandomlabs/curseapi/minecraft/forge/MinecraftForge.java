@@ -8,8 +8,8 @@ import java.util.Locale;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
-import com.therandomlabs.curseapi.util.DocumentUtils;
-import com.therandomlabs.curseapi.util.URLUtils;
+import com.therandomlabs.curseapi.util.Documents;
+import com.therandomlabs.curseapi.util.URLs;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
@@ -58,7 +58,7 @@ public final class MinecraftForge {
 	}
 
 	public static URL getPageURLFromMCVersion(MinecraftVersion version) throws CurseException {
-		return URLUtils.url(VERSION_SPECIFIC_URL.replaceAll(MC_VERSION, version.toString()));
+		return URLs.url(VERSION_SPECIFIC_URL.replaceAll(MC_VERSION, version.toString()));
 	}
 
 	public static String getLatestVersion(String mcVersion) throws CurseException {
@@ -70,11 +70,11 @@ public final class MinecraftForge {
 	}
 
 	public static String getLatestVersion(URL url) throws CurseException {
-		return DocumentUtils.getValue(url, "class=title;tag=small;text").replaceAll(" - ", "-");
+		return Documents.getValue(url, "class=title;tag=small;text").replaceAll(" - ", "-");
 	}
 
 	public static String getLatestVersionWithoutChangelog() throws CurseException {
-		return getLatestVersion(URLUtils.url(URL));
+		return getLatestVersion(URLs.url(URL));
 	}
 
 	public static String getRecommendedVersion(String mcVersion) throws CurseException {
@@ -86,16 +86,16 @@ public final class MinecraftForge {
 	}
 
 	public static String getRecommendedVersion(URL url) throws CurseException {
-		return DocumentUtils.getValue(url, "class=title=1;tag=small;text").replaceAll(" - ", "-");
+		return Documents.getValue(url, "class=title=1;tag=small;text").replaceAll(" - ", "-");
 	}
 
 	public static String getRecommendedVersion() throws CurseException {
-		return getRecommendedVersion(URLUtils.url(URL));
+		return getRecommendedVersion(URLs.url(URL));
 	}
 
 	public static URL getInstallerURL(String forgeVersion) throws CurseException, IOException {
 		validateVersion(forgeVersion);
-		return URLUtils.url(INSTALLER_URL.replaceAll(FORGE_VERSION, forgeVersion));
+		return URLs.url(INSTALLER_URL.replaceAll(FORGE_VERSION, forgeVersion));
 	}
 
 	public static Path downloadInstaller(String forgeVersion, Path location)
@@ -147,7 +147,7 @@ public final class MinecraftForge {
 		if(!changelog.isEmpty()) {
 			validateVersion(version);
 		}
-		return URLUtils.url(CHANGELOG_URL.replaceAll(FORGE_VERSION, version));
+		return URLs.url(CHANGELOG_URL.replaceAll(FORGE_VERSION, version));
 	}
 
 	public static Map<String, String> getChangelog() throws CurseException, IOException {
@@ -157,7 +157,7 @@ public final class MinecraftForge {
 	public static Map<String, String> getChangelog(String oldVersion, String newVersion)
 			throws CurseException, IOException {
 		if(changelog.isEmpty()) {
-			final String[] lines = StringUtils.splitNewline(DocumentUtils.read(getChangelogURL()));
+			final String[] lines = StringUtils.splitNewline(Documents.read(getChangelogURL()));
 			final StringBuilder entry = new StringBuilder();
 			String version = getLatestVersionWithoutChangelog();
 
