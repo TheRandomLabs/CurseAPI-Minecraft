@@ -36,7 +36,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	public int compareTo(Mod mod) {
 		if(title.equals(UNKNOWN_NAME)) {
 			try {
-				title = CurseProject.fromID(projectID).title();
+				title = CurseProject.fromID(projectID, true).title();
 			} catch(CurseException ex) {
 				ThrowableHandling.handle(ex);
 			}
@@ -44,7 +44,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 		if(mod.title.equals(UNKNOWN_NAME)) {
 			try {
-				mod.title = CurseProject.fromID(mod.projectID).title();
+				mod.title = CurseProject.fromID(mod.projectID, true).title();
 			} catch(CurseException ex) {
 				ThrowableHandling.handle(ex);
 			}
@@ -65,7 +65,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 	public String title() throws CurseException {
 		if(title.equals(UNKNOWN_NAME)) {
-			title = CurseProject.fromID(projectID).title();
+			title = CurseProject.fromID(projectID, true).title();
 		}
 		return title;
 	}

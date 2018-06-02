@@ -2,7 +2,6 @@ package com.therandomlabs.curseapi.minecraft;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 
 public final class CurseAPIMinecraft {
 	public static final int LIGHTCHOCOLATE_PROJECT_ID = 257165;
@@ -28,10 +27,6 @@ public final class CurseAPIMinecraft {
 	public static final URL DARKCHOCOLATE_MANIFEST_TXT_URL = url(DARKCHOCOLATE_MANIFEST_TXT);
 
 	private CurseAPIMinecraft() {}
-
-	public static void clearAllCache() {
-		MinecraftForge.clearChangelogCache();
-	}
 
 	private static URL url(String url) {
 		try {
