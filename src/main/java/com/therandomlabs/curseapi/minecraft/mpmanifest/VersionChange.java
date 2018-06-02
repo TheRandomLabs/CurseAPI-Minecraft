@@ -315,7 +315,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(), index -> {
 			final URL url = URLs.of(list.get(index));
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
-			Documents.get(url);
+			CurseAPI.doWithRetries(() -> Documents.get(url));
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
 		});
 
