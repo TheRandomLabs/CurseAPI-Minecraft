@@ -36,9 +36,8 @@ public final class CurseAPIMinecraft {
 	private static URL url(String url) {
 		try {
 			return new URL(url);
-		} catch(MalformedURLException ignored) {
-			//This will never happen
-		}
+		} catch(MalformedURLException ignored) {}
+
 		return null;
 	}
 }

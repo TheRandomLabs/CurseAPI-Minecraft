@@ -58,7 +58,7 @@ public final class MinecraftForge {
 	}
 
 	public static URL getPageURLFromMCVersion(MinecraftVersion version) throws CurseException {
-		return URLs.url(VERSION_SPECIFIC_URL.replaceAll(MC_VERSION, version.toString()));
+		return URLs.of(VERSION_SPECIFIC_URL.replaceAll(MC_VERSION, version.toString()));
 	}
 
 	public static String getLatestVersion(String mcVersion) throws CurseException {
@@ -74,7 +74,7 @@ public final class MinecraftForge {
 	}
 
 	public static String getLatestVersionWithoutChangelog() throws CurseException {
-		return getLatestVersion(URLs.url(URL));
+		return getLatestVersion(URLs.of(URL));
 	}
 
 	public static String getRecommendedVersion(String mcVersion) throws CurseException {
@@ -90,12 +90,12 @@ public final class MinecraftForge {
 	}
 
 	public static String getRecommendedVersion() throws CurseException {
-		return getRecommendedVersion(URLs.url(URL));
+		return getRecommendedVersion(URLs.of(URL));
 	}
 
 	public static URL getInstallerURL(String forgeVersion) throws CurseException, IOException {
 		validateVersion(forgeVersion);
-		return URLs.url(INSTALLER_URL.replaceAll(FORGE_VERSION, forgeVersion));
+		return URLs.of(INSTALLER_URL.replaceAll(FORGE_VERSION, forgeVersion));
 	}
 
 	public static Path downloadInstaller(String forgeVersion, Path location)
@@ -147,7 +147,7 @@ public final class MinecraftForge {
 		if(!changelog.isEmpty()) {
 			validateVersion(version);
 		}
-		return URLs.url(CHANGELOG_URL.replaceAll(FORGE_VERSION, version));
+		return URLs.of(CHANGELOG_URL.replaceAll(FORGE_VERSION, version));
 	}
 
 	public static Map<String, String> getChangelog() throws CurseException, IOException {

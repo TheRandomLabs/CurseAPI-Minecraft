@@ -102,7 +102,7 @@ public final class ManifestComparer {
 	}
 
 	static URL getChangelogURL(CurseFile file) throws CurseException {
-		if(!CurseAPI.isAvoidingCurseMeta() || file.url() == null) {
+		if(CurseAPI.isCurseMetaEnabled() || file.url() == null) {
 			return CurseMeta.getChangelogURL(file.projectID(), file.id());
 		}
 

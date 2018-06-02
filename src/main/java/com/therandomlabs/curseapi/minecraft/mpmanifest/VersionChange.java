@@ -181,7 +181,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 
 		MCEventHandling.forEach(handler -> handler.downloadingModFileData(project));
 
-		if(CurseAPI.isAvoidingCurseMeta()) {
+		if(!CurseAPI.isCurseMetaEnabled()) {
 			try {
 				files = project.filesBetween(getOlderFile().id(), getNewerFile().id());
 				valid = !files.isEmpty();
@@ -273,7 +273,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 				if(urls) {
 					changelogs.put(file.name(), ManifestComparer.getCurseForgeURL(file));
 				} else {
-					String changelog = file.changelog();
+					String changelog = file.changelog(true);
 
 					for(ModSpecificHandler handler : ManifestComparer.handlers) {
 						changelog = handler.modifyChangelog(newMod.projectID, oldFile, newFile,
@@ -313,7 +313,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		final List<String> list = new TRLList<>(toPreload);
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), list.size(), index -> {
-			final URL url = URLs.url(list.get(index));
+			final URL url = URLs.of(list.get(index));
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
 			Documents.get(url);
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
