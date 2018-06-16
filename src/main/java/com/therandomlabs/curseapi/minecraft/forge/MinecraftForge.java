@@ -138,8 +138,14 @@ public final class MinecraftForge {
 	}
 
 	public static URL getChangelogURL() throws CurseException, IOException {
-		final String latestVersion = versions.isEmpty() ?
+		String latestVersion = versions.isEmpty() ?
 				getLatestVersionWithoutChangelog() : versions.get(0);
+
+		//TODO remove once 2709 is released
+		if("1.12.2-14.23.4.2708".equals(latestVersion)) {
+			latestVersion = "1.12.2-14.23.4.2707";
+		}
+
 		return getChangelogURL(latestVersion);
 	}
 
@@ -160,6 +166,13 @@ public final class MinecraftForge {
 			final String[] lines = StringUtils.splitNewline(Documents.read(getChangelogURL()));
 			final StringBuilder entry = new StringBuilder();
 			String version = getLatestVersionWithoutChangelog();
+
+			//TODO remove when 2709 is released
+			if("1.12.2-14.23.4.2708".equals(version)) {
+				version = "1.12.2-14.23.4.2707";
+				versions.add("1.12.2-14.23.4.2708");
+				changelog.put("1.12.2-14.23.4.2708", "No changelog provided.");
+			}
 
 			for(int i = 2; i < lines.length; i++) {
 				final String line = lines[i];
