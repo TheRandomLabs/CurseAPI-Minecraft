@@ -30,7 +30,7 @@ public final class MinecraftForge {
 	public static final String INSTALLER_URL = FORGE_URL_STRING + "maven/net/minecraftforge/" +
 			"forge/" + FORGE_VERSION + "/forge-" + FORGE_VERSION + "-installer.jar";
 	public static final String CHANGELOG_URL = FORGE_URL_STRING + "maven/net/minecraftforge/" +
-			"forge/" + FORGE_VERSION + "/forge-" + FORGE_URL_STRING + "-changelog.txt";
+			"forge/" + FORGE_VERSION + "/forge-" + FORGE_VERSION + "-changelog.txt";
 
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
@@ -174,7 +174,8 @@ public final class MinecraftForge {
 		if(!changelog.isEmpty()) {
 			validateVersion(version);
 		}
-		return URLs.of(CHANGELOG_URL.replaceAll(FORGE_VERSION, version));
+
+		return new URL(CHANGELOG_URL.replaceAll(FORGE_VERSION, version));
 	}
 
 	public static Map<String, String> getChangelog() throws CurseException, IOException {
