@@ -156,7 +156,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	}
 
 	public CurseProject getProject() throws CurseException {
-		if(project == null && !project.isNull() && valid) {
+		if(project == null && valid) {
 			project = CurseProject.fromID(newMod.projectID, true);
 		}
 
