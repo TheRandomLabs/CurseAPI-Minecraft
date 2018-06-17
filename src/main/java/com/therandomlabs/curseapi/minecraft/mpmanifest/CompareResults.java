@@ -61,6 +61,10 @@ public class CompareResults implements Serializable {
 		return unchanged;
 	}
 
+	public TRLList<VersionChange> getUpdated() {
+		return updated;
+	}
+
 	public TRLList<VersionChange> loadAndGetUpdated() throws CurseException {
 		if(!updatedLoaded) {
 			loadVersionChanges(updated);
