@@ -48,8 +48,12 @@ public class CompareResults implements Serializable {
 		return newManifest;
 	}
 
-	public TRLList<Mod> getUnchanged(boolean loadData) throws CurseException {
-		if(!unchangedLoaded && loadData) {
+	public TRLList<Mod> getUnchanged() {
+		return unchanged;
+	}
+
+	public TRLList<Mod> loadAndGetUnchanged() throws CurseException {
+		if(!unchangedLoaded) {
 			load(unchanged);
 			unchangedLoaded = true;
 		}
@@ -57,8 +61,8 @@ public class CompareResults implements Serializable {
 		return unchanged;
 	}
 
-	public TRLList<VersionChange> getUpdated(boolean loadData) throws CurseException {
-		if(!updatedLoaded && loadData) {
+	public TRLList<VersionChange> loadAndGetUpdated() throws CurseException {
+		if(!updatedLoaded) {
 			loadVersionChanges(updated);
 			updatedLoaded = true;
 		}
@@ -66,8 +70,12 @@ public class CompareResults implements Serializable {
 		return updated;
 	}
 
-	public TRLList<VersionChange> getDowngraded(boolean loadData) throws CurseException {
-		if(!downgradedLoaded && loadData) {
+	public TRLList<VersionChange> getDowngraded() {
+		return downgraded;
+	}
+
+	public TRLList<VersionChange> loadAndGetDowngraded() throws CurseException {
+		if(!downgradedLoaded) {
 			loadVersionChanges(downgraded);
 			downgradedLoaded = true;
 		}
@@ -75,7 +83,11 @@ public class CompareResults implements Serializable {
 		return downgraded;
 	}
 
-	public TRLList<Mod> getRemoved() throws CurseException {
+	public TRLList<Mod> getRemoved() {
+		return removed;
+	}
+
+	public TRLList<Mod> loadAndGetRemoved() throws CurseException {
 		if(!removedLoaded) {
 			load(removed);
 			removedLoaded = true;
@@ -84,7 +96,11 @@ public class CompareResults implements Serializable {
 		return removed;
 	}
 
-	public TRLList<Mod> getAdded() throws CurseException {
+	public TRLList<Mod> getAdded() {
+		return added;
+	}
+
+	public TRLList<Mod> loadAndGetAdded() throws CurseException {
 		if(!addedLoaded) {
 			load(added);
 			addedLoaded = true;
