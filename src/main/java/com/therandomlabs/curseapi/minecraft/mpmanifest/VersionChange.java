@@ -186,12 +186,14 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		}
 
 		for(ModSpecificHandler handler : ManifestComparer.handlers) {
+			final CurseFile newFile = getNewerFile();
+
 			if(handler.shouldPreloadOnlyNewFile(getProject())) {
 				return new ImmutableList<>(ManifestComparer.getChangelogURLString(newFile));
 			}
 
-			final List<String> urls = handler.getURLsToPreload(getProject().id(), getOlderFile(),
-					getNewerFile());
+			final List<String> urls =
+					handler.getURLsToPreload(getProject().id(), getOlderFile(), newFile);
 
 			if(urls != null) {
 				return urls;
