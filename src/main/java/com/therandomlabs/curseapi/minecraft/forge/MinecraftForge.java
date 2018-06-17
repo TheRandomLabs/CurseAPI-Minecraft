@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.forge;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -13,27 +14,41 @@ import com.therandomlabs.curseapi.util.URLs;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.NIOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
+import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class MinecraftForge {
 	public static final String TITLE = "Minecraft Forge";
 
-	public static final String URL = "https://files.minecraftforge.net/";
+	public static final String FORGE_URL_STRING = "https://files.minecraftforge.net/";
+	public static final URL FORGE_URL;
 
 	public static final String MC_VERSION = "::MC_VERSION::";
 	public static final String VERSION_SPECIFIC_URL =
-			URL + "maven/net/minecraftforge/forge/index_" + MC_VERSION + ".html";
+			FORGE_URL_STRING + "maven/net/minecraftforge/forge/index_" + MC_VERSION + ".html";
 
 	public static final String FORGE_VERSION = "::FORGE_VERSION::";
-	public static final String INSTALLER_URL = URL + "maven/net/minecraftforge/forge/" +
-			FORGE_VERSION + "/forge-" + FORGE_VERSION + "-installer.jar";
-	public static final String CHANGELOG_URL = URL + "maven/net/minecraftforge/forge/" +
-			FORGE_VERSION + "/forge-" + FORGE_VERSION + "-changelog.txt";
+	public static final String INSTALLER_URL = FORGE_URL_STRING + "maven/net/minecraftforge/" +
+			"forge/" + FORGE_VERSION + "/forge-" + FORGE_VERSION + "-installer.jar";
+	public static final String CHANGELOG_URL = FORGE_URL_STRING + "maven/net/minecraftforge/" +
+			"forge/" + FORGE_VERSION + "/forge-" + FORGE_URL_STRING + "-changelog.txt";
 
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
 
 	private static final Map<String, String> changelog = new LinkedHashMap<>();
 	private static final TRLList<String> versions = new TRLList<>();
+
+	static {
+		URL url = null;
+
+		try {
+			url = new URL(FORGE_URL_STRING);
+		} catch(MalformedURLException ex) {
+			ThrowableHandling.handle(ex);
+		}
+
+		FORGE_URL = url;
+	}
 
 	private MinecraftForge() {}
 
@@ -53,12 +68,16 @@ public final class MinecraftForge {
 		return version;
 	}
 
-	public static URL getPageURLFromMCVersion(String version) throws CurseException {
+	public static URL getPageURLFromMCVersion(String version) {
 		return getPageURLFromMCVersion(MinecraftVersion.fromString(version));
 	}
 
-	public static URL getPageURLFromMCVersion(MinecraftVersion version) throws CurseException {
-		return URLs.of(VERSION_SPECIFIC_URL.replaceAll(MC_VERSION, version.toString()));
+	public static URL getPageURLFromMCVersion(MinecraftVersion version) {
+		try {
+			return new URL(VERSION_SPECIFIC_URL.replaceAll(MC_VERSION, version.toString()));
+		} catch(MalformedURLException ignored) {}
+
+		return null;
 	}
 
 	public static String getLatestVersion(String mcVersion) throws CurseException {
@@ -73,24 +92,26 @@ public final class MinecraftForge {
 		return Documents.getValue(url, "class=title;tag=small;text").replaceAll(" - ", "-");
 	}
 
-	public static String getLatestVersionWithoutChangelog() throws CurseException {
-		return getLatestVersion(URLs.of(URL));
+	public static String getLatestVersionWithoutChangelog() throws CurseException, IOException{
+		return getLatestVersion(FORGE_URL);
 	}
 
-	public static String getRecommendedVersion(String mcVersion) throws CurseException {
+	public static String getRecommendedVersion(String mcVersion)
+			throws CurseException, IOException {
 		return getRecommendedVersion(MinecraftVersion.fromString(mcVersion));
 	}
 
-	public static String getRecommendedVersion(MinecraftVersion version) throws CurseException {
+	public static String getRecommendedVersion(MinecraftVersion version)
+			throws CurseException, IOException {
 		return getRecommendedVersion(getPageURLFromMCVersion(version));
 	}
 
-	public static String getRecommendedVersion(URL url) throws CurseException {
+	public static String getRecommendedVersion(URL url) throws CurseException, IOException {
 		return Documents.getValue(url, "class=title=1;tag=small;text").replaceAll(" - ", "-");
 	}
 
-	public static String getRecommendedVersion() throws CurseException {
-		return getRecommendedVersion(URLs.of(URL));
+	public static String getRecommendedVersion() throws CurseException, IOException {
+		return getRecommendedVersion(FORGE_URL);
 	}
 
 	public static URL getInstallerURL(String forgeVersion) throws CurseException, IOException {

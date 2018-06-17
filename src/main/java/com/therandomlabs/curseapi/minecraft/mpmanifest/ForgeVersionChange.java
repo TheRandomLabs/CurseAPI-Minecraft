@@ -74,7 +74,13 @@ public class ForgeVersionChange extends VersionChange {
 	}
 
 	@Override
-	void preload() {}
+	void preload() throws CurseException {
+		try {
+			MinecraftForge.getChangelog();
+		} catch(IOException ex) {
+			throw CurseException.fromThrowable(ex);
+		}
+	}
 
 	@Override
 	List<String> getURLsToPreload() {

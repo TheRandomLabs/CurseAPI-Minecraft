@@ -3,11 +3,10 @@ package com.therandomlabs.curseapi.minecraft.mpmanifest;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
-import java.util.Objects;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.Mod;
-import com.therandomlabs.curseapi.project.InvalidProjectIDException;
+import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
 
@@ -16,6 +15,7 @@ public class CompareResults implements Serializable {
 
 	private final ExtendedMPManifest oldManifest;
 	private final ExtendedMPManifest newManifest;
+
 	private final TRLList<Mod> unchanged;
 	private final TRLList<VersionChange> updated;
 	private final TRLList<VersionChange> downgraded;
@@ -23,6 +23,8 @@ public class CompareResults implements Serializable {
 	private final TRLList<Mod> added;
 
 	private boolean unchangedLoaded;
+	private boolean updatedLoaded;
+	private boolean downgradedLoaded;
 	private boolean removedLoaded;
 	private boolean addedLoaded;
 
@@ -46,8 +48,8 @@ public class CompareResults implements Serializable {
 		return newManifest;
 	}
 
-	public TRLList<Mod> getUnchanged() throws CurseException {
-		if(!unchangedLoaded) {
+	public TRLList<Mod> getUnchanged(boolean loadData) throws CurseException {
+		if(!unchangedLoaded && loadData) {
 			load(unchanged);
 			unchangedLoaded = true;
 		}
@@ -55,44 +57,22 @@ public class CompareResults implements Serializable {
 		return unchanged;
 	}
 
-	private void load(TRLList<Mod> mods) throws CurseException {
-		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(), index -> {
-			try {
-				mods.get(index).title();
-			} catch(InvalidProjectIDException ex) {
-				mods.set(index, null);
-			}
-		});
-		mods.removeIf(Objects::isNull);
-		mods.sort();
-	}
+	public TRLList<VersionChange> getUpdated(boolean loadData) throws CurseException {
+		if(!updatedLoaded && loadData) {
+			loadVersionChanges(updated);
+			updatedLoaded = true;
+		}
 
-	public TRLList<VersionChange> getUpdated() {
 		return updated;
 	}
 
-	public Map<VersionChange, Map<String, String>> getUpdatedChangelogs(boolean urls)
-			throws CurseException, IOException {
-		return VersionChange.getChangelogs(updated, urls, false);
-	}
+	public TRLList<VersionChange> getDowngraded(boolean loadData) throws CurseException {
+		if(!downgradedLoaded && loadData) {
+			loadVersionChanges(downgraded);
+			downgradedLoaded = true;
+		}
 
-	public Map<VersionChange, Map<String, String>> getUpdatedChangelogsQuietly(boolean urls)
-			throws CurseException, IOException {
-		return VersionChange.getChangelogs(updated, urls, true);
-	}
-
-	public TRLList<VersionChange> getDowngraded() {
 		return downgraded;
-	}
-
-	public Map<VersionChange, Map<String, String>> getDowngradedChangelogs(boolean urls)
-			throws CurseException, IOException {
-		return VersionChange.getChangelogs(downgraded, urls, false);
-	}
-
-	public Map<VersionChange, Map<String, String>> getDowngradedChangelogsQuietly(
-			boolean urls) throws CurseException, IOException {
-		return VersionChange.getChangelogs(downgraded, urls, true);
 	}
 
 	public TRLList<Mod> getRemoved() throws CurseException {
@@ -113,8 +93,14 @@ public class CompareResults implements Serializable {
 		return added;
 	}
 
-	public boolean hasForgeVersionChanged() {
-		return !getOldForgeVersion().equals(getNewForgeVersion());
+	public Map<VersionChange, Map<String, String>> getUpdatedChangelogs(boolean urls,
+			boolean quietly) throws CurseException, IOException {
+		return VersionChange.getChangelogs(updated, urls, quietly);
+	}
+
+	public Map<VersionChange, Map<String, String>> getDowngradedChangelogs(boolean urls,
+			boolean quietly) throws CurseException, IOException {
+		return VersionChange.getChangelogs(downgraded, urls, quietly);
 	}
 
 	public String getOldForgeVersion() {
@@ -123,5 +109,22 @@ public class CompareResults implements Serializable {
 
 	public String getNewForgeVersion() {
 		return newManifest.minecraft.getForgeVersion();
+	}
+
+	public int compareForgeVersions() throws CurseException, IOException {
+		return MinecraftForge.compare(getOldForgeVersion(), getNewForgeVersion());
+	}
+
+	private static void load(TRLList<Mod> mods) throws CurseException {
+		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(),
+				index -> mods.get(index).title());
+		mods.sort();
+	}
+
+	private static void loadVersionChanges(TRLList<VersionChange> versionChanges)
+			throws CurseException {
+		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(),
+				index -> versionChanges.get(index).preload());
+		versionChanges.sort();
 	}
 }

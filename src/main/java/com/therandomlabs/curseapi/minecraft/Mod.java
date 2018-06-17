@@ -10,6 +10,7 @@ import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.project.ProjectType;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
@@ -32,20 +33,11 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 	@Override
 	public int compareTo(Mod mod) {
-		if(title.equals(CurseProject.UNKNOWN_TITLE)) {
-			try {
-				title = CurseProject.fromID(projectID, true).title();
-			} catch(CurseException ex) {
-				ThrowableHandling.handle(ex);
-			}
-		}
-
-		if(mod.title.equals(CurseProject.UNKNOWN_TITLE)) {
-			try {
-				mod.title = CurseProject.fromID(mod.projectID, true).title();
-			} catch(CurseException ex) {
-				ThrowableHandling.handle(ex);
-			}
+		try {
+			title();
+			mod.title();
+		} catch(CurseException ex) {
+			ThrowableHandling.handle(ex);
 		}
 
 		return title.toLowerCase(Locale.ENGLISH).compareTo(mod.title.toLowerCase(Locale.ENGLISH));
@@ -63,8 +55,11 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 	public String title() throws CurseException {
 		if(title.equals(CurseProject.UNKNOWN_TITLE)) {
-			title = CurseProject.fromID(projectID, true).title();
+			try {
+				title = CurseProject.fromID(projectID, true).title();
+			} catch(InvalidProjectIDException ignored) {}
 		}
+
 		return title;
 	}
 
