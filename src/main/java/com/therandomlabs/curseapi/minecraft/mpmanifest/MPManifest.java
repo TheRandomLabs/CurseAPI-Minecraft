@@ -31,7 +31,7 @@ public final class MPManifest implements Cloneable, Serializable {
 		}
 
 		public Mod toMod() throws CurseException {
-			return toMod(true);
+			return toMod(false);
 		}
 
 		public Mod toMod(boolean downloadExtendedData) throws CurseException {
@@ -80,7 +80,7 @@ public final class MPManifest implements Cloneable, Serializable {
 		}
 
 		public static Mod[] toMods(CurseMod[] curseMods) throws CurseException {
-			return toMods(curseMods, true);
+			return toMods(curseMods, false);
 		}
 
 		public static Mod[] toMods(CurseMod[] curseMods, boolean downloadModData)
