@@ -61,7 +61,7 @@ public final class MPManifest implements Cloneable, Serializable {
 			}
 
 			if(project == null) {
-				mod.title = Mod.UNKNOWN_NAME;
+				mod.title = CurseProject.UNKNOWN_TITLE;
 			} else {
 				mod.title = project.title();
 				mod.isResourcePack = project.type() == ProjectType.Minecraft.TEXTURE_PACKS;

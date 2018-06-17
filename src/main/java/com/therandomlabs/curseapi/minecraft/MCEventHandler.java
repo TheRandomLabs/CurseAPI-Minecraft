@@ -62,7 +62,7 @@ public interface MCEventHandler {
 	}
 
 	default void downloadingFile(Mod mod, int count, int total) {
-		if(mod.title.equals(Mod.UNKNOWN_NAME)) {
+		if(mod.title.equals(CurseProject.UNKNOWN_TITLE)) {
 			getLogger().info("Downloading file %s of %s: ", count, total, mod.projectID);
 		} else {
 			getLogger().info("Downloading file %s of %s: %s", count, total, mod.title);
@@ -72,7 +72,7 @@ public interface MCEventHandler {
 	}
 
 	default void downloadedFile(String name, String fileName, int count) {
-		if(name.equals(Mod.UNKNOWN_NAME)) {
+		if(name.equals(CurseProject.UNKNOWN_TITLE)) {
 			getLogger().info("Downloaded mod %s: %s", name, fileName);
 		} else {
 			getLogger().info("Downloaded mod: " + fileName);

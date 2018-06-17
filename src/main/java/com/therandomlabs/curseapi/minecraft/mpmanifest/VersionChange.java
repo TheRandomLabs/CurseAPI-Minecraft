@@ -154,7 +154,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	}
 
 	public String getModTitle() throws CurseException {
-		return getProject() == null ? ManifestComparer.UNKNOWN_TITLE : getProject().title();
+		return getProject() == null ? CurseProject.UNKNOWN_TITLEN_TITLE : getProject().title();
 	}
 
 	public CurseProject getProject() throws CurseException {

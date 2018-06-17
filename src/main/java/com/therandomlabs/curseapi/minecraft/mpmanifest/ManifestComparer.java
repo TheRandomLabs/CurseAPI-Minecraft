@@ -15,7 +15,6 @@ import com.therandomlabs.utils.collection.TRLList;
 public final class ManifestComparer {
 	public static final String NO_CHANGELOG_PROVIDED = "No changelog provided.";
 	public static final String VIEW_CHANGELOG_AT = "View changelog at";
-	public static final String UNKNOWN_TITLE = "Unknown Title";
 
 	static final Set<ModSpecificHandler> handlers = new HashSet<>(2);
 

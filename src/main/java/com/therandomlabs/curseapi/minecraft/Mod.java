@@ -19,9 +19,7 @@ import com.therandomlabs.utils.throwable.ThrowableHandling;
 public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	private static final long serialVersionUID = -3120215335212824363L;
 
-	public static final String UNKNOWN_NAME = "Unknown Name";
-
-	public String title = UNKNOWN_NAME;
+	public String title = CurseProject.UNKNOWN_TITLE;
 	public int projectID;
 	public int fileID;
 	public Side side = Side.BOTH;
@@ -34,7 +32,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 	@Override
 	public int compareTo(Mod mod) {
-		if(title.equals(UNKNOWN_NAME)) {
+		if(title.equals(CurseProject.UNKNOWN_TITLE)) {
 			try {
 				title = CurseProject.fromID(projectID, true).title();
 			} catch(CurseException ex) {
@@ -42,7 +40,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 			}
 		}
 
-		if(mod.title.equals(UNKNOWN_NAME)) {
+		if(mod.title.equals(CurseProject.UNKNOWN_TITLE)) {
 			try {
 				mod.title = CurseProject.fromID(mod.projectID, true).title();
 			} catch(CurseException ex) {
@@ -64,7 +62,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	}
 
 	public String title() throws CurseException {
-		if(title.equals(UNKNOWN_NAME)) {
+		if(title.equals(CurseProject.UNKNOWN_TITLE)) {
 			title = CurseProject.fromID(projectID, true).title();
 		}
 		return title;
