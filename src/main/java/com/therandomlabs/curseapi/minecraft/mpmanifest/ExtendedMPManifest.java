@@ -355,7 +355,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public static ExtendedMPManifest from(String path) throws IOException {
-		return from(path, true);
+		return from(path, false);
 	}
 
 	public static ExtendedMPManifest from(String path, boolean downloadModData) throws IOException {
@@ -363,7 +363,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public static ExtendedMPManifest from(Path path) throws IOException {
-		return from(path, true);
+		return from(path, false);
 	}
 
 	public static ExtendedMPManifest from(Path path, boolean downloadModData) throws IOException {
