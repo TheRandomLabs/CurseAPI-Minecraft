@@ -22,9 +22,17 @@ public final class CurseAPIMinecraft {
 
 	public static final String DARKCHOCOLATE_ID = "darkchocolate";
 
-	public static final String DARKCHOCOLATE_MANIFEST_TXT = "https://raw.githubusercontent.com/" +
-			"TheRandomLabs/LightChocolate/master/darkchocolate.txt";
-	public static final URL DARKCHOCOLATE_MANIFEST_TXT_URL = url(DARKCHOCOLATE_MANIFEST_TXT);
+	public static final String DARKCHOCOLATE_REPO =
+			"https://github.com/TheRandomLabs/DarkChocolate";
+	public static final URL DARKCHOCOLATE_REPO_URL = url(DARKCHOCOLATE_REPO);
+	public static final String DARKCHOCOLATE_DOWNLOAD = DARKCHOCOLATE_REPO + "/archive/master.zip";
+	public static final URL DARKCHOCOLATE_DOWNLOAD_URL = url(DARKCHOCOLATE_DOWNLOAD);
+	public static final String DARKCHOCOLATE_MANIFEST_TXT =
+			"https://raw.githubusercontent.com/TheRandomLabs/DarkChocolate/master/manifest.txt";
+	public static final URL DARKCHOCOLATE_MANIFEST_TXT_URL = url(LIGHTCHOCOLATE_MANIFEST_TXT);
+	public static final String DARKCHOCOLATE_MANIFEST_JSON =
+			"https://raw.githubusercontent.com/TheRandomLabs/DarkChocolate/master/manifest.json";
+	public static final URL DARKCHOCOLATE_MANIFEST_JSON_URL = url(DARKCHOCOLATE_MANIFEST_JSON);
 
 	private CurseAPIMinecraft() {}
 
