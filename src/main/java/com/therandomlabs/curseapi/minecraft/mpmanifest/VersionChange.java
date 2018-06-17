@@ -70,6 +70,10 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		return oldFile;
 	}
 
+	public Mod getOlderMod() {
+		return isDowngrade() ? newMod : oldMod;
+	}
+
 	public CurseFile getOlderFile() throws CurseException {
 		return isDowngrade() ? getNewFile() : getOldFile();
 	}
@@ -93,6 +97,10 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		}
 
 		return newFile;
+	}
+
+	public Mod getNewerMod() {
+		return isDowngrade() ? oldMod : newMod;
 	}
 
 	public CurseFile getNewerFile() throws CurseException {
@@ -170,7 +178,8 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 
 		final CurseProject project = getProject();
 		MCEventHandling.forEach(handler -> handler.downloadingModFileData(project));
-		files = CurseFile.getFilesBetween(newMod.projectID, oldMod.fileID, newMod.fileID);
+		files = CurseFile.getFilesBetween(newMod.projectID, getOlderMod().fileID,
+				getNewerMod().fileID);
 		valid = !files.isEmpty();
 
 		if(valid) {
