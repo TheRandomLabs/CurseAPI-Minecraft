@@ -20,6 +20,8 @@ public interface ModSpecificHandler {
 	Map<String, String> getChangelogs(int projectID, CurseFile oldFile, CurseFile newFile,
 			boolean urls) throws CurseException, IOException;
 
+	String getChangelog(CurseFile file) throws CurseException;
+
 	String modifyChangelog(int projectID, CurseFile oldFile, CurseFile newFile,
 			String changelog) throws CurseException;
 }

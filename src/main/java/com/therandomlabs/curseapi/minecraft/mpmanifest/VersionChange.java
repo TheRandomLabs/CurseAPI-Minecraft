@@ -255,7 +255,15 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		final Map<String, String> changelogs = new LinkedHashMap<>(files.size());
 
 		for(CurseFile file : files) {
-			String changelog = file.changelog(true);
+			String changelog = null;
+
+			for(ModSpecificHandler handler : ManifestComparer.handlers) {
+				changelog = handler.getChangelog(file);
+			}
+
+			if(changelog == null) {
+				changelog = file.changelog(true);
+			}
 
 			if(file.hasChangelog()) {
 				if(urls) {
