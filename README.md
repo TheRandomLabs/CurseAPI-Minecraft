@@ -43,6 +43,7 @@ Example Gradle buildscript:
 Features:
 * The extended Curse manifest format. You can see an example
 [here](https://github.com/TheRandomLabs/LightChocolate) at manifest.json
+(I'm going to rework this soon)
 * Parsing Curse manifests
 * Manifest comparisons (which can be used to
 [create changelogs](https://github.com/TheRandomLabs/ChangelogGenerator))
