@@ -53,13 +53,13 @@ public final class MinecraftForge {
 	private MinecraftForge() {}
 
 	public static boolean isValidVersion(String version) throws CurseException, IOException {
-		if(versions.isEmpty()) {
-			getChangelog();
-		}
-
 		//Temporary fix
 		if(version.equals("1.12.2-14.23.4.2759")) {
 			return true;
+		}
+
+		if(versions.isEmpty()) {
+			getChangelog();
 		}
 
 		return versions.contains(version);
@@ -192,6 +192,11 @@ public final class MinecraftForge {
 			final String[] lines = StringUtils.splitNewline(Documents.read(getChangelogURL()));
 			final StringBuilder entry = new StringBuilder();
 			String version = getLatestVersionWithoutChangelog();
+
+			//Temporary fix
+			if(version.equals("1.12.2-14.23.4.2759")) {
+				changelog.put("1.12.2-14.23.4.2759", "LexManos: Remove BlamingTransformer (#5115)");
+			}
 
 			for(int i = 2; i < lines.length; i++) {
 				final String line = lines[i];
