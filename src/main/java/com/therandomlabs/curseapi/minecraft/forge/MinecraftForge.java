@@ -57,6 +57,11 @@ public final class MinecraftForge {
 			getChangelog();
 		}
 
+		//Temporary fix
+		if(version.equals("1.12.2-14.23.4.2759")) {
+			return true;
+		}
+
 		return versions.contains(version);
 	}
 
@@ -165,6 +170,11 @@ public final class MinecraftForge {
 	}
 
 	public static URL getChangelogURL(String version) throws CurseException, IOException {
+		//Temporary fix
+		if(version.equals("1.12.2-14.23.4.2759")) {
+			version = "1.12.2-14.23.4.2758";
+		}
+
 		if(!changelog.isEmpty()) {
 			validateVersion(version);
 		}
