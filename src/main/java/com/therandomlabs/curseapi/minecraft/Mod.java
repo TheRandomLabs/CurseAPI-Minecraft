@@ -45,10 +45,11 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 	public void validate() {
 		Assertions.nonEmpty(title, "title");
-		CurseAPI.validateID(projectID, fileID);
+		CurseAPI.validateProjectID(projectID);
+		CurseAPI.validateFileID(fileID);
 		Assertions.nonNull(side, "side");
 		Assertions.nonNull(dependents, "dependents");
-		dependents.forEach(CurseAPI::validateID);
+		dependents.forEach(CurseAPI::validateProjectIDID);
 		Assertions.nonNull(relatedFiles, "relatedFiles");
 		Arrays.stream(relatedFiles).forEach(FileInfo::validate);
 	}
