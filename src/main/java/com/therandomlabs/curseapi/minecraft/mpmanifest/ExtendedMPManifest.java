@@ -135,7 +135,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		minecraft.validate();
 
 		if(projectID != 0) {
-			CurseAPI.validateID(projectID);
+			CurseAPI.validateProjectID(projectID);
 		}
 
 		Assertions.nonNull(projectURL, "projectURL");
@@ -162,7 +162,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public int getFileID(int projectID) {
-		CurseAPI.validateID(projectID);
+		CurseAPI.validateProjectID(projectID);
 
 		for(Mod mod : files) {
 			if(mod.projectID == projectID) {
@@ -188,7 +188,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public boolean containsAndIsEnabled(int projectID) {
-		CurseAPI.validateID(projectID);
+		CurseAPI.validateProjectID(projectID);
 
 		for(Mod mod : files) {
 			if(mod.projectID == projectID) {
@@ -200,7 +200,8 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public boolean containsAndIsEnabled(int projectID, int fileID) {
-		CurseAPI.validateID(projectID, fileID);
+		CurseAPI.validateProjectID(projectID);
+		CurseAPI.validateFileID(fileID);
 
 		for(Mod mod : files) {
 			if(mod.projectID == projectID && (fileID == 0 || mod.fileID == fileID)) {
@@ -212,7 +213,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public boolean isDisabled(int projectID) {
-		CurseAPI.validateID(projectID);
+		CurseAPI.validateProjectID(projectID);
 
 		for(Mod mod : disabledMods) {
 			if(mod.projectID == projectID) {
