@@ -197,6 +197,8 @@ public final class MinecraftForge {
 			if(version.equals("1.12.2-14.23.4.2759")) {
 				versions.add("1.12.2-14.23.4.2759");
 				changelog.put("1.12.2-14.23.4.2759", "LexManos: Remove BlamingTransformer (#5115)");
+
+				version = "1.12.2-14.23.4.2758";
 			}
 
 			for(int i = 2; i < lines.length; i++) {
