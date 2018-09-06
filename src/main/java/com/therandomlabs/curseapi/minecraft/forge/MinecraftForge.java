@@ -53,16 +53,13 @@ public final class MinecraftForge {
 	private MinecraftForge() {}
 
 	public static boolean isValidVersion(String version) throws CurseException, IOException {
-		//Temporary fix
-		if(version.equals("1.12.2-14.23.4.2759")) {
-			return true;
-		}
+		return true;/*
 
 		if(versions.isEmpty()) {
 			getChangelog();
 		}
 
-		return versions.contains(version);
+		return versions.contains(version);Temporary fix*/
 	}
 
 	public static String validateVersion(String version) throws CurseException, IOException {
@@ -171,7 +168,7 @@ public final class MinecraftForge {
 
 	public static URL getChangelogURL(String version) throws CurseException, IOException {
 		//Temporary fix
-		if(version.equals("1.12.2-14.23.4.2759")) {
+		if(version.equals("1.12.2-14.23.4.2759") || version.equals("1.12.2-14.23.4.2760")) {
 			version = "1.12.2-14.23.4.2758";
 		}
 
@@ -194,7 +191,12 @@ public final class MinecraftForge {
 			String version = getLatestVersionWithoutChangelog();
 
 			//Temporary fix
-			if(version.equals("1.12.2-14.23.4.2759")) {
+			if(version.equals("1.12.2-14.23.4.2760")) {
+				versions.add("1.12.2-14.23.4.2760");
+				changelog.put("1.12.2-14.23.4.2760", "LexManos: Fix --mods and --modListFile arguments not making it past LaunchWrapper.");
+			}
+
+			if(version.equals("1.12.2-14.23.4.2759") || version.equals("1.12.2-14.23.4.2760")) {
 				versions.add("1.12.2-14.23.4.2759");
 				changelog.put("1.12.2-14.23.4.2759", "LexManos: Remove BlamingTransformer (#5115)");
 
@@ -203,6 +205,7 @@ public final class MinecraftForge {
 
 			for(int i = 2; i < lines.length; i++) {
 				final String line = lines[i];
+
 				if(line.startsWith("Build ")) {
 					version = StringUtils.removeLastChar(line.split(" ")[1]);
 					continue;
@@ -240,6 +243,11 @@ public final class MinecraftForge {
 
 				subchangelog.put(entry.getKey(), entry.getValue());
 			}
+		}
+
+		//Temporary fix
+		if(!newVersionFound) {
+			subchangelog.put("Error", "Forge changelog could not be parsed");
 		}
 
 		return subchangelog;
