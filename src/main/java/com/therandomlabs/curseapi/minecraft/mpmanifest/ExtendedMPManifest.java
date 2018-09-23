@@ -22,11 +22,12 @@ import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
-import com.therandomlabs.utils.io.NIOUtils;
+import com.therandomlabs.utils.io.IOUtils;
 import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
+//TODO rewrite, redo manifest format
 public final class ExtendedMPManifest implements Cloneable, Serializable {
 	private static final long serialVersionUID = 6601285145733232922L;
 
@@ -54,6 +55,22 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	public int minimumServerRam = 2048;
 	public int recommendedServerRam = 3072;
 
+	@Override
+	public ExtendedMPManifest clone() {
+		try {
+			final ExtendedMPManifest manifest = (ExtendedMPManifest) super.clone();
+
+			manifest.files = Utils.tryClone(files);
+			manifest.disabledMods = Utils.tryClone(disabledMods);
+			manifest.additionalFiles = Utils.tryClone(additionalFiles);
+			manifest.minecraft = minecraft.clone();
+
+			return manifest;
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
+	}
+
 	public MPManifest toCurseManifest() {
 		final MPManifest manifest = new MPManifest();
 
@@ -71,22 +88,6 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		return manifest;
 	}
 
-	@Override
-	public ExtendedMPManifest clone() {
-		try {
-			final ExtendedMPManifest manifest = (ExtendedMPManifest) super.clone();
-
-			manifest.files = Utils.tryClone(files);
-			manifest.disabledMods = Utils.tryClone(disabledMods);
-			manifest.additionalFiles = Utils.tryClone(additionalFiles);
-			manifest.minecraft = minecraft.clone();
-
-			return manifest;
-		} catch(CloneNotSupportedException ignored) {}
-
-		return null;
-	}
-
 	public void validate() {
 		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
 		Assertions.equals(manifestVersion, "manifestVersion", 1);
@@ -97,6 +98,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		Assertions.nonEmpty(description, "description");
 
 		Assertions.nonNull(files, "files");
+
 		for(Mod mod : files) {
 			mod.validate();
 
@@ -108,6 +110,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		}
 
 		Assertions.nonNull(disabledMods, "disabledMods");
+
 		for(Mod mod : disabledMods) {
 			mod.validate();
 
@@ -139,6 +142,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		}
 
 		Assertions.nonNull(projectURL, "projectURL");
+
 		if(!projectURL.equals(UNKNOWN_PROJECT_URL)) {
 			Assertions.validURL(projectURL);
 		}
@@ -228,7 +232,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		return enableIf(mod -> mod.projectID == projectID);
 	}
 
-	public boolean disable(int fileID) {
+	public boolean disable(int projectID) {
 		return disableIf(mod -> mod.projectID == projectID);
 	}
 
@@ -250,31 +254,6 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 
 	public void enableAll() {
 		enableIf(mod -> true);
-	}
-
-	private boolean move(boolean enable, Predicate<Mod> predicate) {
-		final List<Mod> newMods = new TRLList<>(files);
-		final List<Mod> newDisabledMods = new TRLList<>(disabledMods);
-
-		final List<Mod> source = enable ? newDisabledMods : newMods;
-		final List<Mod> destination = enable ? newMods : newDisabledMods;
-
-		boolean moved = false;
-
-		final Iterator<Mod> it = source.iterator();
-		while(it.hasNext()) {
-			final Mod mod = it.next();
-			if(predicate.test(mod)) {
-				destination.add(mod);
-				it.remove();
-				moved = true;
-			}
-		}
-
-		files = newMods.toArray(new Mod[0]);
-		disabledMods = newDisabledMods.toArray(new Mod[0]);
-
-		return moved;
 	}
 
 	public TRLList<Mod> getAllMods() {
@@ -340,7 +319,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public void writeTo(Path path) throws IOException {
-		NIOUtils.write(path, toJson());
+		IOUtils.write(path, toJson());
 	}
 
 	public void writeToPretty(String path) throws IOException {
@@ -348,7 +327,34 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 	}
 
 	public void writeToPretty(Path path) throws IOException {
-		NIOUtils.write(path, toPrettyJsonWithTabs());
+		IOUtils.write(path, toPrettyJsonWithTabs());
+	}
+
+	private boolean move(boolean enable, Predicate<Mod> predicate) {
+		final List<Mod> newMods = new TRLList<>(files);
+		final List<Mod> newDisabledMods = new TRLList<>(disabledMods);
+
+		final List<Mod> source = enable ? newDisabledMods : newMods;
+		final List<Mod> destination = enable ? newMods : newDisabledMods;
+
+		boolean moved = false;
+
+		final Iterator<Mod> it = source.iterator();
+
+		while(it.hasNext()) {
+			final Mod mod = it.next();
+
+			if(predicate.test(mod)) {
+				destination.add(mod);
+				it.remove();
+				moved = true;
+			}
+		}
+
+		files = newMods.toArray(new Mod[0]);
+		disabledMods = newDisabledMods.toArray(new Mod[0]);
+
+		return moved;
 	}
 
 	private boolean isActuallyExtended() {
@@ -387,17 +393,6 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 				manifest : manifest.toCurseManifest().toExtendedManifest(downloadModData);
 	}
 
-	private static ExtendedMPManifest tryEnsureExtended(ExtendedMPManifest manifest,
-			boolean downloadModData) {
-		try {
-			return ensureExtended(manifest, downloadModData);
-		} catch(CurseException ex) {
-			//If there's an error, just use the unextended manifest
-			ThrowableHandling.handleWithoutExit(ex);
-		}
-		return manifest;
-	}
-
 	public static ExtendedMPManifest ofFiles(String name, CurseFileList files)
 			throws CurseException {
 		Assertions.nonNull(name, "name");
@@ -431,5 +426,16 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 
 	static String asID(String name) {
 		return StringUtils.replaceWhitespace(name.toLowerCase(Locale.ROOT), "_");
+	}
+
+	private static ExtendedMPManifest tryEnsureExtended(ExtendedMPManifest manifest,
+			boolean downloadModData) {
+		try {
+			return ensureExtended(manifest, downloadModData);
+		} catch(CurseException ex) {
+			//If there's an error, just use the unextended manifest
+			ThrowableHandling.handleWithoutExit(ex);
+		}
+		return manifest;
 	}
 }

@@ -96,8 +96,14 @@ public final class ManifestComparer {
 			downgraded.add(new ForgeVersionChange(mcVersion, newForge, oldForge, true));
 		}
 
-		return new CompareResults(oldManifest, newManifest, unchanged, updated, downgraded, removed,
+		return new CompareResults(oldManifest, newManifest, unchanged, updated, downgraded,
+				removed,
 				added);
+	}
+
+	public static String getCurseForgeURL(CurseFile file) throws CurseException {
+		final String url = file.urlString();
+		return url == null ? CurseMeta.getChangelogURLString(file.projectID(), file.id()) : url;
 	}
 
 	static URL getChangelogURL(CurseFile file) throws CurseException {
@@ -110,10 +116,5 @@ public final class ManifestComparer {
 
 	static String getChangelogURLString(CurseFile file) throws CurseException {
 		return getChangelogURL(file).toString();
-	}
-
-	public static String getCurseForgeURL(CurseFile file) throws CurseException {
-		final String url = file.urlString();
-		return url == null ? CurseMeta.getChangelogURLString(file.projectID(), file.id()) : url;
 	}
 }

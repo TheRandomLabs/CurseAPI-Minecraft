@@ -22,6 +22,22 @@ public final class MinecraftInfo implements Cloneable, Serializable {
 		modLoaders[0] = new ModLoaderInfo(forgeVersion);
 	}
 
+	@Override
+	public MinecraftInfo clone() {
+		try {
+			final MinecraftInfo info = (MinecraftInfo) super.clone();
+			info.modLoaders = Utils.tryClone(modLoaders);
+			return info;
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "[version=\"" + version + ",modLoaders=" + Arrays.toString(modLoaders) + "]";
+	}
+
 	public void validate() {
 		Assertions.nonNull(version, "version");
 		Assertions.validPath(libraries);
@@ -44,22 +60,6 @@ public final class MinecraftInfo implements Cloneable, Serializable {
 		if(!primaryFound) {
 			throw new IllegalStateException("There must be a primary mod loader");
 		}
-	}
-
-	@Override
-	public MinecraftInfo clone() {
-		try {
-			final MinecraftInfo info = (MinecraftInfo) super.clone();
-			info.modLoaders = Utils.tryClone(modLoaders);
-			return info;
-		} catch(CloneNotSupportedException ignored) {}
-
-		return null;
-	}
-
-	@Override
-	public String toString() {
-		return "[version=\"" + version + ",modLoaders=" + Arrays.toString(modLoaders) + "]";
 	}
 
 	public String getForgeVersion() {

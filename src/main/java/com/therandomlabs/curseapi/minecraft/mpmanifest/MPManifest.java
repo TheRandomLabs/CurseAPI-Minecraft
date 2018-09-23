@@ -30,6 +30,25 @@ public final class MPManifest implements Cloneable, Serializable {
 			this.required = required;
 		}
 
+		@Override
+		public int hashCode() {
+			return projectID + fileID;
+		}
+
+		@Override
+		public boolean equals(Object object) {
+			return object instanceof CurseMod && object.hashCode() == hashCode();
+		}
+
+		@Override
+		public CurseMod clone() {
+			try {
+				return (CurseMod) super.clone();
+			} catch(CloneNotSupportedException ignored) {}
+
+			return null;
+		}
+
 		public Mod toMod() throws CurseException {
 			return toMod(false);
 		}
@@ -70,15 +89,6 @@ public final class MPManifest implements Cloneable, Serializable {
 			return mod;
 		}
 
-		@Override
-		public CurseMod clone() {
-			try {
-				return (CurseMod) super.clone();
-			} catch(CloneNotSupportedException ignored) {}
-
-			return null;
-		}
-
 		public static Mod[] toMods(CurseMod[] curseMods) throws CurseException {
 			return toMods(curseMods, false);
 		}
@@ -86,32 +96,29 @@ public final class MPManifest implements Cloneable, Serializable {
 		public static Mod[] toMods(CurseMod[] curseMods, boolean downloadModData)
 				throws CurseException {
 			final Mod[] mods = new Mod[curseMods.length];
-			ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), curseMods.length,
-					index -> mods[index] = curseMods[index].toMod(downloadModData));
+
+			ThreadUtils.splitWorkload(
+					CurseAPI.getMaximumThreads(),
+					curseMods.length,
+					index -> mods[index] = curseMods[index].toMod(downloadModData)
+			);
+
 			return mods;
 		}
 
 		public static CurseMod[] fromMods(Mod[] mods) {
 			final CurseMod[] curseMods = new CurseMod[mods.length];
+
 			for(int i = 0; i < mods.length; i++) {
 				curseMods[i] = fromMod(mods[i]);
 			}
-			return curseMods;
-		}
 
-		@Override
-		public int hashCode() {
-			return projectID + fileID;
+			return curseMods;
 		}
 
 		@Override
 		public String toString() {
 			return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
-		}
-
-		@Override
-		public boolean equals(Object object) {
-			return object instanceof CurseMod && object.hashCode() == hashCode();
 		}
 
 		public static CurseMod fromMod(Mod mod) {
@@ -163,6 +170,10 @@ public final class MPManifest implements Cloneable, Serializable {
 		return StringUtils.replaceSpacesWithTabs(toPrettyJson(), 2);
 	}
 
+	public String toPrettyJson() {
+		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+	}
+
 	@Override
 	public MPManifest clone() {
 		try {
@@ -177,16 +188,13 @@ public final class MPManifest implements Cloneable, Serializable {
 		return null;
 	}
 
-	public String toPrettyJson() {
-		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
-	}
-
 	public boolean containsMod(int projectID, int fileID) {
 		for(CurseMod mod : files) {
 			if(mod.projectID == projectID && mod.fileID == fileID) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 }

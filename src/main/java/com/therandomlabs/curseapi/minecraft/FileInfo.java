@@ -19,11 +19,6 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 		this.side = side;
 	}
 
-	public void validate() {
-		Assertions.validPath(path);
-		Assertions.nonNull(side, "side");
-	}
-
 	@Override
 	public int compareTo(FileInfo file) {
 		return path.toLowerCase(Locale.ROOT).compareTo(file.path.toLowerCase(Locale.ROOT));
@@ -53,8 +48,14 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 		return "[path=\"" + path + ",side=" + side + "]";
 	}
 
+	public void validate() {
+		Assertions.validPath(path);
+		Assertions.nonNull(side, "side");
+	}
+
 	public static TRLList<String> getExcludedPaths(FileInfo[] files, Side side) {
 		final String[] paths;
+
 		if(side == Side.CLIENT) {
 			paths = getPaths(files, Side.SERVER, true);
 		} else if(side == Side.SERVER) {
@@ -62,6 +63,7 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 		} else {
 			paths = new String[0];
 		}
+
 		return new TRLList<>(paths);
 	}
 
@@ -73,6 +75,7 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 				if(side == Side.CLIENT || side == Side.BOTH) {
 					paths.add(file.path);
 				}
+
 				continue;
 			}
 
@@ -80,6 +83,7 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializ
 				if(side == Side.SERVER || side == Side.BOTH) {
 					paths.add(file.path);
 				}
+
 				continue;
 			}
 

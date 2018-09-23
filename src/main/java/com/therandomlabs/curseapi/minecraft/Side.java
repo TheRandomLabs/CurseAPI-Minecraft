@@ -16,15 +16,16 @@ public enum Side {
 		this.name = name;
 	}
 
+	@Override
+	public String toString() {
+		return name;
+	}
+
 	public static Side fromBooleans(boolean client, boolean server, boolean both) {
 		if(both || (client && server) || (!client && !server && !both)) {
 			return BOTH;
 		}
-		return client ? CLIENT : SERVER;
-	}
 
-	@Override
-	public String toString() {
-		return name;
+		return client ? CLIENT : SERVER;
 	}
 }

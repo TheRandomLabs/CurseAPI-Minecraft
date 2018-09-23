@@ -14,14 +14,14 @@ public interface ModSpecificHandler {
 	List<String> getURLsToPreload(int projectID, CurseFile oldFile, CurseFile newFile)
 			throws CurseException;
 
-	void filterFileList(int projectID, CurseFileList files, CurseFile oldFile,
-			CurseFile newFile) throws CurseException;
+	void filterFileList(int projectID, CurseFileList files, CurseFile oldFile, CurseFile newFile)
+			throws CurseException;
 
 	Map<String, String> getChangelogs(int projectID, CurseFile oldFile, CurseFile newFile,
 			boolean urls) throws CurseException, IOException;
 
 	String getChangelog(CurseFile file) throws CurseException;
 
-	String modifyChangelog(int projectID, CurseFile oldFile, CurseFile newFile,
-			String changelog) throws CurseException;
+	String modifyChangelog(int projectID, CurseFile oldFile, CurseFile newFile, String changelog)
+			throws CurseException;
 }

@@ -28,23 +28,37 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	private static final long serialVersionUID = 1789316477374597287L;
 
 	public static final String ARCHIVED_FILE = "[Archived file]";
-
+	transient boolean preloaded;
+	transient boolean valid = true;
 	private final String mcVersion;
 	private final Mod oldMod;
 	private final Mod newMod;
-
 	private transient CurseProject project;
 	private transient CurseFile oldFile;
 	private transient CurseFile newFile;
 	private transient CurseFileList files;
 
-	transient boolean preloaded;
-	transient boolean valid = true;
-
 	VersionChange(String mcVersion, Mod oldMod, Mod newMod) {
 		this.mcVersion = mcVersion;
 		this.oldMod = oldMod;
 		this.newMod = newMod;
+	}
+
+	@Override
+	public int hashCode() {
+		return mcVersion.hashCode() * oldMod.hashCode() * newMod.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		if(!(object instanceof VersionChange)) {
+			return false;
+		}
+
+		final VersionChange versionChange = (VersionChange) object;
+
+		return versionChange.mcVersion.equals(mcVersion) && versionChange.oldMod.equals(oldMod) &&
+				versionChange.newMod.equals(newMod);
 	}
 
 	@Override
@@ -107,18 +121,6 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		return isDowngrade() ? getOldFile() : getNewFile();
 	}
 
-	private CurseFile getFile(int fileID, boolean preferOlder) throws CurseException {
-		try {
-			return CurseFile.getFile(newMod.projectID, fileID);
-		} catch(CurseMetaException ignored) {}
-
-		if(files == null) {
-			preload();
-		}
-
-		return files.fileClosestToID(fileID, preferOlder);
-	}
-
 	public String getNewFileName() throws CurseException {
 		return isNewFileUnknown() ? ARCHIVED_FILE : getNewFile().name();
 	}
@@ -171,54 +173,6 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		return project;
 	}
 
-	void preload() throws CurseException {
-		if(preloaded) {
-			return;
-		}
-
-		final CurseProject project = getProject();
-		MCEventHandling.forEach(handler -> handler.downloadingModFileData(project));
-		files = CurseFile.getFilesBetween(newMod.projectID, getOlderMod().fileID,
-				getNewerMod().fileID);
-		valid = !files.isEmpty();
-
-		if(valid) {
-			MCEventHandling.forEach(handler -> handler.downloadedModFileData(project));
-		} else {
-			MCEventHandling.forEach(handler -> handler.noFilesFound(project));
-		}
-	}
-
-	List<String> getURLsToPreload() throws CurseException {
-		if(preloaded) {
-			return ImmutableList.empty();
-		}
-
-		for(ModSpecificHandler handler : ManifestComparer.handlers) {
-			final CurseFile newFile = getNewerFile();
-
-			if(handler.shouldPreloadOnlyNewFile(getProject())) {
-				return new ImmutableList<>(ManifestComparer.getChangelogURLString(newFile));
-			}
-
-			final List<String> urls =
-					handler.getURLsToPreload(getProject().id(), getOlderFile(), newFile);
-
-			if(urls != null) {
-				return urls;
-			}
-		}
-
-		final CurseFileList files = getChangelogFiles();
-		final List<String> urls = new TRLList<>(files.size());
-
-		for(CurseFile file : files) {
-			urls.add(ManifestComparer.getChangelogURLString(file));
-		}
-
-		return urls;
-	}
-
 	public Map<String, String> getChangelogsQuietly() {
 		return getChangelogsQuietly(false);
 	}
@@ -229,8 +183,11 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		} catch(CurseException | IOException | NumberFormatException |
 				IndexOutOfBoundsException | NullPointerException ex) {
 			ThrowableHandling.handleWithoutExit(ex);
-			return Collections.singletonMap("Could not retrieve changelog",
-					ex.getClass().getName() + ": " + ex.getMessage());
+
+			return Collections.singletonMap(
+					"Could not retrieve changelog",
+					ex.getClass().getName() + ": " + ex.getMessage()
+			);
 		}
 	}
 
@@ -270,8 +227,9 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 					changelogs.put(file.name(), ManifestComparer.getCurseForgeURL(file));
 				} else {
 					for(ModSpecificHandler handler : ManifestComparer.handlers) {
-						changelog = handler.modifyChangelog(newMod.projectID, oldFile, newFile,
-								changelog);
+						changelog = handler.modifyChangelog(
+								newMod.projectID, oldFile, newFile, changelog
+						);
 					}
 
 					changelogs.put(file.name(), changelog);
@@ -284,13 +242,73 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		return changelogs;
 	}
 
+	void preload() throws CurseException {
+		if(preloaded) {
+			return;
+		}
+
+		final CurseProject project = getProject();
+		MCEventHandling.forEach(handler -> handler.downloadingModFileData(project));
+		files = CurseFile.getFilesBetween(
+				newMod.projectID, getOlderMod().fileID, getNewerMod().fileID
+		);
+		valid = !files.isEmpty();
+
+		if(valid) {
+			MCEventHandling.forEach(handler -> handler.downloadedModFileData(project));
+		} else {
+			MCEventHandling.forEach(handler -> handler.noFilesFound(project));
+		}
+	}
+
+	List<String> getURLsToPreload() throws CurseException {
+		if(preloaded) {
+			return ImmutableList.empty();
+		}
+
+		for(ModSpecificHandler handler : ManifestComparer.handlers) {
+			final CurseFile newFile = getNewerFile();
+
+			if(handler.shouldPreloadOnlyNewFile(getProject())) {
+				return new ImmutableList<>(ManifestComparer.getChangelogURLString(newFile));
+			}
+
+			final List<String> urls =
+					handler.getURLsToPreload(getProject().id(), getOlderFile(), newFile);
+
+			if(urls != null) {
+				return urls;
+			}
+		}
+
+		final CurseFileList files = getChangelogFiles();
+		final List<String> urls = new TRLList<>(files.size());
+
+		for(CurseFile file : files) {
+			urls.add(ManifestComparer.getChangelogURLString(file));
+		}
+
+		return urls;
+	}
+
+	private CurseFile getFile(int fileID, boolean preferOlder) throws CurseException {
+		try {
+			return CurseFile.getFile(newMod.projectID, fileID);
+		} catch(CurseMetaException ignored) {}
+
+		if(files == null) {
+			preload();
+		}
+
+		return files.fileClosestToID(fileID, preferOlder);
+	}
+
 	public static Map<VersionChange, Map<String, String>> getChangelogs(
 			List<VersionChange> versionChanges, boolean urls, boolean quietly)
 			throws CurseException, IOException {
 		final Set<String> preloadURLsSet = ConcurrentHashMap.newKeySet();
 
-		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(),
-				index -> {
+		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(), index -> {
 			final VersionChange versionChange = versionChanges.get(index);
 			versionChange.preload();
 
@@ -309,8 +327,11 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), preloadURLs.size(), index -> {
 			final URL url = URLs.of(preloadURLs.get(index));
+
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
+
 			CurseAPI.doWithRetries(() -> Documents.get(url));
+
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
 		});
 

@@ -43,31 +43,6 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 		return title.toLowerCase(Locale.ENGLISH).compareTo(mod.title.toLowerCase(Locale.ENGLISH));
 	}
 
-	public void validate() {
-		Assertions.nonEmpty(title, "title");
-		CurseAPI.validateProjectID(projectID);
-		CurseAPI.validateFileID(fileID);
-		Assertions.nonNull(side, "side");
-		Assertions.nonNull(dependents, "dependents");
-		dependents.forEach(CurseAPI::validateProjectID);
-		Assertions.nonNull(relatedFiles, "relatedFiles");
-		Arrays.stream(relatedFiles).forEach(FileInfo::validate);
-	}
-
-	public String title() throws CurseException {
-		if(title.equals(CurseProject.UNKNOWN_TITLE)) {
-			try {
-				title = CurseProject.fromID(projectID, true).title();
-			} catch(InvalidProjectIDException ignored) {}
-		}
-
-		return title;
-	}
-
-	public String[] getRelatedFiles(Side side) {
-		return FileInfo.getPaths(relatedFiles, side, false);
-	}
-
 	@Override
 	public int hashCode() {
 		return projectID + fileID;
@@ -100,6 +75,31 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	@Override
 	public String toString() {
 		return "[projectID=" + projectID + ",fileID=" + fileID + ",title=\"" + title + "\"]";
+	}
+
+	public void validate() {
+		Assertions.nonEmpty(title, "title");
+		CurseAPI.validateProjectID(projectID);
+		CurseAPI.validateFileID(fileID);
+		Assertions.nonNull(side, "side");
+		Assertions.nonNull(dependents, "dependents");
+		dependents.forEach(CurseAPI::validateProjectID);
+		Assertions.nonNull(relatedFiles, "relatedFiles");
+		Arrays.stream(relatedFiles).forEach(FileInfo::validate);
+	}
+
+	public String title() throws CurseException {
+		if(title.equals(CurseProject.UNKNOWN_TITLE)) {
+			try {
+				title = CurseProject.fromID(projectID, true).title();
+			} catch(InvalidProjectIDException ignored) {}
+		}
+
+		return title;
+	}
+
+	public String[] getRelatedFiles(Side side) {
+		return FileInfo.getPaths(relatedFiles, side, false);
 	}
 
 	public static Mod fromFile(CurseFile file) throws CurseException {

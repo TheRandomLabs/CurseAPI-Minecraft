@@ -15,10 +15,6 @@ public final class ModLoaderInfo implements Cloneable, Serializable {
 		id = "forge-" + forgeVersion.split("-")[1];
 	}
 
-	public void validate() {
-		Assertions.nonEmpty(id, "id");
-	}
-
 	@Override
 	public ModLoaderInfo clone() {
 		try {
@@ -31,5 +27,9 @@ public final class ModLoaderInfo implements Cloneable, Serializable {
 	@Override
 	public String toString() {
 		return "[id=" + id + ",primary=" + primary + "]";
+	}
+
+	public void validate() {
+		Assertions.nonEmpty(id, "id");
 	}
 }

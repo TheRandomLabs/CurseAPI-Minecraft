@@ -136,15 +136,21 @@ public class CompareResults implements Serializable {
 	}
 
 	private static void load(TRLList<Mod> mods) throws CurseException {
-		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), mods.size(),
-				index -> mods.get(index).title());
+		ThreadUtils.splitWorkload(
+				CurseAPI.getMaximumThreads(),
+				mods.size(),
+				index -> mods.get(index).title()
+		);
 		mods.sort();
 	}
 
 	private static void loadVersionChanges(TRLList<VersionChange> versionChanges)
 			throws CurseException {
-		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(),
-				index -> versionChanges.get(index).preload());
+		ThreadUtils.splitWorkload(
+				CurseAPI.getMaximumThreads(),
+				versionChanges.size(),
+				index -> versionChanges.get(index).preload()
+		);
 		versionChanges.sort();
 	}
 }

@@ -12,7 +12,7 @@ import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.util.Documents;
 import com.therandomlabs.curseapi.util.URLs;
 import com.therandomlabs.utils.collection.TRLList;
-import com.therandomlabs.utils.io.NIOUtils;
+import com.therandomlabs.utils.io.IOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
@@ -53,13 +53,18 @@ public final class MinecraftForge {
 	private MinecraftForge() {}
 
 	public static boolean isValidVersion(String version) throws CurseException, IOException {
-		return true;/*
+		return true;
+		/*
+
+		TODO temporary fix, wait for build 2761 to implement a more permanent fix
 
 		if(versions.isEmpty()) {
 			getChangelog();
 		}
 
-		return versions.contains(version);Temporary fix*/
+		return versions.contains(version);
+
+		*/
 	}
 
 	public static String validateVersion(String version) throws CurseException, IOException {
@@ -94,25 +99,25 @@ public final class MinecraftForge {
 		return Documents.getValue(url, "class=title;tag=small;text").replaceAll(" - ", "-");
 	}
 
-	public static String getLatestVersionWithoutChangelog() throws CurseException, IOException{
+	public static String getLatestVersionWithoutChangelog() throws CurseException {
 		return getLatestVersion(FORGE_URL);
 	}
 
 	public static String getRecommendedVersion(String mcVersion)
-			throws CurseException, IOException {
+			throws CurseException {
 		return getRecommendedVersion(MinecraftVersion.fromString(mcVersion));
 	}
 
 	public static String getRecommendedVersion(MinecraftVersion version)
-			throws CurseException, IOException {
+			throws CurseException {
 		return getRecommendedVersion(getPageURLFromMCVersion(version));
 	}
 
-	public static String getRecommendedVersion(URL url) throws CurseException, IOException {
+	public static String getRecommendedVersion(URL url) throws CurseException {
 		return Documents.getValue(url, "class=title=1;tag=small;text").replaceAll(" - ", "-");
 	}
 
-	public static String getRecommendedVersion() throws CurseException, IOException {
+	public static String getRecommendedVersion() throws CurseException {
 		return getRecommendedVersion(FORGE_URL);
 	}
 
@@ -123,12 +128,12 @@ public final class MinecraftForge {
 
 	public static Path downloadInstaller(String forgeVersion, Path location)
 			throws CurseException, IOException {
-		return NIOUtils.download(getInstallerURL(forgeVersion), location);
+		return IOUtils.download(getInstallerURL(forgeVersion), location);
 	}
 
 	public static Path downloadInstallerToDirectory(String forgeVersion, Path directory)
 			throws CurseException, IOException {
-		return NIOUtils.downloadToDirectory(getInstallerURL(forgeVersion), directory);
+		return IOUtils.downloadToDirectory(getInstallerURL(forgeVersion), directory);
 	}
 
 	public static String getInstalledDirectoryName(MinecraftVersion minecraftVersion,
@@ -168,9 +173,7 @@ public final class MinecraftForge {
 
 	public static URL getChangelogURL(String version) throws CurseException, IOException {
 		//Temporary fix
-		//if(version.equals("1.12.2-14.23.4.2759") || version.equals("1.12.2-14.23.4.2760")) {
-			version = "1.12.2-14.23.4.2758";
-		//}
+		version = "1.12.2-14.23.4.2758";
 
 		if(!changelog.isEmpty()) {
 			validateVersion(version);
@@ -188,12 +191,13 @@ public final class MinecraftForge {
 		if(changelog.isEmpty()) {
 			final String[] lines = StringUtils.splitNewline(Documents.read(getChangelogURL()));
 			final StringBuilder entry = new StringBuilder();
-			String version = getLatestVersionWithoutChangelog();
+			String version = "1.12.2-14.23.4.2758"; //getLatestVersionWithoutChangelog();
 
 			//Temporary fix
 
 			versions.add("1.12.2-14.23.4.2760");
-			changelog.put("1.12.2-14.23.4.2760", "LexManos: Fix --mods and --modListFile arguments not making it past LaunchWrapper.");
+			changelog.put("1.12.2-14.23.4.2760", "LexManos: Fix --mods and --modListFile " +
+					"arguments not making it past LaunchWrapper.");
 
 			versions.add("1.12.2-14.23.4.2759");
 			changelog.put("1.12.2-14.23.4.2759", "LexManos: Remove BlamingTransformer (#5115)");
@@ -266,7 +270,8 @@ public final class MinecraftForge {
 		return versions.get(0);
 	}
 
-	public static int compare(String version1, String version2) throws CurseException, IOException {
+	public static int compare(String version1, String version2) throws CurseException,
+			IOException {
 		if(version1.equals(version2)) {
 			return 0;
 		}

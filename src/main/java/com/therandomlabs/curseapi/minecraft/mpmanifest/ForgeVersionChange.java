@@ -92,11 +92,13 @@ public class ForgeVersionChange extends VersionChange {
 		if(urls) {
 			final String newerVersion = isDowngrade() ? oldVersion : newVersion;
 			final URL changelogURL = MinecraftForge.getChangelogURL(newerVersion);
+
 			return new ImmutableMap<>(
 					new ImmutableSet<>(ManifestComparer.VIEW_CHANGELOG_AT),
 					new ImmutableList<>(changelogURL.toString())
 			);
 		}
+
 		return MinecraftForge.getChangelog(oldVersion, newVersion);
 	}
 }
