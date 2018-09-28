@@ -34,6 +34,6 @@ public interface ModSpecificChangelogHandler {
 
 	default String modifyChangelog(CurseFile oldFile, CurseFile newFile, String changelog)
 			throws CurseException {
-		return null;
+		return changelog;
 	}
 }
