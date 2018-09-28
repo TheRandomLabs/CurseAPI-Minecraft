@@ -127,7 +127,9 @@ public enum MCVersion implements GameVersion<MCVersion, MCVersionGroup> {
 	@SerializedName("1.1")
 	V1_1,
 	@SerializedName("1.0.0")
-	V1_0_0;
+	V1_0_0,
+	@SerializedName("Unknown")
+	UNKNOWN;
 
 	@SuppressWarnings("unchecked")
 	public static final GameVersionHandler<MCVersion, MCVersionGroup> HANDLER =
@@ -135,6 +137,11 @@ public enum MCVersion implements GameVersion<MCVersion, MCVersionGroup> {
 		@Override
 		public Game getGame() {
 			return Game.MINECRAFT;
+		}
+
+		@Override
+		public MCVersion getUnknownVersion() {
+			return UNKNOWN;
 		}
 
 		@Override
