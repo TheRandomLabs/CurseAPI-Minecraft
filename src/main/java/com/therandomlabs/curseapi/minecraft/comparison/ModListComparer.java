@@ -81,7 +81,7 @@ public final class ModListComparer {
 		final String oldModLoaderVersion = oldList.getModLoaderVersion();
 		final String newModLoaderVersion = newList.getModLoaderVersion();
 
-		if(newModLoaderVersion.startsWith("forge-")) {
+		if(MinecraftForge.TITLE.equals(newList.getModLoaderName())) {
 			final int compare;
 
 			try {

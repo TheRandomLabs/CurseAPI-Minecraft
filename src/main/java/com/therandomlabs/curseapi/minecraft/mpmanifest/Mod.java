@@ -124,7 +124,7 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		return null;
 	}
 
-	public static TRLList<Mod> fromFilesBasic(Collection<CurseFile> files) throws CurseException {
+	public static TRLList<Mod> fromFilesBasic(Collection<CurseFile> files) {
 		final TRLList<Mod> mods = new TRLList<>(files.size());
 
 		for(CurseFile file : files) {
