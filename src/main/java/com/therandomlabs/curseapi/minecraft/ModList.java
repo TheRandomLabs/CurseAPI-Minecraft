@@ -38,7 +38,7 @@ public class ModList extends ImmutableList<Mod> {
 		return fromCurseFiles(new ImmutableList<>(files), mcVersion, modLoaderVersion);
 	}
 
-	public static ModList fromCurseFiles(ImmutableList<CurseFile> files, MCVersion version,
+	public static ModList fromCurseFiles(Collection<CurseFile> files, MCVersion version,
 			String modLoaderVersion) throws CurseException {
 		return new ModList(Mod.fromFiles(files), version, modLoaderVersion);
 	}
@@ -48,7 +48,7 @@ public class ModList extends ImmutableList<Mod> {
 		return fromCurseFilesBasic(new ImmutableList<>(files), mcVersion, modLoaderVersion);
 	}
 
-	public static ModList fromCurseFilesBasic(ImmutableList<CurseFile> files, MCVersion version,
+	public static ModList fromCurseFilesBasic(Collection<CurseFile> files, MCVersion version,
 			String modLoaderVersion) throws CurseException {
 		return new ModList(Mod.fromFilesBasic(files), version, modLoaderVersion);
 	}
