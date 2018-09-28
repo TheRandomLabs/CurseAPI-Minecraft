@@ -8,6 +8,7 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
+import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.ImmutableMap;
@@ -20,7 +21,7 @@ public class ForgeVersionChange extends VersionChange {
 	private final String newVersion;
 	private final boolean isDowngrade;
 
-	ForgeVersionChange(String mcVersion, String oldVersion, String newVersion,
+	ForgeVersionChange(MCVersion mcVersion, String oldVersion, String newVersion,
 			boolean isDowngrade) {
 		super(mcVersion, null, null);
 		this.oldVersion = oldVersion;

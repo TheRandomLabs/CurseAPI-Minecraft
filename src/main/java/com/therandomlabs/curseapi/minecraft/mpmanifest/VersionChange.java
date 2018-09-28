@@ -16,6 +16,7 @@ import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.Documents;
 import com.therandomlabs.curseapi.util.URLs;
@@ -30,7 +31,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	public static final String ARCHIVED_FILE = "[Archived file]";
 	transient boolean preloaded;
 	transient boolean valid = true;
-	private final String mcVersion;
+	private final MCVersion mcVersion;
 	private final Mod oldMod;
 	private final Mod newMod;
 	private transient CurseProject project;
@@ -38,7 +39,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	private transient CurseFile newFile;
 	private transient CurseFileList files;
 
-	VersionChange(String mcVersion, Mod oldMod, Mod newMod) {
+	VersionChange(MCVersion mcVersion, Mod oldMod, Mod newMod) {
 		this.mcVersion = mcVersion;
 		this.oldMod = oldMod;
 		this.newMod = newMod;
@@ -142,10 +143,10 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		final CurseFile oldFile = getOlderFile();
 		final CurseFile newFile = getNewerFile();
 
-		if(oldFile.minecraftVersion() == newFile.minecraftVersion()) {
-			files.filterVersions(oldFile.minecraftVersion());
+		if(oldFile.gameVersion() == newFile.gameVersion()) {
+			files.filterGameVersions(oldFile.gameVersion());
 		} else {
-			files.filterMCVersionGroup(mcVersion);
+			files.filterGameVersionGroups(mcVersion.getGroup());
 		}
 
 		files.between(oldFile, newFile);

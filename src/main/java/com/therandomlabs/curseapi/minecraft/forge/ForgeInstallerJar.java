@@ -3,7 +3,7 @@ package com.therandomlabs.curseapi.minecraft.forge;
 import java.io.IOException;
 import java.nio.file.Path;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
+import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 
 public final class ForgeInstallerJar {
 	private final Path path;
@@ -12,7 +12,7 @@ public final class ForgeInstallerJar {
 		this.path = path;
 	}
 
-	public static ForgeInstallerJar downloadLatest(MinecraftVersion version, Path location)
+	public static ForgeInstallerJar downloadLatest(MCVersion version, Path location)
 			throws CurseException, IOException {
 		return download(MinecraftForge.getLatestVersion(version), location);
 	}
@@ -22,7 +22,7 @@ public final class ForgeInstallerJar {
 		return new ForgeInstallerJar(MinecraftForge.downloadInstaller(forgeVersion, location));
 	}
 
-	public static ForgeInstallerJar downloadLatestToDirectory(MinecraftVersion version,
+	public static ForgeInstallerJar downloadLatestToDirectory(MCVersion version,
 			Path directory) throws CurseException, IOException {
 		return downloadToDirectory(MinecraftForge.getLatestVersion(version), directory);
 	}
@@ -33,12 +33,12 @@ public final class ForgeInstallerJar {
 				directory));
 	}
 
-	public static ForgeInstallerJar downloadRecommended(MinecraftVersion version, Path location)
+	public static ForgeInstallerJar downloadRecommended(MCVersion version, Path location)
 			throws CurseException, IOException {
 		return download(MinecraftForge.getRecommendedVersion(version), location);
 	}
 
-	public static ForgeInstallerJar downloadRecommendedToDirectory(MinecraftVersion version,
+	public static ForgeInstallerJar downloadRecommendedToDirectory(MCVersion version,
 			Path directory) throws CurseException, IOException {
 		return downloadToDirectory(MinecraftForge.getRecommendedVersion(version), directory);
 	}

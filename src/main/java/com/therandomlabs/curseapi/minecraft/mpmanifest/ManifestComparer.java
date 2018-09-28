@@ -10,6 +10,7 @@ import com.therandomlabs.curseapi.cursemeta.CurseMeta;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
+import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.utils.collection.TRLList;
 
 public final class ManifestComparer {
@@ -39,7 +40,7 @@ public final class ManifestComparer {
 		final TRLList<Mod> removed = new TRLList<>();
 		final TRLList<Mod> added = new TRLList<>();
 
-		final String mcVersion = newManifest.minecraft.version.toString();
+		final MCVersion mcVersion = newManifest.minecraft.version;
 
 		for(Mod oldMod : oldManifest.files) {
 			boolean found = false;

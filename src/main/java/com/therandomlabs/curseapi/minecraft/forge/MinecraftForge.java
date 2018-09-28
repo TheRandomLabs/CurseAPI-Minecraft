@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
+import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Documents;
 import com.therandomlabs.curseapi.util.URLs;
 import com.therandomlabs.utils.collection.TRLList;
@@ -76,10 +76,10 @@ public final class MinecraftForge {
 	}
 
 	public static URL getPageURLFromMCVersion(String version) {
-		return getPageURLFromMCVersion(MinecraftVersion.fromString(version));
+		return getPageURLFromMCVersion(MCVersion.HANDLER.get(version));
 	}
 
-	public static URL getPageURLFromMCVersion(MinecraftVersion version) {
+	public static URL getPageURLFromMCVersion(MCVersion version) {
 		try {
 			return new URL(VERSION_SPECIFIC_URL.replaceAll(MC_VERSION, version.toString()));
 		} catch(MalformedURLException ignored) {}
@@ -88,10 +88,10 @@ public final class MinecraftForge {
 	}
 
 	public static String getLatestVersion(String mcVersion) throws CurseException {
-		return getLatestVersion(MinecraftVersion.fromString(mcVersion));
+		return getLatestVersion(MCVersion.HANDLER.get(mcVersion));
 	}
 
-	public static String getLatestVersion(MinecraftVersion version) throws CurseException {
+	public static String getLatestVersion(MCVersion version) throws CurseException {
 		return getLatestVersion(getPageURLFromMCVersion(version));
 	}
 
@@ -103,13 +103,11 @@ public final class MinecraftForge {
 		return getLatestVersion(FORGE_URL);
 	}
 
-	public static String getRecommendedVersion(String mcVersion)
-			throws CurseException {
-		return getRecommendedVersion(MinecraftVersion.fromString(mcVersion));
+	public static String getRecommendedVersion(String mcVersion) throws CurseException {
+		return getRecommendedVersion(MCVersion.HANDLER.get(mcVersion));
 	}
 
-	public static String getRecommendedVersion(MinecraftVersion version)
-			throws CurseException {
+	public static String getRecommendedVersion(MCVersion version) throws CurseException {
 		return getRecommendedVersion(getPageURLFromMCVersion(version));
 	}
 
@@ -136,30 +134,29 @@ public final class MinecraftForge {
 		return IOUtils.downloadToDirectory(getInstallerURL(forgeVersion), directory);
 	}
 
-	public static String getInstalledDirectoryName(MinecraftVersion minecraftVersion,
-			String forgeVersion) {
-		return getInstalledDirectoryName(minecraftVersion.toString(), forgeVersion);
+	public static String getInstalledDirectoryName(MCVersion mcVersion, String forgeVersion) {
+		return getInstalledDirectoryName(mcVersion.toString(), forgeVersion);
 	}
 
-	public static String getInstalledDirectoryName(String minecraftVersion, String forgeVersion) {
-		return minecraftVersion + "-forge" + forgeVersion;
+	public static String getInstalledDirectoryName(String mcVersion, String forgeVersion) {
+		return mcVersion + "-forge" + forgeVersion;
 	}
 
-	public static String get(String minecraftVersion, String forgeVersion)
+	public static String get(String mcVersion, String forgeVersion)
 			throws CurseException, IOException {
-		return get(MinecraftVersion.fromString(minecraftVersion), forgeVersion);
+		return get(MCVersion.HANDLER.get(mcVersion), forgeVersion);
 	}
 
-	public static String get(MinecraftVersion minecraftVersion, String forgeVersion)
+	public static String get(MCVersion mcVersion, String forgeVersion)
 			throws CurseException, IOException {
 		forgeVersion = forgeVersion.toLowerCase(Locale.ENGLISH);
 
 		if(forgeVersion.equals(LATEST)) {
-			return getLatestVersion(minecraftVersion);
+			return getLatestVersion(mcVersion);
 		}
 
 		if(forgeVersion.equals(RECOMMENDED)) {
-			return getRecommendedVersion(minecraftVersion);
+			return getRecommendedVersion(mcVersion);
 		}
 
 		return validateVersion(forgeVersion);
@@ -296,14 +293,14 @@ public final class MinecraftForge {
 		return Integer.compare(index2, index1);
 	}
 
-	public static MinecraftVersion getMCVersion(String version) {
+	public static MCVersion getMCVersion(String version) {
 		final String[] split = version.split("-");
 
 		if(split.length != 2) {
 			throw new InvalidForgeVersionException(version);
 		}
 
-		final MinecraftVersion mcVersion = MinecraftVersion.fromString(split[0]);
+		final MCVersion mcVersion = MCVersion.HANDLER.get(split[0]);
 
 		if(mcVersion == null) {
 			throw new InvalidForgeVersionException(version);

@@ -16,10 +16,10 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.FileInfo;
 import com.therandomlabs.curseapi.minecraft.Minecraft;
-import com.therandomlabs.curseapi.minecraft.MinecraftVersion;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
+import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.IOUtils;
@@ -398,12 +398,12 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		Assertions.nonNull(name, "name");
 		Assertions.nonNull(files, "files");
 
-		final MinecraftVersion version;
+		final MCVersion version;
 
 		if(files.isEmpty()) {
-			version = MinecraftVersion.LATEST_WITH_FORGE;
+			version = MCVersion.V1_12_2; //TODO latest with Forge
 		} else {
-			version = files.get(0).minecraftVersion();
+			version = files.get(0).gameVersion();
 		}
 
 		final ExtendedMPManifest manifest = new ExtendedMPManifest();
