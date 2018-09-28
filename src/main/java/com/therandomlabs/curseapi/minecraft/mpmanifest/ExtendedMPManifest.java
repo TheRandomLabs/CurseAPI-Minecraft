@@ -91,7 +91,6 @@ public final class ExtendedMPManifest implements Cloneable {
 		Assertions.nonEmpty(version, "version");
 		Assertions.nonEmpty(author, "author");
 		Assertions.nonEmpty(description, "description");
-
 		Assertions.nonNull(files, "files");
 
 		for(Mod mod : files) {
