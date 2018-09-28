@@ -12,6 +12,7 @@ import com.therandomlabs.curseapi.minecraft.ModList;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
+import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
 
@@ -147,11 +148,12 @@ public final class ModListComparer {
 		handlers.remove(handler);
 	}
 
-	public static Set<ModSpecificChangelogHandler> getChangelogHandlers(int projectID) {
+	public static Set<ModSpecificChangelogHandler> getChangelogHandlers(CurseProject project)
+			throws CurseException {
 		final Set<ModSpecificChangelogHandler> handlers = new HashSet<>(1);
 
 		for(ModSpecificChangelogHandler handler : ModListComparer.handlers) {
-			if(handler.getProjectID() == projectID) {
+			if(handler.handlesMod(project)) {
 				handlers.add(handler);
 			}
 		}

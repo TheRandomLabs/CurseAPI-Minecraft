@@ -35,7 +35,7 @@ public class VersionChange implements Comparable<VersionChange> {
 	private final Mod oldMod;
 	private final Mod newMod;
 
-	private final Set<ModSpecificChangelogHandler> handlers;
+	private Set<ModSpecificChangelogHandler> handlers;
 
 	private CurseProject project;
 
@@ -49,8 +49,6 @@ public class VersionChange implements Comparable<VersionChange> {
 
 		this.oldMod = oldMod;
 		this.newMod = newMod;
-
-		handlers = ModListComparer.getChangelogHandlers(newMod.projectID);
 	}
 
 	@Override
@@ -173,6 +171,7 @@ public class VersionChange implements Comparable<VersionChange> {
 	public CurseProject getProject() throws CurseException {
 		if(project == null && valid) {
 			project = CurseProject.fromID(newMod.projectID, true);
+			handlers = ModListComparer.getChangelogHandlers(project);
 		}
 
 		return project;

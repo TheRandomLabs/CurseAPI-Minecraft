@@ -9,7 +9,7 @@ import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.project.CurseProject;
 
 public interface ModSpecificChangelogHandler {
-	int getProjectID();
+	boolean handlesMod(CurseProject project) throws CurseException;
 
 	default boolean isFullChangelogInNewFile(CurseProject project) {
 		return false;
