@@ -2,6 +2,13 @@ package com.therandomlabs.curseapi.minecraft;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import com.therandomlabs.curseapi.minecraft.version.MCVersion;
+import com.therandomlabs.utils.collection.ImmutableList;
+import com.therandomlabs.utils.collection.TRLList;
+import com.therandomlabs.utils.platform.Platform;
+import com.therandomlabs.utils.systemproperty.SystemProperties;
 
 public final class CurseAPIMinecraft {
 	public static final int LIGHTCHOCOLATE_PROJECT_ID = 257165;
@@ -34,7 +41,38 @@ public final class CurseAPIMinecraft {
 			"https://raw.githubusercontent.com/TheRandomLabs/DarkChocolate/master/manifest.json";
 	public static final URL DARKCHOCOLATE_MANIFEST_JSON_URL = url(DARKCHOCOLATE_MANIFEST_JSON);
 
+	public static final TRLList<String> CLIENT_ONLY_FILES = new ImmutableList<>(
+			"resourcepacks",
+			"server-resource-packs",
+			"shaderpacks",
+			"options.txt",
+			"optionsof.txt",
+			"realms_persistence.json",
+			"servers.dat"
+	);
+
 	private CurseAPIMinecraft() {}
+
+	public static void initialize() {
+		//Initialize MCVersion
+		MCVersion.HANDLER.getGame();
+	}
+
+	public static Path getDefaultMCDirectory() {
+		switch(Platform.OS) {
+		case WINDOWS:
+			return Paths.get(System.getenv("APPDATA"), ".minecraft");
+		case MAC_OS_X:
+			return Paths.get(
+					SystemProperties.USER_HOME_DIRECTORY.get(),
+					"Library",
+					"Application Support",
+					"minecraft"
+			);
+		default:
+			return Paths.get(SystemProperties.USER_HOME_DIRECTORY.get(), ".minecraft");
+		}
+	}
 
 	private static URL url(String url) {
 		try {

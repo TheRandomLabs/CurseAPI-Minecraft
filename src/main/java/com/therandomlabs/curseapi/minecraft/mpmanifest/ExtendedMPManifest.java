@@ -14,8 +14,8 @@ import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFileList;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.minecraft.FileInfo;
-import com.therandomlabs.curseapi.minecraft.Minecraft;
 import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
@@ -296,7 +296,7 @@ public final class ExtendedMPManifest implements Cloneable, Serializable {
 		}
 
 		if(side == Side.SERVER) {
-			paths.addAll(Minecraft.CLIENT_ONLY_FILES);
+			paths.addAll(CurseAPIMinecraft.CLIENT_ONLY_FILES);
 		}
 
 		return paths;
