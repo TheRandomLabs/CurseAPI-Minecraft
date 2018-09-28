@@ -53,7 +53,7 @@ public class ModList extends ImmutableList<Mod> {
 	}
 
 	public static ModList fromCurseFilesBasic(CurseFile[] files, MCVersion mcVersion,
-			String modLoaderName, String modLoaderVersion) throws CurseException {
+			String modLoaderName, String modLoaderVersion) {
 		return fromCurseFilesBasic(new ImmutableList<>(files), mcVersion, modLoaderName,
 				modLoaderVersion);
 	}
