@@ -171,7 +171,7 @@ public class VersionChange implements Comparable<VersionChange> {
 	public CurseProject getProject() throws CurseException {
 		if(project == null && valid) {
 			project = CurseProject.fromID(newMod.projectID, true);
-			handlers = ModListComparer.getChangelogHandlers(project);
+			handlers = ModListComparer.getChangelogHandlers(project, newMod.projectID);
 		}
 
 		return project;
@@ -214,6 +214,8 @@ public class VersionChange implements Comparable<VersionChange> {
 			}
 		} catch(IOException ex) {
 			throw CurseException.fromThrowable(ex);
+		} catch(IndexOutOfBoundsException | NullPointerException | NumberFormatException ex) {
+			ThrowableHandling.handleWithoutExit(ex);
 		}
 
 		final CurseFileList files = getChangelogFiles();

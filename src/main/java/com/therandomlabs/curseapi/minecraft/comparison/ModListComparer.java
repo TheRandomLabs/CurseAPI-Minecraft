@@ -148,8 +148,12 @@ public final class ModListComparer {
 		handlers.remove(handler);
 	}
 
-	public static Set<ModSpecificChangelogHandler> getChangelogHandlers(CurseProject project)
-			throws CurseException {
+	public static Set<ModSpecificChangelogHandler> getChangelogHandlers(CurseProject project,
+			int projectID) throws CurseException {
+		if(project == null) {
+			project = CurseProject.nullProject(projectID);
+		}
+
 		final Set<ModSpecificChangelogHandler> handlers = new HashSet<>(1);
 
 		for(ModSpecificChangelogHandler handler : ModListComparer.handlers) {

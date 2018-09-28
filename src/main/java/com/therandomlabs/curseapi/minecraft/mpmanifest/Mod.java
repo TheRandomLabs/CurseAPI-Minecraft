@@ -3,6 +3,7 @@ package com.therandomlabs.curseapi.minecraft.mpmanifest;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import com.therandomlabs.curseapi.CurseAPI;
@@ -105,12 +106,32 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		return fromFile(file, false);
 	}
 
+	public static TRLList<Mod> fromFiles(Collection<CurseFile> files) throws CurseException {
+		final TRLList<Mod> mods = new TRLList<>(files.size());
+
+		for(CurseFile file : files) {
+			mods.add(fromFile(file));
+		}
+
+		return mods;
+	}
+
 	public static Mod fromFileBasic(CurseFile file) {
 		try {
 			return fromFile(file, true);
 		} catch(CurseException ignored) {}
 
 		return null;
+	}
+
+	public static TRLList<Mod> fromFilesBasic(Collection<CurseFile> files) throws CurseException {
+		final TRLList<Mod> mods = new TRLList<>(files.size());
+
+		for(CurseFile file : files) {
+			mods.add(fromFileBasic(file));
+		}
+
+		return mods;
 	}
 
 	private static Mod fromFile(CurseFile file, boolean basic) throws CurseException {
