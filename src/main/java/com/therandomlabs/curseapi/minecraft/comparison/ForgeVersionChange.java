@@ -12,6 +12,11 @@ public class ForgeVersionChange extends ModLoaderVersionChange {
 	}
 
 	@Override
+	public boolean equals(Object object) {
+		return object instanceof ForgeVersionChange && object.hashCode() == hashCode();
+	}
+
+	@Override
 	public String getModTitle() {
 		return MinecraftForge.TITLE;
 	}

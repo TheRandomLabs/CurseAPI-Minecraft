@@ -28,6 +28,16 @@ public class ModLoaderVersionChange extends VersionChange {
 	}
 
 	@Override
+	public int hashCode() {
+		return oldVersion.hashCode() * newVersion.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		return object instanceof ModLoaderVersionChange && object.hashCode() == hashCode();
+	}
+
+	@Override
 	public Mod getOldMod() {
 		return null;
 	}
