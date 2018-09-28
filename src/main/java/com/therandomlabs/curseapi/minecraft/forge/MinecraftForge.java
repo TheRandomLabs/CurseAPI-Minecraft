@@ -16,6 +16,7 @@ import com.therandomlabs.utils.io.IOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
+//TODO move to separate project, fix changelogs, etc.
 public final class MinecraftForge {
 	public static final String TITLE = "Minecraft Forge";
 

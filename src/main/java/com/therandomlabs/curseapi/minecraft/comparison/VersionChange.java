@@ -146,7 +146,7 @@ public class VersionChange implements Comparable<VersionChange> {
 		final CurseFile newFile = getNewerFile();
 
 		if(oldFile.gameVersion() == newFile.gameVersion()) {
-			changelogFiles.filterGameVersions(oldFile.gameVersion());
+			changelogFiles.filterGameVersions(oldFile.<MCVersion>gameVersion());
 		} else {
 			changelogFiles.filterGameVersionGroups(mcVersion.getGroup());
 		}
