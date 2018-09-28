@@ -1,18 +1,14 @@
 package com.therandomlabs.curseapi.minecraft.comparison;
 
-import java.io.IOException;
-import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
-import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.ImmutableList;
-import com.therandomlabs.utils.collection.ImmutableMap;
-import com.therandomlabs.utils.collection.ImmutableSet;
 
 public class ModLoaderVersionChange extends VersionChange {
 	private final String oldVersion;
@@ -92,20 +88,6 @@ public class ModLoaderVersionChange extends VersionChange {
 
 	@Override
 	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
-		try {
-			if(urls) {
-				final String newerVersion = isDowngrade() ? oldVersion : newVersion;
-				final URL changelogURL = MinecraftForge.getChangelogURL(newerVersion);
-
-				return new ImmutableMap<>(
-						new ImmutableSet<>(ModListComparer.VIEW_CHANGELOG_AT),
-						new ImmutableList<>(changelogURL.toString())
-				);
-			}
-
-			return MinecraftForge.getChangelog(oldVersion, newVersion);
-		} catch(IOException ex) {
-			throw CurseException.fromThrowable(ex);
-		}
+		return Collections.singletonMap("Unsupported", "This mod loader is currently unsupported.");
 	}
 }
