@@ -7,9 +7,6 @@ import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
-import com.therandomlabs.utils.collection.ImmutableList;
-import com.therandomlabs.utils.collection.ImmutableMap;
-import com.therandomlabs.utils.collection.ImmutableSet;
 
 public class ForgeVersionChange extends ModLoaderVersionChange {
 	ForgeVersionChange(MCVersion mcVersion, String oldVersion, String newVersion,
