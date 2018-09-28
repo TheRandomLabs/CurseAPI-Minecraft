@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft;
 
 import java.net.URL;
+import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import static com.therandomlabs.utils.logging.Logging.getLogger;
 

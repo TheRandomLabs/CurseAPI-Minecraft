@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest;
+package com.therandomlabs.curseapi.minecraft.comparison;
 
 import java.io.IOException;
 import java.net.URL;
@@ -6,22 +6,20 @@ import java.util.List;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
-import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
+import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.ImmutableMap;
 import com.therandomlabs.utils.collection.ImmutableSet;
 
-public class ForgeVersionChange extends VersionChange {
-	private static final long serialVersionUID = -4645680856319627592L;
-
+public class ModLoaderVersionChange extends VersionChange {
 	private final String oldVersion;
 	private final String newVersion;
 	private final boolean isDowngrade;
 
-	ForgeVersionChange(MCVersion mcVersion, String oldVersion, String newVersion,
+	ModLoaderVersionChange(MCVersion mcVersion, String oldVersion, String newVersion,
 			boolean isDowngrade) {
 		super(mcVersion, null, null);
 		this.oldVersion = oldVersion;
@@ -66,7 +64,7 @@ public class ForgeVersionChange extends VersionChange {
 
 	@Override
 	public String getModTitle() {
-		return MinecraftForge.TITLE;
+		return "Unknown Mod Loader";
 	}
 
 	@Override
@@ -75,13 +73,7 @@ public class ForgeVersionChange extends VersionChange {
 	}
 
 	@Override
-	void preload() throws CurseException {
-		try {
-			MinecraftForge.getChangelog();
-		} catch(IOException ex) {
-			throw CurseException.fromThrowable(ex);
-		}
-	}
+	void loadChangelogFiles() throws CurseException {}
 
 	@Override
 	List<String> getURLsToPreload() {
@@ -89,17 +81,21 @@ public class ForgeVersionChange extends VersionChange {
 	}
 
 	@Override
-	public Map<String, String> getChangelogs(boolean urls) throws CurseException, IOException {
-		if(urls) {
-			final String newerVersion = isDowngrade() ? oldVersion : newVersion;
-			final URL changelogURL = MinecraftForge.getChangelogURL(newerVersion);
+	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
+		try {
+			if(urls) {
+				final String newerVersion = isDowngrade() ? oldVersion : newVersion;
+				final URL changelogURL = MinecraftForge.getChangelogURL(newerVersion);
 
-			return new ImmutableMap<>(
-					new ImmutableSet<>(ManifestComparer.VIEW_CHANGELOG_AT),
-					new ImmutableList<>(changelogURL.toString())
-			);
+				return new ImmutableMap<>(
+						new ImmutableSet<>(ModListComparer.VIEW_CHANGELOG_AT),
+						new ImmutableList<>(changelogURL.toString())
+				);
+			}
+
+			return MinecraftForge.getChangelog(oldVersion, newVersion);
+		} catch(IOException ex) {
+			throw CurseException.fromThrowable(ex);
 		}
-
-		return MinecraftForge.getChangelog(oldVersion, newVersion);
 	}
 }

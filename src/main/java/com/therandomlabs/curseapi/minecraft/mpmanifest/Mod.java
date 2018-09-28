@@ -1,6 +1,5 @@
-package com.therandomlabs.curseapi.minecraft;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
-import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +8,7 @@ import java.util.Locale;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
+import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.project.ProjectType;
@@ -17,9 +17,7 @@ import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
-public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
-	private static final long serialVersionUID = -3120215335212824363L;
-
+public final class Mod implements Cloneable, Comparable<Mod> {
 	public String title = CurseProject.UNKNOWN_TITLE;
 	public int projectID;
 	public int fileID;
@@ -29,7 +27,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 	public boolean disabledByDefault;
 	public List<Integer> dependents = new TRLList<>();
 	public FileInfo[] relatedFiles = new FileInfo[0];
-	public URL url;
+	public URL downloadURL;
 
 	@Override
 	public int compareTo(Mod mod) {
@@ -64,6 +62,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 			} else {
 				mod.dependents = new TRLList<>(dependents);
 			}
+
 			mod.relatedFiles = Utils.tryClone(relatedFiles);
 
 			return mod;
@@ -122,7 +121,7 @@ public final class Mod implements Cloneable, Comparable<Mod>, Serializable {
 
 		if(!basic) {
 			mod.isResourcePack = file.project().type() == ProjectType.Minecraft.TEXTURE_PACKS;
-			mod.url = file.downloadURL();
+			mod.downloadURL = file.downloadURL();
 		}
 
 		return mod;

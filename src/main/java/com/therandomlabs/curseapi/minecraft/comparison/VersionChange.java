@@ -1,7 +1,6 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest;
+package com.therandomlabs.curseapi.minecraft.comparison;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -15,7 +14,7 @@ import com.therandomlabs.curseapi.cursemeta.CurseMetaException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
-import com.therandomlabs.curseapi.minecraft.Mod;
+import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.Documents;
@@ -25,24 +24,33 @@ import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
-public class VersionChange implements Comparable<VersionChange>, Serializable {
-	private static final long serialVersionUID = 1789316477374597287L;
-
+public class VersionChange implements Comparable<VersionChange> {
 	public static final String ARCHIVED_FILE = "[Archived file]";
-	transient boolean preloaded;
-	transient boolean valid = true;
+
+	boolean preloaded;
+	boolean valid = true;
+
 	private final MCVersion mcVersion;
+
 	private final Mod oldMod;
 	private final Mod newMod;
-	private transient CurseProject project;
-	private transient CurseFile oldFile;
-	private transient CurseFile newFile;
-	private transient CurseFileList files;
+
+	private final Set<ModSpecificChangelogHandler> handlers;
+
+	private CurseProject project;
+
+	private CurseFile oldFile;
+	private CurseFile newFile;
+
+	private CurseFileList changelogFiles;
 
 	VersionChange(MCVersion mcVersion, Mod oldMod, Mod newMod) {
 		this.mcVersion = mcVersion;
+
 		this.oldMod = oldMod;
 		this.newMod = newMod;
+
+		handlers = ModListComparer.getChangelogHandlers(newMod.projectID);
 	}
 
 	@Override
@@ -57,9 +65,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		}
 
 		final VersionChange versionChange = (VersionChange) object;
-
-		return versionChange.mcVersion.equals(mcVersion) && versionChange.oldMod.equals(oldMod) &&
-				versionChange.newMod.equals(newMod);
+		return versionChange.oldMod.equals(oldMod) && versionChange.newMod.equals(newMod);
 	}
 
 	@Override
@@ -136,30 +142,28 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	}
 
 	public CurseFileList getChangelogFiles() throws CurseException {
-		if(files == null) {
-			preload();
-		}
+		loadChangelogFiles();
 
 		final CurseFile oldFile = getOlderFile();
 		final CurseFile newFile = getNewerFile();
 
 		if(oldFile.gameVersion() == newFile.gameVersion()) {
-			files.filterGameVersions(oldFile.gameVersion());
+			changelogFiles.filterGameVersions(oldFile.gameVersion());
 		} else {
-			files.filterGameVersionGroups(mcVersion.getGroup());
+			changelogFiles.filterGameVersionGroups(mcVersion.getGroup());
 		}
 
-		files.between(oldFile, newFile);
+		changelogFiles.between(oldFile, newFile);
 
 		if(oldFile == newFile) {
-			files.add(newFile);
+			changelogFiles.add(newFile);
 		}
 
-		for(ModSpecificHandler handler : ManifestComparer.handlers) {
-			handler.filterFileList(newMod.projectID, files, oldFile, newFile);
+		for(ModSpecificChangelogHandler handler : handlers) {
+			handler.filterFileList(changelogFiles, oldFile, newFile);
 		}
 
-		return files;
+		return changelogFiles;
 	}
 
 	public String getModTitle() throws CurseException {
@@ -181,8 +185,8 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 	public Map<String, String> getChangelogsQuietly(boolean urls) {
 		try {
 			return getChangelogs(urls);
-		} catch(CurseException | IOException | NumberFormatException |
-				IndexOutOfBoundsException | NullPointerException ex) {
+		} catch(CurseException | NumberFormatException | IndexOutOfBoundsException |
+				NullPointerException ex) {
 			ThrowableHandling.handleWithoutExit(ex);
 
 			return Collections.singletonMap(
@@ -192,30 +196,34 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		}
 	}
 
-	public Map<String, String> getChangelogs() throws CurseException, IOException {
+	public Map<String, String> getChangelogs() throws CurseException {
 		return getChangelogs(false);
 	}
 
-	public Map<String, String> getChangelogs(boolean urls) throws CurseException, IOException {
+	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
 		final CurseFile oldFile = getOlderFile();
 		final CurseFile newFile = getNewerFile();
 
-		for(ModSpecificHandler handler : ManifestComparer.handlers) {
-			final Map<String, String> changelogs =
-					handler.getChangelogs(newMod.projectID, oldFile, newFile, urls);
+		try {
+			for(ModSpecificChangelogHandler handler : handlers) {
+				final Map<String, String> changelogs =
+						handler.getChangelogs(oldFile, newFile, urls);
 
-			if(changelogs != null) {
-				return changelogs;
+				if(changelogs != null) {
+					return changelogs;
+				}
 			}
+		} catch(IOException ex) {
+			throw CurseException.fromThrowable(ex);
 		}
 
-		CurseFileList files = getChangelogFiles();
+		final CurseFileList files = getChangelogFiles();
 		final Map<String, String> changelogs = new LinkedHashMap<>(files.size());
 
 		for(CurseFile file : files) {
 			String changelog = null;
 
-			for(ModSpecificHandler handler : ManifestComparer.handlers) {
+			for(ModSpecificChangelogHandler handler : handlers) {
 				changelog = handler.getChangelog(file);
 			}
 
@@ -225,35 +233,39 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 
 			if(file.hasChangelog()) {
 				if(urls) {
-					changelogs.put(file.name(), ManifestComparer.getCurseForgeURL(file));
+					changelogs.put(
+							file.name(),
+							ModListComparer.getChangelogURL(file, true).toString()
+					);
 				} else {
-					for(ModSpecificHandler handler : ManifestComparer.handlers) {
-						changelog = handler.modifyChangelog(
-								newMod.projectID, oldFile, newFile, changelog
-						);
+					for(ModSpecificChangelogHandler handler : handlers) {
+						changelog = handler.modifyChangelog(oldFile, newFile, changelog);
 					}
 
 					changelogs.put(file.name(), changelog);
 				}
 			} else {
-				changelogs.put(file.name(), ManifestComparer.NO_CHANGELOG_PROVIDED);
+				changelogs.put(file.name(), ModListComparer.NO_CHANGELOG_PROVIDED);
 			}
 		}
 
 		return changelogs;
 	}
 
-	void preload() throws CurseException {
-		if(preloaded) {
+	void loadChangelogFiles() throws CurseException {
+		if(changelogFiles != null) {
 			return;
 		}
 
 		final CurseProject project = getProject();
+
 		MCEventHandling.forEach(handler -> handler.downloadingModFileData(project));
-		files = CurseFile.getFilesBetween(
+
+		changelogFiles = CurseFile.getFilesBetween(
 				newMod.projectID, getOlderMod().fileID, getNewerMod().fileID
 		);
-		valid = !files.isEmpty();
+
+		valid = !changelogFiles.isEmpty();
 
 		if(valid) {
 			MCEventHandling.forEach(handler -> handler.downloadedModFileData(project));
@@ -267,15 +279,14 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 			return ImmutableList.empty();
 		}
 
-		for(ModSpecificHandler handler : ManifestComparer.handlers) {
+		for(ModSpecificChangelogHandler handler : handlers) {
 			final CurseFile newFile = getNewerFile();
 
-			if(handler.shouldPreloadOnlyNewFile(getProject())) {
-				return new ImmutableList<>(ManifestComparer.getChangelogURLString(newFile));
+			if(handler.isFullChangelogInNewFile(getProject())) {
+				return new ImmutableList<>(ModListComparer.getChangelogURLString(newFile, false));
 			}
 
-			final List<String> urls =
-					handler.getURLsToPreload(getProject().id(), getOlderFile(), newFile);
+			final List<String> urls = handler.getURLsToPreload(getOlderFile(), newFile);
 
 			if(urls != null) {
 				return urls;
@@ -286,7 +297,7 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 		final List<String> urls = new TRLList<>(files.size());
 
 		for(CurseFile file : files) {
-			urls.add(ManifestComparer.getChangelogURLString(file));
+			urls.add(ModListComparer.getChangelogURLString(file, false));
 		}
 
 		return urls;
@@ -297,37 +308,35 @@ public class VersionChange implements Comparable<VersionChange>, Serializable {
 			return CurseFile.getFile(newMod.projectID, fileID);
 		} catch(CurseMetaException ignored) {}
 
-		if(files == null) {
-			preload();
-		}
-
-		return files.fileClosestToID(fileID, preferOlder);
+		loadChangelogFiles();
+		return changelogFiles.fileClosestToID(fileID, preferOlder);
 	}
 
 	public static Map<VersionChange, Map<String, String>> getChangelogs(
 			List<VersionChange> versionChanges, boolean urls, boolean quietly)
-			throws CurseException, IOException {
-		final Set<String> preloadURLsSet = ConcurrentHashMap.newKeySet();
+			throws CurseException {
+		final Set<String> urlsToPreload = ConcurrentHashMap.newKeySet();
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(), index -> {
 			final VersionChange versionChange = versionChanges.get(index);
-			versionChange.preload();
+			versionChange.loadChangelogFiles();
 
 			if(!versionChange.valid) {
 				return;
 			}
 
-			preloadURLsSet.addAll(versionChange.getURLsToPreload());
+			urlsToPreload.addAll(versionChange.getURLsToPreload());
+			versionChange.preloaded = true;
 		});
 
 		final TRLList<VersionChange> sorted = new TRLList<>(versionChanges);
 		sorted.removeIf(versionChange -> !versionChange.valid);
 		sorted.sort();
 
-		final List<String> preloadURLs = new TRLList<>(preloadURLsSet);
+		final List<String> urlList = new TRLList<>(urlsToPreload);
 
-		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), preloadURLs.size(), index -> {
-			final URL url = URLs.of(preloadURLs.get(index));
+		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), urlList.size(), index -> {
+			final URL url = URLs.of(urlList.get(index));
 
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
 

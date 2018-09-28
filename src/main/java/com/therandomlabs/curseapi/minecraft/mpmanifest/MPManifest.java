@@ -1,12 +1,10 @@
 package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
-import java.io.Serializable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
-import com.therandomlabs.curseapi.minecraft.Mod;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.curseapi.project.ProjectType;
@@ -14,10 +12,8 @@ import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.misc.ThreadUtils;
 
-public final class MPManifest implements Cloneable, Serializable {
-	public static class CurseMod implements Cloneable, Serializable {
-		private static final long serialVersionUID = -6936293567291965636L;
-
+public final class MPManifest implements Cloneable {
+	public static class CurseMod implements Cloneable {
 		public int projectID;
 		public int fileID;
 		public boolean required;
@@ -125,8 +121,6 @@ public final class MPManifest implements Cloneable, Serializable {
 			return new CurseMod(mod.projectID, mod.fileID, mod.required);
 		}
 	}
-
-	private static final long serialVersionUID = -8163938330549340465L;
 
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;

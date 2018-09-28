@@ -1,15 +1,12 @@
 package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.misc.Assertions;
 
-public final class MinecraftInfo implements Cloneable, Serializable {
-	private static final long serialVersionUID = -5189220713785105134L;
-
+public final class MinecraftInfo implements Cloneable {
 	public MCVersion version;
 	public String libraries = "libraries";
 	public ModLoaderInfo[] modLoaders;

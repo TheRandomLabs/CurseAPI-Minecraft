@@ -1,11 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
-import java.io.Serializable;
 import com.therandomlabs.utils.misc.Assertions;
 
-public final class ModLoaderInfo implements Cloneable, Serializable {
-	private static final long serialVersionUID = -5375584834183726145L;
-
+public final class ModLoaderInfo implements Cloneable {
 	public String id;
 	public boolean primary = true;
 

@@ -1,14 +1,12 @@
-package com.therandomlabs.curseapi.minecraft;
+package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
+import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
 
-public final class FileInfo implements Cloneable, Comparable<FileInfo>, Serializable {
-	private static final long serialVersionUID = -3418209854129685785L;
-
+public final class FileInfo implements Cloneable, Comparable<FileInfo> {
 	public String path;
 	public Side side;
 
