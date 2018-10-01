@@ -11,6 +11,7 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Documents;
 import com.therandomlabs.curseapi.util.URLs;
+import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.io.IOUtils;
 import com.therandomlabs.utils.misc.StringUtils;
@@ -32,6 +33,8 @@ public final class MinecraftForge {
 			"forge/" + FORGE_VERSION + "/forge-" + FORGE_VERSION + "-installer.jar";
 	public static final String CHANGELOG_URL = FORGE_URL_STRING + "maven/net/minecraftforge/" +
 			"forge/" + FORGE_VERSION + "/forge-" + FORGE_VERSION + "-changelog.txt";
+	public static final String OLD_CHANGELOG_URL = FORGE_URL_STRING + "maven/net/minecraftforge/" +
+			"forge/1.12.2-14.23.4.2758/forge-1.12.2-14.23.4.2758-changelog.txt";
 
 	public static final String LATEST = "latest";
 	public static final String RECOMMENDED = "recommended";
@@ -54,18 +57,11 @@ public final class MinecraftForge {
 	private MinecraftForge() {}
 
 	public static boolean isValidVersion(String version) throws CurseException, IOException {
-		return true;
-		/*
-
-		TODO temporary fix, wait for build 2761 to implement a more permanent fix
-
 		if(versions.isEmpty()) {
 			getChangelog();
 		}
 
 		return versions.contains(version);
-
-		*/
 	}
 
 	public static String validateVersion(String version) throws CurseException, IOException {
@@ -170,9 +166,6 @@ public final class MinecraftForge {
 	}
 
 	public static URL getChangelogURL(String version) throws CurseException, IOException {
-		//Temporary fix
-		version = "1.12.2-14.23.4.2758";
-
 		if(!changelog.isEmpty()) {
 			validateVersion(version);
 		}
@@ -188,25 +181,26 @@ public final class MinecraftForge {
 			throws CurseException, IOException {
 		if(changelog.isEmpty()) {
 			final String[] lines = StringUtils.splitNewline(Documents.read(getChangelogURL()));
+
+			String[] lines2 = StringUtils.splitNewline(Documents.read(OLD_CHANGELOG_URL));
+			lines2 = ArrayUtils.subArray(lines2, 1, lines2.length);
+
+			final String[] allLines = ArrayUtils.connect(lines, lines2);
+
 			final StringBuilder entry = new StringBuilder();
-			String version = "1.12.2-14.23.4.2758"; //getLatestVersionWithoutChangelog();
+			String version = getLatestVersionWithoutChangelog();
 
-			//Temporary fix
-
-			versions.add("1.12.2-14.23.4.2760");
-			changelog.put("1.12.2-14.23.4.2760", "LexManos: Fix --mods and --modListFile " +
-					"arguments not making it past LaunchWrapper.");
-
-			versions.add("1.12.2-14.23.4.2759");
-			changelog.put("1.12.2-14.23.4.2759", "LexManos: Remove BlamingTransformer (#5115)");
-
-			version = "1.12.2-14.23.4.2758";
-
-			for(int i = 2; i < lines.length; i++) {
-				final String line = lines[i];
+			for(int i = 2; i < allLines.length; i++) {
+				final String line = allLines[i];
 
 				if(line.startsWith("Build ")) {
 					version = StringUtils.removeLastChar(line.split(" ")[1]);
+
+					//Temporary fix
+					if(version.length() == 4) {
+						version = "1.12.2-14.23.4." + version;
+					}
+
 					continue;
 				}
 
@@ -242,11 +236,6 @@ public final class MinecraftForge {
 
 				subchangelog.put(entry.getKey(), entry.getValue());
 			}
-		}
-
-		//Temporary fix
-		if(!newVersionFound) {
-			subchangelog.put("Error", "Forge changelog could not be parsed");
 		}
 
 		return subchangelog;

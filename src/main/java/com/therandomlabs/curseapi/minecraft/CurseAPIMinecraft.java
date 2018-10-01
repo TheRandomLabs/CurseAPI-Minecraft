@@ -51,12 +51,12 @@ public final class CurseAPIMinecraft {
 			"servers.dat"
 	);
 
-	private CurseAPIMinecraft() {}
-
-	public static void initialize() {
+	static {
 		//Initialize MCVersion
 		MCVersion.HANDLER.getGame();
 	}
+
+	private CurseAPIMinecraft() {}
 
 	public static Path getDefaultMCDirectory() {
 		switch(Platform.OS) {
