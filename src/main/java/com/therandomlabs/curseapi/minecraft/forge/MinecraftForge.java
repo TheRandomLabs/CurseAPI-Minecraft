@@ -198,7 +198,15 @@ public final class MinecraftForge {
 
 					//Temporary fix
 					if(version.length() == 4) {
-						version = "1.12.2-14.23.4." + version;
+						final int number = Integer.parseInt(version);
+
+						if(number > 2767) {
+							version = "1.12.2-14.23.5." + version;
+						} else {
+							version = "1.12.2-14.23.4." + version;
+						}
+
+						System.out.println(version);
 					}
 
 					continue;
