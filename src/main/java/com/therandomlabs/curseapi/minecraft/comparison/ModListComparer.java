@@ -1,6 +1,5 @@
 package com.therandomlabs.curseapi.minecraft.comparison;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,7 +8,6 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.cursemeta.CurseMeta;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.minecraft.ModList;
-import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
@@ -81,36 +79,18 @@ public final class ModListComparer {
 		final String oldModLoaderVersion = oldList.getModLoaderVersion();
 		final String newModLoaderVersion = newList.getModLoaderVersion();
 
-		if(MinecraftForge.TITLE.equals(newList.getModLoaderName())) {
-			final int compare;
+		final ModLoaderHandler handler =
+				ModLoaderVersionChange.getModLoaderHandler(newList.getModLoaderName());
+		final int compare = handler.compare(oldModLoaderVersion, newModLoaderVersion);
 
-			try {
-				compare = MinecraftForge.compare(oldModLoaderVersion, newModLoaderVersion);
-			} catch(IOException ex) {
-				throw CurseException.fromThrowable(ex);
-			}
-
-			if(compare < 0) {
-				updated.add(new ForgeVersionChange(
-						mcVersion, oldModLoaderVersion, newModLoaderVersion, false
-				));
-			} else if(compare > 0) {
-				downgraded.add(new ForgeVersionChange(
-						mcVersion, newModLoaderVersion, oldModLoaderVersion, true
-				));
-			}
+		if(compare < 0) {
+			updated.add(handler.getVersionChange(
+					mcVersion, oldModLoaderVersion, newModLoaderVersion, true
+			));
 		} else {
-			final int compare = oldModLoaderVersion.compareTo(newModLoaderVersion);
-
-			if(compare < 0) {
-				updated.add(new ModLoaderVersionChange(
-						mcVersion, oldModLoaderVersion, newModLoaderVersion, false
-				));
-			} else if(compare > 0) {
-				downgraded.add(new ModLoaderVersionChange(
-						mcVersion, newModLoaderVersion, oldModLoaderVersion, true
-				));
-			}
+			downgraded.add(handler.getVersionChange(
+					mcVersion, oldModLoaderVersion, newModLoaderVersion, false
+			));
 		}
 
 		return new ModListComparison(

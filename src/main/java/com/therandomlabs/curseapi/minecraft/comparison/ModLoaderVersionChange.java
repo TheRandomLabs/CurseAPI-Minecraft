@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.comparison;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
@@ -11,6 +12,21 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.ImmutableList;
 
 public class ModLoaderVersionChange extends VersionChange {
+	public static final ModLoaderHandler UNKNOWN_MOD_LOADER_HANDLER = new ModLoaderHandler() {
+		@Override
+		public int compare(String oldVersion, String newVersion) {
+			return oldVersion.compareTo(newVersion);
+		}
+
+		@Override
+		public ModLoaderVersionChange getVersionChange(MCVersion version, String oldVersion,
+				String newVersion, boolean isDowngrade) {
+			return new ModLoaderVersionChange(version, oldVersion, newVersion, isDowngrade);
+		}
+	};
+
+	private static final HashMap<String, ModLoaderHandler> MOD_LOADERS = new HashMap<>();
+
 	private final String oldVersion;
 	private final String newVersion;
 	private final boolean isDowngrade;
@@ -18,6 +34,7 @@ public class ModLoaderVersionChange extends VersionChange {
 	ModLoaderVersionChange(MCVersion mcVersion, String oldVersion, String newVersion,
 			boolean isDowngrade) {
 		super(mcVersion, null, null);
+
 		this.oldVersion = oldVersion;
 		this.newVersion = newVersion;
 		this.isDowngrade = isDowngrade;
@@ -89,5 +106,23 @@ public class ModLoaderVersionChange extends VersionChange {
 	@Override
 	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
 		return Collections.singletonMap("Unsupported", "This mod loader is currently unsupported.");
+	}
+
+	public static void registerModLoaderHandler(String name, ModLoaderHandler handler) {
+		MOD_LOADERS.put(name, handler);
+	}
+
+	public static void unregisterModLoaderHandler(String name) {
+		MOD_LOADERS.remove(name);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, ModLoaderHandler> getModLoaderHandlers() {
+		return (Map<String, ModLoaderHandler>) MOD_LOADERS.clone();
+	}
+
+	public static ModLoaderHandler getModLoaderHandler(String name) {
+		final ModLoaderHandler handler = MOD_LOADERS.get(name);
+		return handler == null ? UNKNOWN_MOD_LOADER_HANDLER : handler;
 	}
 }

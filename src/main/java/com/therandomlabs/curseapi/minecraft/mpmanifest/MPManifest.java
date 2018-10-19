@@ -7,7 +7,6 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
-import com.therandomlabs.curseapi.project.ProjectType;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.misc.ThreadUtils;
@@ -79,7 +78,7 @@ public final class MPManifest implements Cloneable {
 				mod.title = CurseProject.UNKNOWN_TITLE;
 			} else {
 				mod.title = project.title();
-				mod.isResourcePack = project.type() == ProjectType.Minecraft.TEXTURE_PACKS;
+				mod.projectType = project.type().singularName();
 			}
 
 			return mod;
@@ -133,7 +132,7 @@ public final class MPManifest implements Cloneable {
 	public MinecraftInfo minecraft;
 	public int projectID;
 
-	public ExtendedMPManifest toExtendedManifest() throws CurseException {
+	/*public ExtendedMPManifest toExtendedManifest() throws CurseException {
 		return toExtendedManifest(true);
 	}
 
@@ -154,7 +153,7 @@ public final class MPManifest implements Cloneable {
 		manifest.optifineVersion = "latest";
 
 		return manifest;
-	}
+	}*/
 
 	public String toJson() {
 		return new Gson().toJson(this);

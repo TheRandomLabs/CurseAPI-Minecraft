@@ -1,13 +1,13 @@
 package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.CurseForgeSite;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.project.CurseProject;
@@ -19,15 +19,17 @@ import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class Mod implements Cloneable, Comparable<Mod> {
-	public String title = CurseProject.UNKNOWN_TITLE;
 	public int projectID;
 	public int fileID;
+	public boolean required = true;
+
+	public String title = CurseProject.UNKNOWN_TITLE;
+	public String fileTitle = CurseProject.UNKNOWN_TITLE;
+
 	public Side side = Side.BOTH;
-	public boolean required;
-	public boolean isResourcePack;
-	public boolean disabledByDefault;
+	public String projectType;
 	public List<Integer> dependents = new TRLList<>();
-	public FileInfo[] relatedFiles = new FileInfo[0];
+	public FileInfo[] relatedFilesOnDisk = new FileInfo[0];
 	public URL downloadURL;
 
 	@Override
@@ -52,19 +54,13 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		return object instanceof Mod && object.hashCode() == hashCode();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Mod clone() {
 		try {
 			final Mod mod = (Mod) super.clone();
 
-			if(dependents instanceof ArrayList) {
-				mod.dependents = (ArrayList<Integer>) ((ArrayList<Integer>) dependents).clone();
-			} else {
-				mod.dependents = new TRLList<>(dependents);
-			}
-
-			mod.relatedFiles = Utils.tryClone(relatedFiles);
+			mod.dependents = new TRLList<>(dependents);
+			mod.relatedFilesOnDisk = Utils.tryClone(relatedFilesOnDisk);
 
 			return mod;
 		} catch(CloneNotSupportedException ignored) {}
@@ -84,8 +80,8 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		Assertions.nonNull(side, "side");
 		Assertions.nonNull(dependents, "dependents");
 		dependents.forEach(CurseAPI::validateProjectID);
-		Assertions.nonNull(relatedFiles, "relatedFiles");
-		Arrays.stream(relatedFiles).forEach(FileInfo::validate);
+		Assertions.nonNull(relatedFilesOnDisk, "relatedFilesOnDisk");
+		Arrays.stream(relatedFilesOnDisk).forEach(FileInfo::validate);
 	}
 
 	public String title() throws CurseException {
@@ -98,8 +94,12 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		return title;
 	}
 
-	public String[] getRelatedFiles(Side side) {
-		return FileInfo.getPaths(relatedFiles, side, false);
+	public ProjectType projectType() {
+		return ProjectType.get(CurseForgeSite.MINECRAFT, projectType);
+	}
+
+	public String[] getRelatedFilesOnDisk(Side side) {
+		return FileInfo.getPaths(relatedFilesOnDisk, side, false);
 	}
 
 	public static Mod fromFile(CurseFile file) throws CurseException {
@@ -141,7 +141,7 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		mod.fileID = file.id();
 
 		if(!basic) {
-			mod.isResourcePack = file.project().type() == ProjectType.Minecraft.TEXTURE_PACKS;
+			mod.projectType = file.project().type().singularName();
 			mod.downloadURL = file.downloadURL();
 		}
 
