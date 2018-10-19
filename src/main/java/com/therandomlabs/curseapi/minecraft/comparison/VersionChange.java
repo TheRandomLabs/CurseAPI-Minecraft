@@ -289,7 +289,7 @@ public class VersionChange implements Comparable<VersionChange> {
 
 			final List<String> urls = handler.getURLsToPreload(getOlderFile(), newFile);
 
-			if(urls != null) {
+			if(!urls.isEmpty()) {
 				return urls;
 			}
 		}

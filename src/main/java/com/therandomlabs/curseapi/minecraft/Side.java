@@ -22,7 +22,7 @@ public enum Side {
 	}
 
 	public static Side fromBooleans(boolean client, boolean server, boolean both) {
-		if(both || (client && server) || (!client && !server && !both)) {
+		if(both || (client && server) || (!client && !server)) {
 			return BOTH;
 		}
 

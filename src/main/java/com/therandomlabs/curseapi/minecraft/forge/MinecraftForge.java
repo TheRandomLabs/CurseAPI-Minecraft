@@ -205,8 +205,6 @@ public final class MinecraftForge {
 						} else {
 							version = "1.12.2-14.23.4." + version;
 						}
-
-						System.out.println(version);
 					}
 
 					continue;

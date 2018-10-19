@@ -20,6 +20,11 @@ public class ForgeVersionChange extends ModLoaderVersionChange {
 	}
 
 	@Override
+	public int hashCode() {
+		return super.hashCode() * 1000;
+	}
+
+	@Override
 	public String getModTitle() {
 		return MinecraftForge.TITLE;
 	}

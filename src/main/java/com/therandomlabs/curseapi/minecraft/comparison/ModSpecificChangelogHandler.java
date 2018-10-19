@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.comparison;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
@@ -17,7 +18,7 @@ public interface ModSpecificChangelogHandler {
 
 	default List<String> getURLsToPreload(CurseFile oldFile, CurseFile newFile)
 			throws CurseException {
-		return null;
+		return Collections.emptyList();
 	}
 
 	default void filterFileList(CurseFileList files, CurseFile oldFile, CurseFile newFile)

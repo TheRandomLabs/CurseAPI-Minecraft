@@ -14,8 +14,10 @@ public class ModList extends ImmutableList<Mod> {
 	private final String modLoaderName;
 	private final String modLoaderVersion;
 
-	public ModList(Mod[] mods, MCVersion mcVersion, String modLoaderName, String modLoaderVersion) {
+	public ModList(Mod[] mods, MCVersion mcVersion, String modLoaderName,
+			String modLoaderVersion) {
 		super(mods);
+
 		this.mcVersion = mcVersion;
 		this.modLoaderName = modLoaderName;
 		this.modLoaderVersion = modLoaderVersion;
@@ -24,9 +26,27 @@ public class ModList extends ImmutableList<Mod> {
 	public ModList(Collection<Mod> mods, MCVersion mcVersion, String modLoaderName,
 			String modLoaderVersion) {
 		super(mods);
+
 		this.mcVersion = mcVersion;
 		this.modLoaderName = modLoaderName;
 		this.modLoaderVersion = modLoaderVersion;
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		if(!super.equals(object)) {
+			return false;
+		}
+
+		final ModList modList = (ModList) object;
+		return mcVersion == modList.mcVersion && modLoaderName.equals(modList.modLoaderName) &&
+				modLoaderVersion.equals(modList.modLoaderVersion);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode() * mcVersion.hashCode() * modLoaderName.hashCode() *
+				modLoaderVersion.hashCode();
 	}
 
 	public MCVersion getMCVersion() {
@@ -43,8 +63,9 @@ public class ModList extends ImmutableList<Mod> {
 
 	public static ModList fromCurseFiles(CurseFile[] files, MCVersion mcVersion,
 			String modLoaderName, String modLoaderVersion) throws CurseException {
-		return fromCurseFiles(new ImmutableList<>(files), mcVersion, modLoaderName,
-				modLoaderVersion);
+		return fromCurseFiles(
+				new ImmutableList<>(files), mcVersion, modLoaderName, modLoaderVersion
+		);
 	}
 
 	public static ModList fromCurseFiles(Collection<CurseFile> files, MCVersion version,
@@ -54,8 +75,9 @@ public class ModList extends ImmutableList<Mod> {
 
 	public static ModList fromCurseFilesBasic(CurseFile[] files, MCVersion mcVersion,
 			String modLoaderName, String modLoaderVersion) {
-		return fromCurseFilesBasic(new ImmutableList<>(files), mcVersion, modLoaderName,
-				modLoaderVersion);
+		return fromCurseFilesBasic(
+				new ImmutableList<>(files), mcVersion, modLoaderName, modLoaderVersion
+		);
 	}
 
 	public static ModList fromCurseFilesBasic(Collection<CurseFile> files, MCVersion version,
