@@ -1,7 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.mpmanifest;
 
 import java.util.Arrays;
-import com.therandomlabs.curseapi.minecraft.forge.MinecraftForge;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.misc.Assertions;
@@ -13,11 +12,11 @@ public final class MinecraftInfo implements Cloneable {
 
 	public MinecraftInfo() {}
 
-	public MinecraftInfo(String forgeVersion) {
+	/*public MinecraftInfo(String forgeVersion) {
 		this.version = MinecraftForge.getMCVersion(forgeVersion);
 		modLoaders = new ModLoaderInfo[1];
 		modLoaders[0] = new ModLoaderInfo(forgeVersion);
-	}
+	}*/
 
 	@Override
 	public MinecraftInfo clone() {
