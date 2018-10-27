@@ -8,6 +8,12 @@ import com.therandomlabs.curseapi.game.GameVersions;
 import com.therandomlabs.utils.collection.TRLList;
 
 public enum MCVersion implements GameVersion<MCVersion, MCVersionGroup> {
+	@SerializedName("1.14")
+	V1_14,
+	@SerializedName("1.14-Snapshot")
+	V1_14_SNAPSHOT,
+	@SerializedName("1.13.2")
+	V1_13_2,
 	@SerializedName("1.13.1")
 	V1_13_1,
 	@SerializedName("1.13")

@@ -6,6 +6,8 @@ import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 
 public enum MCVersionGroup implements GameVersionGroup<MCVersion, MCVersionGroup> {
+	@SerializedName("1.14-Group")
+	V1_14,
 	@SerializedName("1.13-Group")
 	V1_13,
 	@SerializedName("1.12-Group")
