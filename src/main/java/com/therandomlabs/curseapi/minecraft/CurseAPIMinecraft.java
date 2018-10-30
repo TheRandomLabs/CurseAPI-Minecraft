@@ -53,7 +53,7 @@ public final class CurseAPIMinecraft {
 
 	static {
 		//Initialize MCVersion
-		MCVersion.HANDLER.getGame();
+		MCVersion.UNKNOWN.toString();
 	}
 
 	private CurseAPIMinecraft() {}

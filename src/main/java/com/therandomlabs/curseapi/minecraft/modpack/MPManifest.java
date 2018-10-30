@@ -71,12 +71,12 @@ public abstract class MPManifest implements Cloneable {
 		return "";
 	}
 
-	protected int clientRAM() {
+	protected int minimumClientRAM() {
 		return 4096;
 	}
 
-	protected String serverJVMArguments() {
-		return "";
+	protected int recommendedClientRAM() {
+		return 6144;
 	}
 
 	public String toJson() {

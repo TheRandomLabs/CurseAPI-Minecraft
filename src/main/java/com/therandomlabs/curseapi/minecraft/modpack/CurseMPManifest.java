@@ -8,11 +8,15 @@ import com.therandomlabs.utils.throwable.ThrowableHandling;
 public final class CurseMPManifest extends MPManifest {
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
+
 	public String name;
+
 	public String version;
 	public String author;
 	public String description;
+
 	public CurseMod[] files;
+
 	public String overrides = "overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
@@ -31,14 +35,6 @@ public final class CurseMPManifest extends MPManifest {
 		} catch(CloneNotSupportedException ignored) {}
 
 		return null;
-	}
-
-	public boolean downloadExtendedFileData() {
-		return downloadExtendedFileData;
-	}
-
-	public void downloadExtendedFileData(boolean flag) {
-		downloadExtendedFileData = flag;
 	}
 
 	@Override
@@ -105,5 +101,13 @@ public final class CurseMPManifest extends MPManifest {
 	@Override
 	protected int projectID() {
 		return projectID;
+	}
+
+	public boolean downloadExtendedFileData() {
+		return downloadExtendedFileData;
+	}
+
+	public void downloadExtendedFileData(boolean flag) {
+		downloadExtendedFileData = flag;
 	}
 }
