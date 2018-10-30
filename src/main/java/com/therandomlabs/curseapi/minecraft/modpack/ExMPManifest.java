@@ -3,6 +3,7 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 import java.net.URL;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
+import com.therandomlabs.utils.collection.TRLList;
 
 public final class ExMPManifest extends MPManifest {
 	public String manifestType = "minecraftModpack";
@@ -36,16 +37,29 @@ public final class ExMPManifest extends MPManifest {
 
 	@Override
 	public ExMPManifest clone() {
-		try {
-			final ExMPManifest manifest = (ExMPManifest) super.clone();
+		final ExMPManifest manifest = (ExMPManifest) super.clone();
 
-			manifest.files = Utils.tryClone(files);
-			manifest.minecraft = minecraft.clone();
+		manifest.files = Utils.tryClone(files);
 
-			return manifest;
-		} catch(CloneNotSupportedException ignored) {}
+		if(serverOnlyFiles != null) {
+			manifest.serverOnlyFiles = Utils.tryClone(serverOnlyFiles);
+		}
 
-		return null;
+		if(disabledByDefaultFiles != null) {
+			manifest.disabledByDefaultFiles = Utils.tryClone(disabledByDefaultFiles);
+		}
+
+		if(optifineIncompatibleFiles != null) {
+			manifest.optifineIncompatibleFiles = Utils.tryClone(optifineIncompatibleFiles);
+		}
+
+		if(additionalFilesOnDisk != null) {
+			manifest.additionalFilesOnDisk = Utils.tryClone(additionalFilesOnDisk);
+		}
+
+		manifest.minecraft = minecraft.clone();
+
+		return manifest;
 	}
 
 	@Override
@@ -91,6 +105,11 @@ public final class ExMPManifest extends MPManifest {
 	@Override
 	protected ModList optifineIncompatibleFiles() {
 		return modList(optifineIncompatibleFiles);
+	}
+
+	@Override
+	protected TRLList<FileInfo> additionalFilesOnDisk() {
+		return new TRLList<>(additionalFilesOnDisk);
 	}
 
 	@Override

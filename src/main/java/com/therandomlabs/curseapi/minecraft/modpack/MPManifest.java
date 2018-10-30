@@ -8,12 +8,22 @@ import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public abstract class MPManifest implements Cloneable {
 	public static final String RECOMMENDED_OPTIFINE_VERSION = "recommended";
 	public static final String LATEST_OPTIFINE_VERSION = "latest";
+
+	@Override
+	public MPManifest clone() {
+		try {
+			return (MPManifest) super.clone();
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
+	}
 
 	protected String id() {
 		return StringUtils.replaceWhitespace(name().toLowerCase(Locale.ENGLISH), "_");
@@ -39,6 +49,10 @@ public abstract class MPManifest implements Cloneable {
 
 	protected ModList optifineIncompatibleFiles() {
 		return ModList.EMPTY;
+	}
+
+	protected TRLList<FileInfo> additionalFilesOnDisk() {
+		return new TRLList<>();
 	}
 
 	protected abstract String overrides();
