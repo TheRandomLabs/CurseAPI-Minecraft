@@ -24,6 +24,9 @@ public final class ModListComparer {
 
 	public static ModListComparison compare(ModList oldList, ModList newList)
 			throws CurseException {
+		oldList = oldList.clone();
+		newList = newList.clone();
+
 		final TRLList<Mod> unchanged = new TRLList<>();
 		final TRLList<VersionChange> updated = new TRLList<>();
 		final TRLList<VersionChange> downgraded = new TRLList<>();

@@ -4,19 +4,18 @@ import java.util.Collection;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
+import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.ImmutableList;
+import com.therandomlabs.utils.collection.TRLList;
 
-public class ModList extends ImmutableList<Mod> {
+public class ModList extends TRLList<Mod> {
 	private static final long serialVersionUID = -3618723187025236453L;
-
-	public static final ModList EMPTY = new ModList(new Mod[0], MCVersion.UNKNOWN, "Unknown", "");
 
 	private final MCVersion mcVersion;
 	private final String modLoaderName;
 	private final String modLoaderVersion;
 
-	public ModList(Mod[] mods, MCVersion mcVersion, String modLoaderName,
-			String modLoaderVersion) {
+	public ModList(Mod[] mods, MCVersion mcVersion, String modLoaderName, String modLoaderVersion) {
 		super(mods);
 
 		this.mcVersion = mcVersion;
@@ -48,6 +47,11 @@ public class ModList extends ImmutableList<Mod> {
 	public int hashCode() {
 		return super.hashCode() * mcVersion.hashCode() * modLoaderName.hashCode() *
 				modLoaderVersion.hashCode();
+	}
+
+	@Override
+	public ModList clone() {
+		return new ModList(Utils.tryClone(this), mcVersion, modLoaderName, modLoaderVersion);
 	}
 
 	public MCVersion getMCVersion() {
@@ -126,5 +130,9 @@ public class ModList extends ImmutableList<Mod> {
 	public static ModList fromCurseFilesBasic(Collection<CurseFile> files, MCVersion version,
 			String modLoaderName, String modLoaderVersion) {
 		return new ModList(Mod.fromFilesBasic(files), version, modLoaderName, modLoaderVersion);
+	}
+
+	public static ModList empty() {
+		return new ModList(new Mod[0], MCVersion.UNKNOWN, "Unknown", "");
 	}
 }

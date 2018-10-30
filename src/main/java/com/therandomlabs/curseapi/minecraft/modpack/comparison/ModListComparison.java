@@ -24,9 +24,9 @@ public class ModListComparison {
 	private boolean removedLoaded;
 	private boolean addedLoaded;
 
-	ModListComparison(ModList oldList, ModList newList,
-			TRLList<Mod> unchanged, TRLList<VersionChange> updated,
-			TRLList<VersionChange> downgraded, TRLList<Mod> removed, TRLList<Mod> added) {
+	ModListComparison(ModList oldList, ModList newList, TRLList<Mod> unchanged,
+			TRLList<VersionChange> updated, TRLList<VersionChange> downgraded, TRLList<Mod> removed,
+			TRLList<Mod> added) {
 		this.oldList = oldList;
 		this.newList = newList;
 		this.unchanged = unchanged;
@@ -37,11 +37,11 @@ public class ModListComparison {
 	}
 
 	public ModList getOldList() {
-		return oldList;
+		return oldList.clone();
 	}
 
 	public ModList getNewList() {
-		return newList;
+		return newList.clone();
 	}
 
 	public TRLList<Mod> getUnchanged() {

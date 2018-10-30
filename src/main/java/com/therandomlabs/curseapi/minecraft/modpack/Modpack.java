@@ -17,4 +17,9 @@ public final class Modpack implements Cloneable {
 
 		return null;
 	}
+
+	@SuppressWarnings("unchecked")
+	public <M extends MPManifest> M getManifest() {
+		return (M) manifest;
+	}
 }
