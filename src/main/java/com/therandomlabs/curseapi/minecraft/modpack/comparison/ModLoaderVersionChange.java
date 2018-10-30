@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.comparison;
+package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
-import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
+import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.ImmutableList;
@@ -47,6 +47,10 @@ public class ModLoaderVersionChange extends VersionChange {
 
 	@Override
 	public boolean equals(Object object) {
+		if(this == object) {
+			return true;
+		}
+
 		return object instanceof ModLoaderVersionChange && object.hashCode() == hashCode();
 	}
 

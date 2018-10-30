@@ -1,10 +1,10 @@
-package com.therandomlabs.curseapi.minecraft.comparison;
+package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.ModList;
-import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
+import com.therandomlabs.curseapi.minecraft.modpack.ModList;
+import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
 

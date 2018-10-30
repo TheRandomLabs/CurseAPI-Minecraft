@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest;
+package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -51,6 +51,10 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 
 	@Override
 	public boolean equals(Object object) {
+		if(this == object) {
+			return true;
+		}
+
 		return object instanceof Mod && object.hashCode() == hashCode();
 	}
 

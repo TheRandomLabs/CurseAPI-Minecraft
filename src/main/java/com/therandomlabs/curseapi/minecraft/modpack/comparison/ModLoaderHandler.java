@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.comparison;
+package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 

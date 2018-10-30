@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest;
+package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.util.List;
 import java.util.Locale;
@@ -29,6 +29,10 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo> {
 
 	@Override
 	public boolean equals(Object object) {
+		if(this == object) {
+			return true;
+		}
+
 		return object instanceof FileInfo && object.hashCode() == hashCode();
 	}
 

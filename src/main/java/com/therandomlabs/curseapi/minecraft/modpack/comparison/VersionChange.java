@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.comparison;
+package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
 import java.io.IOException;
 import java.net.URL;
@@ -14,7 +14,7 @@ import com.therandomlabs.curseapi.cursemeta.CurseMetaException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
-import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
+import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.util.Documents;

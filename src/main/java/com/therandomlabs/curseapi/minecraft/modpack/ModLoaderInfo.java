@@ -1,4 +1,4 @@
-package com.therandomlabs.curseapi.minecraft.mpmanifest;
+package com.therandomlabs.curseapi.minecraft.modpack;
 
 import com.therandomlabs.utils.misc.Assertions;
 

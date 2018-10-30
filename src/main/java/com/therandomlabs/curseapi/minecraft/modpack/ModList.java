@@ -1,14 +1,15 @@
-package com.therandomlabs.curseapi.minecraft;
+package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.util.Collection;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
-import com.therandomlabs.curseapi.minecraft.mpmanifest.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.utils.collection.ImmutableList;
 
 public class ModList extends ImmutableList<Mod> {
 	private static final long serialVersionUID = -3618723187025236453L;
+
+	public static final ModList EMPTY = new ModList(new Mod[0], MCVersion.UNKNOWN, "Unknown", "");
 
 	private final MCVersion mcVersion;
 	private final String modLoaderName;
@@ -59,6 +60,48 @@ public class ModList extends ImmutableList<Mod> {
 
 	public String getModLoaderVersion() {
 		return modLoaderVersion;
+	}
+
+	public boolean contains(int projectID, int fileID) {
+		return get(projectID, fileID) != null;
+	}
+
+	public Mod get(int projectID, int fileID) {
+		for(Mod mod : this) {
+			if(mod.projectID == projectID && mod.fileID == fileID) {
+				return mod;
+			}
+		}
+
+		return null;
+	}
+
+	public boolean containsProjectID(int id) {
+		return getByProjectID(id) != null;
+	}
+
+	public Mod getByProjectID(int id) {
+		for(Mod mod : this) {
+			if(mod.projectID == id) {
+				return mod;
+			}
+		}
+
+		return null;
+	}
+
+	public boolean containsFileID(int id) {
+		return getByFileID(id) != null;
+	}
+
+	public Mod getByFileID(int id) {
+		for(Mod mod : this) {
+			if(mod.fileID == id) {
+				return mod;
+			}
+		}
+
+		return null;
 	}
 
 	public static ModList fromCurseFiles(CurseFile[] files, MCVersion mcVersion,
