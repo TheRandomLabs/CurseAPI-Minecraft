@@ -50,6 +50,11 @@ public class CurseMod implements Cloneable {
 		return null;
 	}
 
+	public void validate() {
+		CurseAPI.validateProjectID(projectID);
+		CurseAPI.validateFileID(fileID);
+	}
+
 	public Mod toExtendedMod() throws CurseException {
 		final Mod mod = new Mod();
 

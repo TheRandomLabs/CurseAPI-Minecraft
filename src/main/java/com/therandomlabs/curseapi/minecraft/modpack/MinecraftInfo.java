@@ -12,11 +12,11 @@ public final class MinecraftInfo implements Cloneable {
 
 	public MinecraftInfo() {}
 
-	/*public MinecraftInfo(String forgeVersion) {
-		this.version = MinecraftForge.getMCVersion(forgeVersion);
+	public MinecraftInfo(String forgeVersion) {
+		version = MCVersion.HANDLER.get(forgeVersion.split("-")[0]);
 		modLoaders = new ModLoaderInfo[1];
 		modLoaders[0] = new ModLoaderInfo(forgeVersion);
-	}*/
+	}
 
 	@Override
 	public MinecraftInfo clone() {

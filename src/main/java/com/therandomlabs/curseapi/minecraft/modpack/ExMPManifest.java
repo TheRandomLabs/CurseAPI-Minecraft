@@ -1,9 +1,11 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.net.URL;
+import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
+import com.therandomlabs.utils.misc.Assertions;
 
 public final class ExMPManifest extends MPManifest {
 	public String manifestType = "minecraftModpack";
@@ -157,9 +159,68 @@ public final class ExMPManifest extends MPManifest {
 		return recommendedClientRAM;
 	}
 
+	@SuppressWarnings("Duplicates")
+	public void validate() {
+		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
+		Assertions.equals(manifestVersion, "manifestVersion", 1);
+		Assertions.nonEmpty(name, "name");
+		Assertions.nonEmpty(id, "id");
+		Assertions.nonEmpty(version, "version");
+		Assertions.nonEmpty(author, "author");
+		Assertions.nonEmpty(description, "description");
+		Assertions.nonNull(files, "files");
+
+		for(Mod mod : files) {
+			mod.validate();
+		}
+
+		if(serverOnlyFiles != null) {
+			for(Mod mod : serverOnlyFiles) {
+				mod.validate();
+			}
+		}
+
+		if(disabledByDefaultFiles != null) {
+			for(Mod mod : disabledByDefaultFiles) {
+				mod.validate();
+			}
+		}
+
+		if(optifineIncompatibleFiles != null) {
+			for(Mod mod : optifineIncompatibleFiles) {
+				mod.validate();
+			}
+		}
+
+		if(additionalFilesOnDisk != null) {
+			for(FileInfo file : additionalFilesOnDisk) {
+				file.validate();
+			}
+		}
+
+		Assertions.validPath(overrides);
+
+		minecraft.validate();
+
+		if(projectID != 0) {
+			CurseAPI.validateProjectID(projectID);
+		}
+
+		Assertions.nonNull(projectURL, "projectURL");
+		Assertions.nonEmpty(optifineVersion, "optifineVersion");
+
+		Assertions.positive(minimumClientRAM, "minimumClientRAM", false);
+		Assertions.positive(recommendedClientRAM, "recommendedClientRAM", false);
+
+		Assertions.larger(
+				recommendedClientRAM, "recommendedClientRAM",
+				minimumClientRAM, "minimumClientRAM"
+		);
+	}
+
 	private ModList modList(Mod[] mods) {
 		if(mods == null || mods.length == 0) {
-			return ModList.EMPTY;
+			return ModList.empty();
 		}
 
 		return new ModList(mods, minecraft.version, "MinecraftForge", minecraft.getForgeVersion());

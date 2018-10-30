@@ -1,8 +1,10 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
+import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
+import com.therandomlabs.utils.misc.Assertions;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class CurseMPManifest extends MPManifest {
@@ -97,6 +99,29 @@ public final class CurseMPManifest extends MPManifest {
 	@Override
 	protected int projectID() {
 		return projectID;
+	}
+
+	@SuppressWarnings("Duplicates")
+	public void validate() {
+		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
+		Assertions.equals(manifestVersion, "manifestVersion", 1);
+		Assertions.nonEmpty(name, "name");
+		Assertions.nonEmpty(version, "version");
+		Assertions.nonEmpty(author, "author");
+		Assertions.nonEmpty(description, "description");
+		Assertions.nonNull(files, "files");
+
+		for(CurseMod mod : files) {
+			mod.validate();
+		}
+
+		Assertions.validPath(overrides);
+
+		minecraft.validate();
+
+		if(projectID != 0) {
+			CurseAPI.validateProjectID(projectID);
+		}
 	}
 
 	public boolean downloadExtendedFileData() {

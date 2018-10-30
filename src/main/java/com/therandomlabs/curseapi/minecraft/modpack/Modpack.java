@@ -22,4 +22,6 @@ public final class Modpack implements Cloneable {
 	public <M extends MPManifest> M getManifest() {
 		return (M) manifest;
 	}
+
+	//TODO validate dependencies/dependents
 }

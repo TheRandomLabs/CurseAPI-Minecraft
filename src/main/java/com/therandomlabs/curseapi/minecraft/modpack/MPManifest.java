@@ -40,15 +40,15 @@ public abstract class MPManifest implements Cloneable {
 	protected abstract ModList universalFiles();
 
 	protected ModList serverOnlyFiles() {
-		return ModList.EMPTY;
+		return ModList.empty();
 	}
 
 	protected ModList disabledByDefaultFiles() {
-		return ModList.EMPTY;
+		return ModList.empty();
 	}
 
 	protected ModList optifineIncompatibleFiles() {
-		return ModList.EMPTY;
+		return ModList.empty();
 	}
 
 	protected TRLList<FileInfo> additionalFilesOnDisk() {
