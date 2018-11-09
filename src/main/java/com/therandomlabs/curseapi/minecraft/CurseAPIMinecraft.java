@@ -4,11 +4,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
+import com.therandomlabs.curseapi.project.CurseProject;
+import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.platform.Platform;
 import com.therandomlabs.utils.systemproperty.SystemProperties;
+import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class CurseAPIMinecraft {
 	public static final int LIGHTCHOCOLATE_PROJECT_ID = 257165;
@@ -72,6 +76,28 @@ public final class CurseAPIMinecraft {
 		default:
 			return Paths.get(SystemProperties.USER_HOME_DIRECTORY.get(), ".minecraft");
 		}
+	}
+
+	public static CurseProject downloadModData(int projectID) throws CurseException {
+		CurseProject project = CurseProject.NULL_PROJECT;
+		final boolean cached = CurseProject.isCached(projectID);
+
+		if(!cached) {
+			MCEventHandling.forEach(handler -> handler.downloadingModData(projectID));
+		}
+
+		try {
+			project = CurseProject.fromID(projectID);
+
+			if(!cached) {
+				final CurseProject curseProject = project;
+				MCEventHandling.forEach(handler -> handler.downloadedModData(curseProject));
+			}
+		} catch(InvalidProjectIDException ex) {
+			ThrowableHandling.handleWithoutExit(ex);
+		}
+
+		return project;
 	}
 
 	private static URL url(String url) {

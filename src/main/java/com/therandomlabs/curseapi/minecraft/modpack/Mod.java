@@ -9,6 +9,7 @@ import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.CurseForgeSite;
 import com.therandomlabs.curseapi.file.CurseFile;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.curseapi.project.InvalidProjectIDException;
@@ -27,7 +28,7 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 	public String fileTitle = CurseProject.UNKNOWN_TITLE;
 
 	public Side side = Side.BOTH;
-	public String projectType;
+	public String projectType = ProjectType.Minecraft.MODS.singularName();
 	public List<Integer> dependents = new TRLList<>();
 	public FileInfo[] relatedFilesOnDisk = new FileInfo[0];
 	public URL downloadURL;
@@ -82,6 +83,7 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		CurseAPI.validateProjectID(projectID);
 		CurseAPI.validateFileID(fileID);
 		Assertions.nonNull(side, "side");
+		Assertions.nonNull(projectType, "projectType");
 		Assertions.nonNull(dependents, "dependents");
 		dependents.forEach(CurseAPI::validateProjectID);
 		Assertions.nonNull(relatedFilesOnDisk, "relatedFilesOnDisk");
@@ -104,6 +106,31 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 
 	public String[] getRelatedFilesOnDisk(Side side) {
 		return FileInfo.getPaths(relatedFilesOnDisk, side, false);
+	}
+
+	public boolean hasExtendedData() {
+		return !CurseProject.UNKNOWN_TITLE.equals(title) &&
+				!CurseProject.UNKNOWN_TITLE.equals(fileTitle) && downloadURL != null;
+	}
+
+	public void ensureExtendedData() throws CurseException {
+		if(!hasExtendedData()) {
+			reloadData();
+		}
+	}
+
+	public void reloadData() throws CurseException {
+		final CurseProject project = CurseAPIMinecraft.downloadModData(projectID);
+
+		if(project.reload()) {
+			title = project.title();
+			projectType = project.type().singularName();
+
+			final CurseFile file = project.fileWithID(fileID);
+
+			fileTitle = file.name();
+			downloadURL = file.downloadURL();
+		}
 	}
 
 	public static Mod fromFile(CurseFile file) throws CurseException {
@@ -143,8 +170,10 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 
 		mod.projectID = file.projectID();
 		mod.fileID = file.id();
+		mod.fileTitle = file.name();
 
 		if(!basic) {
+			mod.title = file.projectTitle();
 			mod.projectType = file.project().type().singularName();
 			mod.downloadURL = file.downloadURL();
 		}

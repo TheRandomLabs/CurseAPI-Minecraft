@@ -2,12 +2,8 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.minecraft.MCEventHandling;
-import com.therandomlabs.curseapi.project.CurseProject;
-import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.misc.ThreadUtils;
-import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public class CurseMod implements Cloneable {
 	public int projectID;
@@ -56,33 +52,8 @@ public class CurseMod implements Cloneable {
 	}
 
 	public Mod toExtendedMod() throws CurseException {
-		final Mod mod = new Mod();
-
-		mod.projectID = projectID;
-		mod.fileID = fileID;
-		mod.required = required;
-
-		CurseProject project = CurseProject.NULL_PROJECT;
-		final boolean cached = CurseProject.isCached(projectID);
-
-		if(!cached) {
-			MCEventHandling.forEach(handler -> handler.downloadingModData(projectID));
-		}
-
-		try {
-			project = CurseProject.fromID(projectID);
-
-			if(!cached) {
-				final CurseProject curseProject = project;
-				MCEventHandling.forEach(handler -> handler.downloadedModData(curseProject));
-			}
-		} catch(InvalidProjectIDException ex) {
-			ThrowableHandling.handleWithoutExit(ex);
-		}
-
-		mod.title = project.title();
-		mod.projectType = project.type().singularName();
-
+		final Mod mod = toExtendedModWithoutExtendedData();
+		mod.reloadData();
 		return mod;
 	}
 

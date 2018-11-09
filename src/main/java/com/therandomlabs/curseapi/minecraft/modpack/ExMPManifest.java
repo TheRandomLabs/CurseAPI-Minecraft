@@ -8,8 +8,8 @@ import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
 
 public final class ExMPManifest extends MPManifest {
-	public String manifestType = "minecraftModpack";
-	public int manifestVersion = 1;
+	public String manifestType;
+	public int manifestVersion;
 
 	public String id;
 	public String name;
@@ -24,8 +24,9 @@ public final class ExMPManifest extends MPManifest {
 	public Mod[] optifineIncompatibleFiles;
 
 	public FileInfo[] additionalFilesOnDisk;
+	public String[] persistentConfigs;
 
-	public String overrides = "overrides";
+	public String overrides;
 	public MinecraftInfo minecraft;
 	public int projectID;
 
@@ -57,6 +58,10 @@ public final class ExMPManifest extends MPManifest {
 
 		if(additionalFilesOnDisk != null) {
 			manifest.additionalFilesOnDisk = Utils.tryClone(additionalFilesOnDisk);
+		}
+
+		if(persistentConfigs != null) {
+			manifest.persistentConfigs = persistentConfigs.clone();
 		}
 
 		manifest.minecraft = minecraft.clone();
@@ -115,6 +120,11 @@ public final class ExMPManifest extends MPManifest {
 	}
 
 	@Override
+	protected TRLList<String> persistentConfigs() {
+		return new TRLList<>(persistentConfigs);
+	}
+
+	@Override
 	protected String overrides() {
 		return overrides;
 	}
@@ -126,7 +136,7 @@ public final class ExMPManifest extends MPManifest {
 
 	@Override
 	protected String forgeVersion() {
-		return minecraft.getForgeVersion();
+		return minecraft.forgeVersion();
 	}
 
 	@Override
@@ -198,6 +208,12 @@ public final class ExMPManifest extends MPManifest {
 			}
 		}
 
+		if(persistentConfigs != null) {
+			for(String config : persistentConfigs) {
+				Assertions.validPath(config);
+			}
+		}
+
 		Assertions.validPath(overrides);
 
 		minecraft.validate();
@@ -223,6 +239,6 @@ public final class ExMPManifest extends MPManifest {
 			return ModList.empty();
 		}
 
-		return new ModList(mods, minecraft.version, "MinecraftForge", minecraft.getForgeVersion());
+		return new ModList(mods, minecraft.version, "MinecraftForge", minecraft.forgeVersion());
 	}
 }

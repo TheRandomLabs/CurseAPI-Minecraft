@@ -55,6 +55,10 @@ public abstract class MPManifest implements Cloneable {
 		return new TRLList<>();
 	}
 
+	protected TRLList<String> persistentConfigs() {
+		return new TRLList<>();
+	}
+
 	protected abstract String overrides();
 
 	protected abstract MCVersion mcVersion();

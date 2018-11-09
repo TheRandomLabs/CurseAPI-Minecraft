@@ -3,12 +3,12 @@ package com.therandomlabs.curseapi.minecraft;
 import com.google.gson.annotations.SerializedName;
 
 public enum Side {
-	@SerializedName("both")
-	BOTH("both"),
 	@SerializedName("client")
 	CLIENT("client"),
 	@SerializedName("server")
-	SERVER("server");
+	SERVER("server"),
+	@SerializedName("both")
+	BOTH("both");
 
 	private final String name;
 
