@@ -9,7 +9,7 @@ public final class Modpack implements Cloneable {
 	private Side side = Side.CLIENT;
 
 	public Modpack(MPManifest manifest) {
-		this.manifest = manifest;
+		this.manifest = manifest.clone();
 	}
 
 	@Override
@@ -25,7 +25,7 @@ public final class Modpack implements Cloneable {
 
 	@SuppressWarnings("unchecked")
 	public <M extends MPManifest> M getManifest() {
-		return (M) manifest;
+		return (M) manifest.clone();
 	}
 
 	public boolean optifineEnabled() {

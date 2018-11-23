@@ -58,7 +58,7 @@ public final class CurseMPManifest extends MPManifest {
 	@Override
 	protected ModList universalFiles() {
 		final String modLoaderName = "Minecraft Forge";
-		final String modLoaderVersion = minecraft.getForgeVersion();
+		final String modLoaderVersion = minecraft.forgeVersion();
 
 		if(downloadExtendedFileData) {
 			try {
@@ -93,7 +93,7 @@ public final class CurseMPManifest extends MPManifest {
 
 	@Override
 	protected String forgeVersion() {
-		return minecraft.getForgeVersion();
+		return minecraft.forgeVersion();
 	}
 
 	@Override
