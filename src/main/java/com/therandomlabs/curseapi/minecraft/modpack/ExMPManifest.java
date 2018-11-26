@@ -1,6 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
@@ -240,15 +242,25 @@ public final class ExMPManifest extends MPManifest {
 		sortMods(serverOnlyFiles);
 		sortMods(disabledByDefaultFiles);
 		sortMods(optifineIncompatibleFiles);
-		Arrays.sort(additionalFilesOnDisk);
-		Arrays.sort(persistentConfigs);
+		sort(additionalFilesOnDisk);
+		sort(persistentConfigs);
 	}
 
 	private void sortMods(Mod[] mods) {
+		if(mods == null) {
+			return;
+		}
+
 		Arrays.sort(mods);
 
 		for(Mod mod : mods) {
 			mod.sort();
+		}
+	}
+
+	private void sort(Object[] objects) {
+		if(objects != null) {
+			Arrays.sort(objects);
 		}
 	}
 
@@ -258,5 +270,9 @@ public final class ExMPManifest extends MPManifest {
 		}
 
 		return new ModList(mods, minecraft.version, "MinecraftForge", minecraft.forgeVersion());
+	}
+
+	public static ExMPManifest from(Path path) throws IOException {
+		return Utils.fromJson(path, ExMPManifest.class);
 	}
 }

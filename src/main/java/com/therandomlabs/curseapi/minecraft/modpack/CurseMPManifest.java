@@ -1,5 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
@@ -130,5 +132,9 @@ public final class CurseMPManifest extends MPManifest {
 
 	public void downloadExtendedFileData(boolean flag) {
 		downloadExtendedFileData = flag;
+	}
+
+	public static CurseMPManifest from(Path path) throws IOException {
+		return Utils.fromJson(path, CurseMPManifest.class);
 	}
 }
