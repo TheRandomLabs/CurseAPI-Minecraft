@@ -1,11 +1,9 @@
 package com.therandomlabs.curseapi.minecraft.version;
 
 import com.google.gson.annotations.SerializedName;
-import com.therandomlabs.curseapi.game.Game;
 import com.therandomlabs.curseapi.game.GameVersion;
 import com.therandomlabs.curseapi.game.GameVersionHandler;
 import com.therandomlabs.curseapi.game.GameVersions;
-import com.therandomlabs.utils.collection.TRLList;
 
 public enum MCVersion implements GameVersion<MCVersion, MCVersionGroup> {
 	@SerializedName("1.14")
@@ -139,34 +137,14 @@ public enum MCVersion implements GameVersion<MCVersion, MCVersionGroup> {
 
 	@SuppressWarnings("unchecked")
 	public static final GameVersionHandler<MCVersion, MCVersionGroup> HANDLER =
-			new GameVersionHandler() {
-		@Override
-		public Game getGame() {
-			return Game.MINECRAFT;
-		}
+			new MCVersionHandler();
 
-		@Override
-		public MCVersion getUnknownVersion() {
-			return UNKNOWN;
-		}
-
-		@Override
-		public TRLList<MCVersion> getVersions() {
-			return new TRLList<>(values());
-		}
-
-		@Override
-		public TRLList<MCVersionGroup> getGroups() {
-			return new TRLList<>(MCVersionGroup.values());
-		}
-	};
+	MCVersionGroup group;
+	private final String version;
 
 	static {
 		GameVersions.registerHandler(HANDLER);
 	}
-
-	private final String version;
-	MCVersionGroup group;
 
 	MCVersion() {
 		version = super.toString().substring(1).replaceAll("_", ".").

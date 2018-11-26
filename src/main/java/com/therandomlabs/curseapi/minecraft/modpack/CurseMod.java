@@ -19,6 +19,11 @@ public class CurseMod implements Cloneable {
 	}
 
 	@Override
+	public int hashCode() {
+		return projectID + fileID;
+	}
+
+	@Override
 	public boolean equals(Object object) {
 		if(this == object) {
 			return true;
@@ -28,22 +33,17 @@ public class CurseMod implements Cloneable {
 	}
 
 	@Override
-	public int hashCode() {
-		return projectID + fileID;
-	}
-
-	@Override
-	public String toString() {
-		return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
-	}
-
-	@Override
 	public CurseMod clone() {
 		try {
 			return (CurseMod) super.clone();
 		} catch(CloneNotSupportedException ignored) {}
 
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "[projectID=" + projectID + ",fileID=" + fileID + ",required=" + required + "]";
 	}
 
 	public void validate() {

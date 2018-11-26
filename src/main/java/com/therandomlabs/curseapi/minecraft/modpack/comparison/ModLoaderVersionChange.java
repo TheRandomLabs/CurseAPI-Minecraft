@@ -100,16 +100,16 @@ public class ModLoaderVersionChange extends VersionChange {
 	}
 
 	@Override
+	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
+		return Collections.singletonMap("Unsupported", "This mod loader is currently unsupported.");
+	}
+
+	@Override
 	void loadChangelogFiles() throws CurseException {}
 
 	@Override
 	List<String> getURLsToPreload() {
 		return ImmutableList.empty();
-	}
-
-	@Override
-	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
-		return Collections.singletonMap("Unsupported", "This mod loader is currently unsupported.");
 	}
 
 	public static void registerModLoaderHandler(String name, ModLoaderHandler handler) {

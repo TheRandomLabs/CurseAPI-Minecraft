@@ -25,6 +25,18 @@ public abstract class MPManifest implements Cloneable {
 		return null;
 	}
 
+	public String toJson() {
+		return new Gson().toJson(this);
+	}
+
+	public String toPrettyJsonWithTabs() {
+		return StringUtils.replaceSpacesWithTabs(toPrettyJson(), 2);
+	}
+
+	public String toPrettyJson() {
+		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+	}
+
 	protected String id() {
 		return StringUtils.replaceWhitespace(name().toLowerCase(Locale.ENGLISH), "_");
 	}
@@ -95,17 +107,5 @@ public abstract class MPManifest implements Cloneable {
 
 	protected int recommendedClientRAM() {
 		return 6144;
-	}
-
-	public String toJson() {
-		return new Gson().toJson(this);
-	}
-
-	public String toPrettyJsonWithTabs() {
-		return StringUtils.replaceSpacesWithTabs(toPrettyJson(), 2);
-	}
-
-	public String toPrettyJson() {
-		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
 	}
 }
