@@ -236,12 +236,20 @@ public final class ExMPManifest extends MPManifest {
 	}
 
 	public void sort() {
-		Arrays.sort(files);
-		Arrays.sort(serverOnlyFiles);
-		Arrays.sort(disabledByDefaultFiles);
-		Arrays.sort(optifineIncompatibleFiles);
+		sortMods(files);
+		sortMods(serverOnlyFiles);
+		sortMods(disabledByDefaultFiles);
+		sortMods(optifineIncompatibleFiles);
 		Arrays.sort(additionalFilesOnDisk);
 		Arrays.sort(persistentConfigs);
+	}
+
+	private void sortMods(Mod[] mods) {
+		Arrays.sort(mods);
+
+		for(Mod mod : mods) {
+			mod.sort();
+		}
 	}
 
 	private ModList modList(Mod[] mods) {

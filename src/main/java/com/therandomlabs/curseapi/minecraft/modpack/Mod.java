@@ -133,6 +133,11 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 		}
 	}
 
+	public void sort() {
+		dependents.sort(null);
+		Arrays.sort(relatedFilesOnDisk);
+	}
+
 	public static Mod fromFile(CurseFile file) throws CurseException {
 		return fromFile(file, false);
 	}
