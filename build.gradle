@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-	compile "com.github.TheRandomLabs:CurseAPI:master-SNAPSHOT"
+	compile "com.github.TheRandomLabs:CurseAPI:-SNAPSHOT"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
