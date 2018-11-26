@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.net.URL;
+import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
@@ -232,6 +233,15 @@ public final class ExMPManifest extends MPManifest {
 				recommendedClientRAM, "recommendedClientRAM",
 				minimumClientRAM, "minimumClientRAM"
 		);
+	}
+
+	public void sort() {
+		Arrays.sort(files);
+		Arrays.sort(serverOnlyFiles);
+		Arrays.sort(disabledByDefaultFiles);
+		Arrays.sort(optifineIncompatibleFiles);
+		Arrays.sort(additionalFilesOnDisk);
+		Arrays.sort(persistentConfigs);
 	}
 
 	private ModList modList(Mod[] mods) {
