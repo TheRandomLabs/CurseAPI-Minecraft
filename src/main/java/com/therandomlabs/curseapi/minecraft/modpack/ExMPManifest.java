@@ -12,7 +12,7 @@ import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
 
 public final class ExMPManifest extends MPManifest {
-	public String manifestType;
+	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 
 	public String id;
@@ -30,7 +30,7 @@ public final class ExMPManifest extends MPManifest {
 	public FileInfo[] additionalFilesOnDisk;
 	public String[] persistentConfigs;
 
-	public String overrides;
+	public String overrides = "overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
 
@@ -226,7 +226,6 @@ public final class ExMPManifest extends MPManifest {
 			CurseAPI.validateProjectID(projectID);
 		}
 
-		Assertions.nonNull(projectURL, "projectURL");
 		Assertions.nonEmpty(optifineVersion, "optifineVersion");
 
 		Assertions.positive(minimumClientRAM, "minimumClientRAM", false);
