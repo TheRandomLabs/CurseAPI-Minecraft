@@ -22,8 +22,7 @@ public final class ModListComparer {
 
 	private ModListComparer() {}
 
-	public static ModListComparison compare(ModList oldList, ModList newList)
-			throws CurseException {
+	public static ModListComparison compare(ModList oldList, ModList newList) {
 		oldList = oldList.clone();
 		newList = newList.clone();
 
