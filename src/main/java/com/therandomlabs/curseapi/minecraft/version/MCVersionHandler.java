@@ -4,7 +4,11 @@ import com.therandomlabs.curseapi.game.Game;
 import com.therandomlabs.curseapi.game.GameVersionHandler;
 import com.therandomlabs.utils.collection.TRLList;
 
-final class MCVersionHandler implements GameVersionHandler {
+final class MCVersionHandler implements GameVersionHandler<MCVersion, MCVersionGroup> {
+	static final MCVersionHandler INSTANCE = new MCVersionHandler();
+
+	private MCVersionHandler() {}
+
 	@Override
 	public Game getGame() {
 		return Game.MINECRAFT;

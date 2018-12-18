@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.TRLList;
@@ -35,6 +36,28 @@ public abstract class MPManifest implements Cloneable {
 
 	public String toPrettyJson() {
 		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+	}
+
+	public ModList getAllFiles() {
+		final ModList universalFiles = universalFiles();
+		final ModList serverOnlyFiles = serverOnlyFiles();
+		final ModList disabledByDefaultFiles = disabledByDefaultFiles();
+		final ModList optifineIncompatibleFiles = optifineIncompatibleFiles();
+
+		final ModList allFiles = new ModList(
+				universalFiles.size() + serverOnlyFiles.size() + disabledByDefaultFiles.size() +
+						optifineIncompatibleFiles.size(),
+				mcVersion(),
+				CurseAPIMinecraft.MINECRAFT_FORGE,
+				forgeVersion()
+		);
+
+		allFiles.addAll(universalFiles);
+		allFiles.addAll(serverOnlyFiles);
+		allFiles.addAll(disabledByDefaultFiles);
+		allFiles.addAll(optifineIncompatibleFiles);
+
+		return allFiles;
 	}
 
 	protected String id() {

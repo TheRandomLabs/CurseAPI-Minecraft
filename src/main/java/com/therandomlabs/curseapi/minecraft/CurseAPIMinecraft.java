@@ -15,6 +15,8 @@ import com.therandomlabs.utils.systemproperty.SystemProperties;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class CurseAPIMinecraft {
+	public static final String MINECRAFT_FORGE = "Minecraft Forge";
+
 	public static final int LIGHTCHOCOLATE_PROJECT_ID = 257165;
 	public static final String LIGHTCHOCOLATE_ID = "lightchocolate";
 

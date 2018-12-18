@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
@@ -12,7 +13,7 @@ import com.therandomlabs.utils.misc.Assertions;
 
 public final class ExMPManifest extends MPManifest {
 	public String manifestType;
-	public int manifestVersion;
+	public int manifestVersion = 1;
 
 	public String id;
 	public String name;
@@ -269,7 +270,10 @@ public final class ExMPManifest extends MPManifest {
 			return ModList.empty();
 		}
 
-		return new ModList(mods, minecraft.version, "MinecraftForge", minecraft.forgeVersion());
+		return new ModList(
+				mods, minecraft.version, CurseAPIMinecraft.MINECRAFT_FORGE,
+				minecraft.forgeVersion()
+		);
 	}
 
 	public static ExMPManifest from(Path path) throws IOException {

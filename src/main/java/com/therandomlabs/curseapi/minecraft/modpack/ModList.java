@@ -15,9 +15,16 @@ public class ModList extends TRLList<Mod> {
 	private final String modLoaderName;
 	private final String modLoaderVersion;
 
+	public ModList(int initialCapacity, MCVersion mcVersion, String modLoaderName,
+			String modLoaderVersion) {
+		super(initialCapacity);
+		this.mcVersion = mcVersion;
+		this.modLoaderName = modLoaderName;
+		this.modLoaderVersion = modLoaderVersion;
+	}
+
 	public ModList(Mod[] mods, MCVersion mcVersion, String modLoaderName, String modLoaderVersion) {
 		super(mods);
-
 		this.mcVersion = mcVersion;
 		this.modLoaderName = modLoaderName;
 		this.modLoaderVersion = modLoaderVersion;
@@ -26,7 +33,6 @@ public class ModList extends TRLList<Mod> {
 	public ModList(Collection<Mod> mods, MCVersion mcVersion, String modLoaderName,
 			String modLoaderVersion) {
 		super(mods);
-
 		this.mcVersion = mcVersion;
 		this.modLoaderName = modLoaderName;
 		this.modLoaderVersion = modLoaderVersion;

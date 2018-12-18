@@ -135,9 +135,8 @@ public enum MCVersion implements GameVersion<MCVersion, MCVersionGroup> {
 	@SerializedName("Unknown")
 	UNKNOWN;
 
-	@SuppressWarnings("unchecked")
 	public static final GameVersionHandler<MCVersion, MCVersionGroup> HANDLER =
-			new MCVersionHandler();
+			MCVersionHandler.INSTANCE;
 
 	MCVersionGroup group;
 	private final String version;
