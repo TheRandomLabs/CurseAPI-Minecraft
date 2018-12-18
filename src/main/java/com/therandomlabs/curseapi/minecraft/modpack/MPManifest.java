@@ -18,13 +18,7 @@ public abstract class MPManifest implements Cloneable {
 	public static final String LATEST_OPTIFINE_VERSION = "latest";
 
 	@Override
-	public MPManifest clone() {
-		try {
-			return (MPManifest) super.clone();
-		} catch(CloneNotSupportedException ignored) {}
-
-		return null;
-	}
+	public abstract MPManifest clone();
 
 	public String toJson() {
 		return new Gson().toJson(this);
@@ -59,6 +53,30 @@ public abstract class MPManifest implements Cloneable {
 
 		return allFiles;
 	}
+
+	protected final MPManifest getCloned() {
+		try {
+			return (MPManifest) super.clone();
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
+	}
+
+	/*TODO
+	public TRLList<String> getExcludedPaths(Side side) {
+		final TRLList<String> paths = FileInfo.getExcludedPaths(additionalFilesOnDisk, side);
+
+		for(Mod mod : enabledFiles) {
+			paths.addAll(FileInfo.getExcludedPaths(mod.relatedFilesOnDisk, side));
+		}
+
+		if(side == Side.SERVER) {
+			paths.addAll(CurseAPIMinecraft.CLIENT_ONLY_FILES);
+		}
+
+		return paths;
+	}
+	*/
 
 	protected String id() {
 		return StringUtils.replaceWhitespace(name().toLowerCase(Locale.ENGLISH), "_");

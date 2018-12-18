@@ -44,7 +44,7 @@ public final class ExMPManifest extends MPManifest {
 
 	@Override
 	public ExMPManifest clone() {
-		final ExMPManifest manifest = (ExMPManifest) super.clone();
+		final ExMPManifest manifest = (ExMPManifest) getCloned();
 
 		manifest.files = Utils.tryClone(files);
 
