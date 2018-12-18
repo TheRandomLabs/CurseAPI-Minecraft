@@ -29,7 +29,7 @@ public final class CurseMPManifest extends MPManifest {
 
 	@Override
 	public CurseMPManifest clone() {
-		final CurseMPManifest manifest = (CurseMPManifest) super.clone();
+		final CurseMPManifest manifest = (CurseMPManifest) getCloned();
 
 		manifest.files = Utils.tryClone(files);
 		manifest.minecraft = minecraft.clone();
