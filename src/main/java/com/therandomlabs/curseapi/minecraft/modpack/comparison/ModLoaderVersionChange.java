@@ -31,7 +31,7 @@ public class ModLoaderVersionChange extends VersionChange {
 	private final String newVersion;
 	private final boolean isDowngrade;
 
-	ModLoaderVersionChange(MCVersion mcVersion, String oldVersion, String newVersion,
+	protected ModLoaderVersionChange(MCVersion mcVersion, String oldVersion, String newVersion,
 			boolean isDowngrade) {
 		super(mcVersion, null, null);
 
@@ -105,10 +105,10 @@ public class ModLoaderVersionChange extends VersionChange {
 	}
 
 	@Override
-	void loadChangelogFiles() throws CurseException {}
+	protected void loadChangelogFiles() throws CurseException {}
 
 	@Override
-	List<String> getURLsToPreload() {
+	protected List<String> getURLsToPreload() {
 		return ImmutableList.empty();
 	}
 
