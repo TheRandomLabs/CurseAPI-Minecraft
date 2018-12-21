@@ -48,15 +48,15 @@ public abstract class MPManifest implements Cloneable {
 	public abstract ModList universalFiles();
 
 	public ModList serverOnlyFiles() {
-		return ModList.empty();
+		return new ModList();
 	}
 
 	public ModList disabledByDefaultFiles() {
-		return ModList.empty();
+		return new ModList();
 	}
 
 	public ModList optifineIncompatibleFiles() {
-		return ModList.empty();
+		return new ModList();
 	}
 
 	public TRLList<FileInfo> additionalFilesOnDisk() {
@@ -123,7 +123,7 @@ public abstract class MPManifest implements Cloneable {
 
 	protected final ModList modList(Mod[] mods) {
 		if(mods == null || mods.length == 0) {
-			return ModList.empty();
+			return new ModList();
 		}
 
 		return new ModList(mods, mcVersion(), CurseAPIMinecraft.MINECRAFT_FORGE, forgeVersion());

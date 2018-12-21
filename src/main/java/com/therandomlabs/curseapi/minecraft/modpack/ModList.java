@@ -3,6 +3,7 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 import java.util.Collection;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.ImmutableList;
@@ -14,6 +15,14 @@ public class ModList extends TRLList<Mod> {
 	private final MCVersion mcVersion;
 	private final String modLoaderName;
 	private final String modLoaderVersion;
+
+	public ModList() {
+		this(MCVersion.UNKNOWN, CurseAPIMinecraft.MINECRAFT_FORGE, "Unknown-Unknown");
+	}
+
+	public ModList(MCVersion mcVersion, String modLoaderName, String modLoaderVersion) {
+		this(10, mcVersion, modLoaderName, modLoaderVersion);
+	}
 
 	public ModList(int initialCapacity, MCVersion mcVersion, String modLoaderName,
 			String modLoaderVersion) {
@@ -136,9 +145,5 @@ public class ModList extends TRLList<Mod> {
 	public static ModList fromCurseFilesBasic(Collection<CurseFile> files, MCVersion version,
 			String modLoaderName, String modLoaderVersion) {
 		return new ModList(Mod.fromFilesBasic(files), version, modLoaderName, modLoaderVersion);
-	}
-
-	public static ModList empty() {
-		return new ModList(new Mod[0], MCVersion.UNKNOWN, "Unknown", "");
 	}
 }
