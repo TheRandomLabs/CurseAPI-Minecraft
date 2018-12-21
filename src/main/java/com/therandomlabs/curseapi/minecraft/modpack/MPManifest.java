@@ -1,6 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Locale;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -64,6 +65,10 @@ public abstract class MPManifest implements Cloneable {
 
 	public TRLList<String> persistentConfigs() {
 		return new TRLList<>();
+	}
+
+	public Path iconPath() {
+		return null;
 	}
 
 	public abstract String overrides();

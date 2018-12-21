@@ -3,6 +3,7 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.minecraft.Side;
@@ -29,6 +30,7 @@ public final class ExMPManifest extends MPManifest {
 
 	public FileInfo[] additionalFilesOnDisk;
 	public String[] persistentConfigs;
+	public String iconPath;
 
 	public String overrides = "overrides";
 	public String serverOnlyOverrides = "server_only_overrides";
@@ -130,6 +132,11 @@ public final class ExMPManifest extends MPManifest {
 	}
 
 	@Override
+	public Path iconPath() {
+		return iconPath == null || iconPath.isEmpty() ? null : Paths.get(iconPath);
+	}
+
+	@Override
 	public String overrides() {
 		return overrides;
 	}
@@ -223,6 +230,10 @@ public final class ExMPManifest extends MPManifest {
 			for(String config : persistentConfigs) {
 				Assertions.validPath(config);
 			}
+		}
+
+		if(iconPath != null && !iconPath.isEmpty()) {
+			Assertions.validPath(iconPath);
 		}
 
 		Assertions.validPath(overrides);
