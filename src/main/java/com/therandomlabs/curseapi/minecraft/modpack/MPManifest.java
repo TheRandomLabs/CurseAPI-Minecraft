@@ -32,95 +32,53 @@ public abstract class MPManifest implements Cloneable {
 		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
 	}
 
-	public ModList getAllFiles() {
-		final ModList universalFiles = universalFiles();
-		final ModList serverOnlyFiles = serverOnlyFiles();
-		final ModList disabledByDefaultFiles = disabledByDefaultFiles();
-		final ModList optifineIncompatibleFiles = optifineIncompatibleFiles();
-
-		final ModList allFiles = new ModList(
-				universalFiles.size() + serverOnlyFiles.size() + disabledByDefaultFiles.size() +
-						optifineIncompatibleFiles.size(),
-				mcVersion(),
-				CurseAPIMinecraft.MINECRAFT_FORGE,
-				forgeVersion()
-		);
-
-		allFiles.addAll(universalFiles);
-		allFiles.addAll(serverOnlyFiles);
-		allFiles.addAll(disabledByDefaultFiles);
-		allFiles.addAll(optifineIncompatibleFiles);
-
-		return allFiles;
-	}
-
-	protected final MPManifest getCloned() {
-		try {
-			return (MPManifest) super.clone();
-		} catch(CloneNotSupportedException ignored) {}
-
-		return null;
-	}
-
-	/*TODO
-	public TRLList<String> getExcludedPaths(Side side) {
-		final TRLList<String> paths = FileInfo.getExcludedPaths(additionalFilesOnDisk, side);
-
-		for(Mod mod : enabledFiles) {
-			paths.addAll(FileInfo.getExcludedPaths(mod.relatedFilesOnDisk, side));
-		}
-
-		if(side == Side.SERVER) {
-			paths.addAll(CurseAPIMinecraft.CLIENT_ONLY_FILES);
-		}
-
-		return paths;
-	}
-	*/
-
-	protected String id() {
+	public String id() {
 		return StringUtils.replaceWhitespace(name().toLowerCase(Locale.ENGLISH), "_");
 	}
 
-	protected abstract String name();
+	public abstract String name();
 
-	protected abstract String version();
+	public abstract String version();
 
-	protected abstract String author();
+	public abstract String author();
 
-	protected abstract String description();
+	public abstract String description();
 
-	protected abstract ModList universalFiles();
+	public abstract ModList universalFiles();
 
-	protected ModList serverOnlyFiles() {
+	public ModList serverOnlyFiles() {
 		return ModList.empty();
 	}
 
-	protected ModList disabledByDefaultFiles() {
+	public ModList disabledByDefaultFiles() {
 		return ModList.empty();
 	}
 
-	protected ModList optifineIncompatibleFiles() {
+	public ModList optifineIncompatibleFiles() {
 		return ModList.empty();
 	}
 
-	protected TRLList<FileInfo> additionalFilesOnDisk() {
+	public TRLList<FileInfo> additionalFilesOnDisk() {
 		return new TRLList<>();
 	}
 
-	protected TRLList<String> persistentConfigs() {
+	public TRLList<String> persistentConfigs() {
 		return new TRLList<>();
 	}
 
-	protected abstract String overrides();
+	public abstract String overrides();
 
-	protected abstract MCVersion mcVersion();
+	public String serverOnlyOverrides() {
+		return "";
+	}
 
-	protected abstract String forgeVersion();
+	public abstract MCVersion mcVersion();
 
-	protected abstract int projectID();
+	public abstract String forgeVersion();
 
-	protected URL projectURL() {
+	public abstract int projectID();
+
+	public URL projectURL() {
 		final int id = projectID();
 
 		if(CurseAPI.isValidProjectID(id)) {
@@ -134,19 +92,35 @@ public abstract class MPManifest implements Cloneable {
 		return null;
 	}
 
-	protected String optifineVersion() {
+	public String optifineVersion() {
 		return RECOMMENDED_OPTIFINE_VERSION;
 	}
 
-	protected String clientJVMArguments() {
+	public String clientJVMArguments() {
 		return "";
 	}
 
-	protected int minimumClientRAM() {
+	public int minimumClientRAM() {
 		return 4096;
 	}
 
-	protected int recommendedClientRAM() {
+	public int recommendedClientRAM() {
 		return 6144;
+	}
+
+	protected final MPManifest getCloned() {
+		try {
+			return (MPManifest) super.clone();
+		} catch(CloneNotSupportedException ignored) {}
+
+		return null;
+	}
+
+	protected final ModList modList(Mod[] mods) {
+		if(mods == null || mods.length == 0) {
+			return ModList.empty();
+		}
+
+		return new ModList(mods, mcVersion(), CurseAPIMinecraft.MINECRAFT_FORGE, forgeVersion());
 	}
 }

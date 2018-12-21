@@ -5,7 +5,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
-import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
+import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
@@ -31,6 +31,7 @@ public final class ExMPManifest extends MPManifest {
 	public String[] persistentConfigs;
 
 	public String overrides = "overrides";
+	public String serverOnlyOverrides = "server_only_overrides";
 	public MinecraftInfo minecraft;
 	public int projectID;
 
@@ -74,102 +75,107 @@ public final class ExMPManifest extends MPManifest {
 	}
 
 	@Override
-	protected String id() {
+	public String id() {
 		return id;
 	}
 
 	@Override
-	protected String name() {
+	public String name() {
 		return name;
 	}
 
 	@Override
-	protected String version() {
+	public String version() {
 		return version;
 	}
 
 	@Override
-	protected String author() {
+	public String author() {
 		return author;
 	}
 
 	@Override
-	protected String description() {
+	public String description() {
 		return description;
 	}
 
 	@Override
-	protected ModList universalFiles() {
+	public ModList universalFiles() {
 		return modList(files);
 	}
 
 	@Override
-	protected ModList serverOnlyFiles() {
+	public ModList serverOnlyFiles() {
 		return modList(serverOnlyFiles);
 	}
 
 	@Override
-	protected ModList disabledByDefaultFiles() {
+	public ModList disabledByDefaultFiles() {
 		return modList(disabledByDefaultFiles);
 	}
 
 	@Override
-	protected ModList optifineIncompatibleFiles() {
+	public ModList optifineIncompatibleFiles() {
 		return modList(optifineIncompatibleFiles);
 	}
 
 	@Override
-	protected TRLList<FileInfo> additionalFilesOnDisk() {
+	public TRLList<FileInfo> additionalFilesOnDisk() {
 		return new TRLList<>(additionalFilesOnDisk);
 	}
 
 	@Override
-	protected TRLList<String> persistentConfigs() {
+	public TRLList<String> persistentConfigs() {
 		return new TRLList<>(persistentConfigs);
 	}
 
 	@Override
-	protected String overrides() {
+	public String overrides() {
 		return overrides;
 	}
 
 	@Override
-	protected MCVersion mcVersion() {
+	public String serverOnlyOverrides() {
+		return serverOnlyOverrides;
+	}
+
+	@Override
+	public MCVersion mcVersion() {
 		return minecraft.version;
 	}
 
 	@Override
-	protected String forgeVersion() {
+	public String forgeVersion() {
 		return minecraft.forgeVersion();
 	}
 
 	@Override
-	protected int projectID() {
+	public int projectID() {
 		return projectID;
 	}
 
 	@Override
-	protected URL projectURL() {
+	public URL projectURL() {
 		return projectURL == null ? super.projectURL() : projectURL;
 	}
 
 	@Override
-	protected String optifineVersion() {
+	public String optifineVersion() {
 		return optifineVersion;
 	}
 
 	@Override
-	protected String clientJVMArguments() {
+	public String clientJVMArguments() {
 		return clientJVMArguments;
 	}
 
 	@Override
-	protected int minimumClientRAM() {
+	public int minimumClientRAM() {
 		return minimumClientRAM;
 	}
 
 	@Override
-	protected int recommendedClientRAM() {
+	public int recommendedClientRAM() {
 		return recommendedClientRAM;
 	}
 
@@ -203,6 +209,7 @@ public final class ExMPManifest extends MPManifest {
 		if(optifineIncompatibleFiles != null) {
 			for(Mod mod : optifineIncompatibleFiles) {
 				mod.validate();
+				Assertions.equals(mod.side, "optifineIncompatibleFiles.side", Side.CLIENT);
 			}
 		}
 
@@ -219,6 +226,10 @@ public final class ExMPManifest extends MPManifest {
 		}
 
 		Assertions.validPath(overrides);
+
+		if(serverOnlyOverrides != null && !serverOnlyOverrides.isEmpty()) {
+			Assertions.validPath(serverOnlyOverrides);
+		}
 
 		minecraft.validate();
 
@@ -262,17 +273,6 @@ public final class ExMPManifest extends MPManifest {
 		if(objects != null) {
 			Arrays.sort(objects);
 		}
-	}
-
-	private ModList modList(Mod[] mods) {
-		if(mods == null || mods.length == 0) {
-			return ModList.empty();
-		}
-
-		return new ModList(
-				mods, minecraft.version, CurseAPIMinecraft.MINECRAFT_FORGE,
-				minecraft.forgeVersion()
-		);
 	}
 
 	public static ExMPManifest from(Path path) throws IOException {

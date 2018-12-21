@@ -30,6 +30,7 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 	public Side side = Side.BOTH;
 	public String projectType = ProjectType.Minecraft.MODS.singularName();
 	public List<Integer> dependents = new TRLList<>();
+	public boolean disableIfNoDependents = true;
 	public FileInfo[] relatedFilesOnDisk = new FileInfo[0];
 	public URL downloadURL;
 

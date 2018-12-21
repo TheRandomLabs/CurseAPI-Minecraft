@@ -38,68 +38,55 @@ public final class CurseMPManifest extends MPManifest {
 	}
 
 	@Override
-	protected String name() {
+	public String name() {
 		return name;
 	}
 
 	@Override
-	protected String version() {
+	public String version() {
 		return version;
 	}
 
 	@Override
-	protected String author() {
+	public String author() {
 		return author;
 	}
 
 	@Override
-	protected String description() {
+	public String description() {
 		return description;
 	}
 
 	@Override
-	protected ModList universalFiles() {
-		final String modLoaderName = "Minecraft Forge";
-		final String modLoaderVersion = minecraft.forgeVersion();
-
+	public ModList universalFiles() {
 		if(downloadExtendedFileData) {
 			try {
-				return new ModList(
-						CurseMod.toExtendedMods(files),
-						minecraft.version,
-						modLoaderName,
-						modLoaderVersion
-				);
+				return modList(CurseMod.toExtendedMods(files));
 			} catch(CurseException ex) {
 				ThrowableHandling.handleWithoutExit(ex);
 			}
 		}
 
-		return new ModList(
-				CurseMod.toExtendedModsWithoutExtendedData(files),
-				minecraft.version,
-				modLoaderName,
-				modLoaderVersion
-		);
+		return modList(CurseMod.toExtendedModsWithoutExtendedData(files));
 	}
 
 	@Override
-	protected String overrides() {
+	public String overrides() {
 		return overrides;
 	}
 
 	@Override
-	protected MCVersion mcVersion() {
+	public MCVersion mcVersion() {
 		return minecraft.version;
 	}
 
 	@Override
-	protected String forgeVersion() {
+	public String forgeVersion() {
 		return minecraft.forgeVersion();
 	}
 
 	@Override
-	protected int projectID() {
+	public int projectID() {
 		return projectID;
 	}
 
