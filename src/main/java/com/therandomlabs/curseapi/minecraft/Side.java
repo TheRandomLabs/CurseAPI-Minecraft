@@ -21,6 +21,10 @@ public enum Side {
 		return name;
 	}
 
+	public boolean test(Side side) {
+		return this == BOTH || this == side;
+	}
+
 	public static Side fromBooleans(boolean client, boolean server, boolean both) {
 		if(both || (client && server) || (!client && !server)) {
 			return BOTH;
