@@ -41,6 +41,10 @@ public abstract class MPManifest implements Cloneable {
 
 	public abstract String version();
 
+	public String nameWithVersion() {
+		return name() + " " + version();
+	}
+
 	public abstract String author();
 
 	public abstract String description();
