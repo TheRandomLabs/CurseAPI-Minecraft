@@ -28,8 +28,8 @@ public final class ExMPManifest extends MPManifest {
 	public Mod[] disabledByDefaultFiles;
 	public Mod[] optifineIncompatibleFiles;
 
-	public FileInfo[] additionalFilesOnDisk;
-	public String[] persistentConfigs;
+	public FileInfo[] additionalFilesOnDisk = new FileInfo[0];
+	public String[] persistentConfigs = new String[0];
 	public String iconPath;
 
 	public String overrides = "overrides";
