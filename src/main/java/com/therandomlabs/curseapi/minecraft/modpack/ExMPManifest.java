@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.minecraft.Side;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
@@ -119,6 +120,28 @@ public final class ExMPManifest extends MPManifest {
 	@Override
 	public ModList optifineIncompatibleFiles() {
 		return modList(optifineIncompatibleFiles);
+	}
+
+	public ModList getAllFiles() {
+		final ModList universalFiles = universalFiles();
+		final ModList serverOnlyFiles = serverOnlyFiles();
+		final ModList disabledByDefaultFiles = disabledByDefaultFiles();
+		final ModList optifineIncompatibleFiles = optifineIncompatibleFiles();
+
+		final ModList allFiles = new ModList(
+				universalFiles.size() + serverOnlyFiles.size() + disabledByDefaultFiles.size() +
+						optifineIncompatibleFiles.size(),
+				mcVersion(),
+				CurseAPIMinecraft.MINECRAFT_FORGE,
+				forgeVersion()
+		);
+
+		allFiles.addAll(universalFiles);
+		allFiles.addAll(serverOnlyFiles);
+		allFiles.addAll(disabledByDefaultFiles);
+		allFiles.addAll(optifineIncompatibleFiles);
+
+		return allFiles;
 	}
 
 	@Override
