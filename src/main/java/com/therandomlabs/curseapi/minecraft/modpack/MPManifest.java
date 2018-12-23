@@ -71,7 +71,7 @@ public abstract class MPManifest implements Cloneable {
 		return new TRLList<>();
 	}
 
-	public Path iconPath() {
+	public String iconPath() {
 		return null;
 	}
 

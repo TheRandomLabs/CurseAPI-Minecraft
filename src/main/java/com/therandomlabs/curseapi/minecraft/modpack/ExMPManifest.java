@@ -155,8 +155,8 @@ public final class ExMPManifest extends MPManifest {
 	}
 
 	@Override
-	public Path iconPath() {
-		return iconPath == null || iconPath.isEmpty() ? null : Paths.get(iconPath);
+	public String iconPath() {
+		return iconPath;
 	}
 
 	@Override
