@@ -1,7 +1,6 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Locale;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -61,6 +60,28 @@ public abstract class MPManifest implements Cloneable {
 
 	public ModList optifineIncompatibleFiles() {
 		return new ModList();
+	}
+
+	public ModList getAllFiles() {
+		final ModList universalFiles = universalFiles();
+		final ModList serverOnlyFiles = serverOnlyFiles();
+		final ModList disabledByDefaultFiles = disabledByDefaultFiles();
+		final ModList optifineIncompatibleFiles = optifineIncompatibleFiles();
+
+		final ModList allFiles = new ModList(
+				universalFiles.size() + serverOnlyFiles.size() + disabledByDefaultFiles.size() +
+						optifineIncompatibleFiles.size(),
+				mcVersion(),
+				CurseAPIMinecraft.MINECRAFT_FORGE,
+				forgeVersion()
+		);
+
+		allFiles.addAll(universalFiles);
+		allFiles.addAll(serverOnlyFiles);
+		allFiles.addAll(disabledByDefaultFiles);
+		allFiles.addAll(optifineIncompatibleFiles);
+
+		return allFiles;
 	}
 
 	public TRLList<FileInfo> additionalFilesOnDisk() {
