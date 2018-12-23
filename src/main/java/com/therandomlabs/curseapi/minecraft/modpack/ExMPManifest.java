@@ -3,7 +3,6 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
@@ -210,6 +209,7 @@ public final class ExMPManifest extends MPManifest {
 	}
 
 	@SuppressWarnings("Duplicates")
+	@Override
 	public void validate() {
 		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
 		Assertions.equals(manifestVersion, "manifestVersion", 1);
@@ -282,6 +282,7 @@ public final class ExMPManifest extends MPManifest {
 		);
 	}
 
+	@Override
 	public void sort() {
 		sortMods(files);
 		sortMods(serverOnlyFiles);

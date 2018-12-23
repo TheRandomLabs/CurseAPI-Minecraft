@@ -117,6 +117,10 @@ public abstract class MPManifest implements Cloneable {
 		return 6144;
 	}
 
+	public abstract void validate();
+
+	public abstract void sort();
+
 	protected final MPManifest getCloned() {
 		try {
 			return (MPManifest) super.clone();

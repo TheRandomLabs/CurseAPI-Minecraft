@@ -2,6 +2,7 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
@@ -91,6 +92,7 @@ public final class CurseMPManifest extends MPManifest {
 	}
 
 	@SuppressWarnings("Duplicates")
+	@Override
 	public void validate() {
 		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
 		Assertions.equals(manifestVersion, "manifestVersion", 1);
@@ -111,6 +113,11 @@ public final class CurseMPManifest extends MPManifest {
 		if(projectID != 0) {
 			CurseAPI.validateProjectID(projectID);
 		}
+	}
+
+	@Override
+	public void sort() {
+		Arrays.sort(files);
 	}
 
 	public boolean downloadExtendedFileData() {

@@ -5,7 +5,7 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.utils.collection.ArrayUtils;
 import com.therandomlabs.utils.misc.ThreadUtils;
 
-public class CurseMod implements Cloneable {
+public class CurseMod implements Cloneable, Comparable<CurseMod> {
 	public int projectID;
 	public int fileID;
 	public boolean required;
@@ -16,6 +16,15 @@ public class CurseMod implements Cloneable {
 		this.projectID = projectID;
 		this.fileID = fileID;
 		this.required = required;
+	}
+
+	@Override
+	public int compareTo(CurseMod mod) {
+		if(mod.projectID == projectID) {
+			return Integer.compare(fileID, mod.fileID);
+		}
+
+		return Integer.compare(projectID, mod.projectID);
 	}
 
 	@Override
