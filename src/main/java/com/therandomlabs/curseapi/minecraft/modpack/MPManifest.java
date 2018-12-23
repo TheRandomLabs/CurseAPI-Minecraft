@@ -1,6 +1,8 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Locale;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -156,5 +158,10 @@ public abstract class MPManifest implements Cloneable {
 		}
 
 		return new ModList(mods, mcVersion(), CurseAPIMinecraft.MINECRAFT_FORGE, forgeVersion());
+	}
+
+	public static MPManifest from(Path path) throws IOException {
+		final ExMPManifest manifest = ExMPManifest.from(path);
+		return manifest.isActuallyExtended() ? manifest : CurseMPManifest.from(path);
 	}
 }

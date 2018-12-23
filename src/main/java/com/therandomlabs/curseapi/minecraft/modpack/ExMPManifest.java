@@ -268,6 +268,10 @@ public final class ExMPManifest extends MPManifest {
 		sort(persistentConfigs);
 	}
 
+	public boolean isActuallyExtended() {
+		return id != null;
+	}
+
 	private void sortMods(Mod[] mods) {
 		if(mods == null) {
 			return;
