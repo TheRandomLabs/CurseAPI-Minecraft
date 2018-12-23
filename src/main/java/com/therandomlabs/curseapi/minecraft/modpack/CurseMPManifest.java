@@ -14,11 +14,11 @@ public final class CurseMPManifest extends MPManifest {
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 
-	public String name;
+	public String name = "Unknown Modpack";
 
 	public String version;
 	public String author;
-	public String description;
+	public String description = "No description provided.";
 
 	public CurseMod[] files;
 
