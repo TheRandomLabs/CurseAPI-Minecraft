@@ -26,7 +26,7 @@ public final class CurseMPManifest extends MPManifest {
 	public MinecraftInfo minecraft;
 	public int projectID;
 
-	private boolean downloadExtendedFileData;
+	private transient boolean downloadExtendedFileData;
 
 	@Override
 	public CurseMPManifest clone() {
