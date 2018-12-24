@@ -190,7 +190,6 @@ public final class ExMPManifest extends MPManifest {
 	public void validate() {
 		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
 		Assertions.equals(manifestVersion, "manifestVersion", 1);
-		Assertions.nonEmpty(name, "name");
 
 		if(id != null) {
 			Assertions.nonEmpty(id, "id");
@@ -206,7 +205,6 @@ public final class ExMPManifest extends MPManifest {
 
 		Assertions.nonEmpty(version, "version");
 		Assertions.nonEmpty(author, "author");
-		Assertions.nonEmpty(description, "description");
 		Assertions.nonNull(files, "files");
 
 		for(Mod mod : files) {
