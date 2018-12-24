@@ -10,17 +10,18 @@ import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.util.Utils;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.Assertions;
+import com.therandomlabs.utils.misc.StringUtils;
 
 public final class ExMPManifest extends MPManifest {
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 
 	public String id;
-	public String name;
+	public String name = "Unknown Modpack";
 
 	public String version;
 	public String author;
-	public String description;
+	public String description = "No description provided.";
 
 	public Mod[] files;
 	public Mod[] serverOnlyFiles;
@@ -40,7 +41,6 @@ public final class ExMPManifest extends MPManifest {
 	public String optifineVersion = RECOMMENDED_OPTIFINE_VERSION;
 
 	public String clientJVMArguments = "";
-
 	public int minimumClientRAM = 4096;
 	public int recommendedClientRAM = 6144;
 
@@ -77,7 +77,7 @@ public final class ExMPManifest extends MPManifest {
 
 	@Override
 	public String id() {
-		return id;
+		return id == null ? super.id() : id;
 	}
 
 	@Override
@@ -185,12 +185,25 @@ public final class ExMPManifest extends MPManifest {
 		return recommendedClientRAM;
 	}
 
+	@SuppressWarnings("Duplicates")
 	@Override
 	public void validate() {
 		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
 		Assertions.equals(manifestVersion, "manifestVersion", 1);
 		Assertions.nonEmpty(name, "name");
-		Assertions.nonEmpty(id, "id");
+
+		if(id != null) {
+			Assertions.nonEmpty(id, "id");
+
+			if(!StringUtils.isSanitized(id)) {
+				throw new IllegalArgumentException("Unsanitized modpack ID: " + id);
+			}
+
+			if(StringUtils.containsWhitespace(id)) {
+				throw new IllegalArgumentException("Modpack ID contains whitespace: " + id);
+			}
+		}
+
 		Assertions.nonEmpty(version, "version");
 		Assertions.nonEmpty(author, "author");
 		Assertions.nonEmpty(description, "description");
