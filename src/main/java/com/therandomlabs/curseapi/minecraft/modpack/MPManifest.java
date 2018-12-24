@@ -36,7 +36,7 @@ public abstract class MPManifest implements Cloneable {
 	}
 
 	public String id() {
-		return StringUtils.replaceWhitespace(sanitizedName().toLowerCase(Locale.ENGLISH), "_");
+		return StringUtils.replaceWhitespace(sanitizedName().toLowerCase(Locale.ENGLISH), "");
 	}
 
 	public String name() {
