@@ -40,6 +40,10 @@ public abstract class MPManifest implements Cloneable {
 
 	public abstract String name();
 
+	public String sanitizedName() {
+		return name().replaceAll("[\\\\/:*?\"<>|]", "");
+	}
+
 	public abstract String version();
 
 	public String nameWithVersion() {
