@@ -17,11 +17,11 @@ public final class ExMPManifest extends MPManifest {
 	public int manifestVersion = 1;
 
 	public String id;
-	public String name = "Unknown Modpack";
+	public String name;
 
 	public String version;
 	public String author;
-	public String description = "No description provided.";
+	public String description;
 
 	public Mod[] files;
 	public Mod[] serverOnlyFiles;
@@ -82,7 +82,7 @@ public final class ExMPManifest extends MPManifest {
 
 	@Override
 	public String name() {
-		return name;
+		return name == null ? super.name() : name;
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public final class ExMPManifest extends MPManifest {
 
 	@Override
 	public String description() {
-		return description;
+		return description == null ? super.description() : description;
 	}
 
 	@Override

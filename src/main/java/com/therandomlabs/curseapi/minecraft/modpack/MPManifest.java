@@ -14,6 +14,7 @@ import com.therandomlabs.curseapi.project.CurseProject;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.StringUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
+import static com.therandomlabs.utils.logging.Logging.getLogger;
 
 public abstract class MPManifest implements Cloneable {
 	public static final String RECOMMENDED_OPTIFINE_VERSION = "recommended";
@@ -38,7 +39,24 @@ public abstract class MPManifest implements Cloneable {
 		return StringUtils.replaceWhitespace(sanitizedName().toLowerCase(Locale.ENGLISH), "_");
 	}
 
-	public abstract String name();
+	public String name() {
+		final int projectID = projectID();
+
+		if(!CurseAPI.isValidProjectID(projectID)) {
+			return "Unknown Modpack";
+		}
+
+		try {
+			return CurseProject.fromID(projectID).title();
+		} catch(CurseException ex) {
+			getLogger().error(
+					"Error retrieving name for project with ID: " + projectID
+			);
+			getLogger().printStackTrace(ex);
+		}
+
+		return "Unknown Modpack";
+	}
 
 	public String sanitizedName() {
 		return name().replaceAll("[\\\\/:*?\"<>|]", "");
@@ -52,7 +70,24 @@ public abstract class MPManifest implements Cloneable {
 
 	public abstract String author();
 
-	public abstract String description();
+	public String description() {
+		final int projectID = projectID();
+
+		if(!CurseAPI.isValidProjectID(projectID)) {
+			return "No description provided.";
+		}
+
+		try {
+			return CurseProject.fromID(projectID).shortDescription();
+		} catch(CurseException ex) {
+			getLogger().error(
+					"Error retrieving description for project with ID: " + projectID
+			);
+			getLogger().printStackTrace(ex);
+		}
+
+		return "No description provided.";
+	}
 
 	public abstract ModList universalFiles();
 

@@ -14,11 +14,11 @@ public final class CurseMPManifest extends MPManifest {
 	public String manifestType = "minecraftModpack";
 	public int manifestVersion = 1;
 
-	public String name = "Unknown Modpack";
+	public String name;
 
 	public String version;
 	public String author;
-	public String description = "No description provided.";
+	public String description;
 
 	public CurseMod[] files;
 
@@ -40,7 +40,7 @@ public final class CurseMPManifest extends MPManifest {
 
 	@Override
 	public String name() {
-		return name;
+		return name == null ? super.name() : name;
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public final class CurseMPManifest extends MPManifest {
 
 	@Override
 	public String description() {
-		return description;
+		return description == null ? super.description() : description;
 	}
 
 	@Override
