@@ -121,7 +121,11 @@ public final class Mod implements Cloneable, Comparable<Mod> {
 	}
 
 	public void reloadData() throws CurseException {
-		final CurseProject project = CurseAPIMinecraft.downloadModData(projectID);
+		final CurseProject project = CurseAPIMinecraft.downloadProjectData(projectID);
+
+		if(project == CurseProject.NULL_PROJECT && hasExtendedData()) {
+			return;
+		}
 
 		if(project.reload()) {
 			title = project.title();

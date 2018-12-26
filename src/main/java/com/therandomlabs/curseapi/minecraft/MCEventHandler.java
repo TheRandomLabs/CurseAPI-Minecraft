@@ -13,11 +13,15 @@ public interface MCEventHandler {
 		);
 	}
 
-	default void downloadingModData(int projectID) {
-		getLogger().info("Downloading data for mod with project ID: " + projectID);
+	default void downloadingProjectData(int projectID) {
+		getLogger().info("Downloading data for project with ID: " + projectID);
 	}
 
-	default void downloadedModData(CurseProject project) {
+	default void projectNotFound(int projectID) {
+		getLogger().info("Project with ID %s not found", projectID);
+	}
+
+	default void downloadedProjectData(CurseProject project) {
 		getLogger().info("Downloaded data for %s (%s)", project.title(), project.id());
 	}
 

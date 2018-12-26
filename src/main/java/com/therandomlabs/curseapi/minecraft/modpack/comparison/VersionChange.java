@@ -1,6 +1,5 @@
 package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.URL;
 import java.util.AbstractMap;
@@ -15,6 +14,7 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.cursemeta.CurseMetaException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
+import com.therandomlabs.curseapi.minecraft.CurseAPIMinecraft;
 import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.minecraft.modpack.Mod;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
@@ -26,7 +26,7 @@ import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
-public class VersionChange implements Closeable, Comparable<VersionChange> {
+public class VersionChange implements Comparable<VersionChange> {
 	public static final String ARCHIVED_FILE = "[Archived file]";
 
 	private final MCVersion mcVersion;
@@ -82,11 +82,6 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 		}
 
 		return 0;
-	}
-
-	@Override
-	public void close() {
-		Documents.removeTemporaryCache(this);
 	}
 
 	public Mod getOldMod() {
@@ -182,7 +177,7 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 
 	public CurseProject getProject() throws CurseException {
 		if(project == null && valid) {
-			project = CurseProject.fromID(newMod.projectID, true);
+			project = CurseAPIMinecraft.downloadProjectData(newMod.projectID);
 			handlers = ModListComparer.getChangelogHandlers(project, newMod.projectID);
 		}
 
@@ -293,7 +288,6 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 
 	protected void primaryPreload() throws CurseException {
 		if(!preloaded) {
-			Documents.putTemporaryCache(this, new ConcurrentHashMap<>());
 			getProject();
 		}
 	}
@@ -339,6 +333,10 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 	public static Map<VersionChange, Map<String, String>> getChangelogs(
 			List<VersionChange> versionChanges, boolean urls, boolean quietly)
 			throws CurseException {
+		final Object cacheKey = new Object();
+
+		Documents.putTemporaryCache(cacheKey, new ConcurrentHashMap<>());
+
 		ThreadUtils.splitWorkload(
 				CurseAPI.getMaximumThreads(),
 				versionChanges.size(),
@@ -390,6 +388,8 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 				changelogs.put(versionChange, versionChange.getChangelogs(urls));
 			}
 		}
+
+		Documents.removeTemporaryCache(cacheKey);
 
 		return changelogs;
 	}

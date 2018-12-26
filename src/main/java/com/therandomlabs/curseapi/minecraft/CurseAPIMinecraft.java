@@ -7,12 +7,10 @@ import java.nio.file.Paths;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.minecraft.version.MCVersion;
 import com.therandomlabs.curseapi.project.CurseProject;
-import com.therandomlabs.curseapi.project.InvalidProjectIDException;
 import com.therandomlabs.utils.collection.ImmutableList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.platform.Platform;
 import com.therandomlabs.utils.systemproperty.SystemProperties;
-import com.therandomlabs.utils.throwable.ThrowableHandling;
 
 public final class CurseAPIMinecraft {
 	public static final String MINECRAFT_FORGE = "Minecraft Forge";
@@ -80,23 +78,19 @@ public final class CurseAPIMinecraft {
 		}
 	}
 
-	public static CurseProject downloadModData(int projectID) throws CurseException {
-		CurseProject project = CurseProject.NULL_PROJECT;
-		final boolean cached = CurseProject.isCached(projectID);
-
-		if(!cached) {
-			MCEventHandling.forEach(handler -> handler.downloadingModData(projectID));
+	public static CurseProject downloadProjectData(int projectID) throws CurseException {
+		if(CurseProject.isCached(projectID)) {
+			return CurseProject.fromID(projectID);
 		}
 
-		try {
-			project = CurseProject.fromID(projectID);
+		MCEventHandling.forEach(handler -> handler.downloadingProjectData(projectID));
 
-			if(!cached) {
-				final CurseProject curseProject = project;
-				MCEventHandling.forEach(handler -> handler.downloadedModData(curseProject));
-			}
-		} catch(InvalidProjectIDException ex) {
-			ThrowableHandling.handleWithoutExit(ex);
+		final CurseProject project = CurseProject.fromID(projectID, true);
+
+		if(project == CurseProject.NULL_PROJECT) {
+			MCEventHandling.forEach(handler -> handler.projectNotFound(projectID));
+		} else {
+			MCEventHandling.forEach(handler -> handler.downloadedProjectData(project));
 		}
 
 		return project;
