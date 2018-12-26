@@ -63,6 +63,11 @@ public class VersionChange implements Comparable<VersionChange> {
 		}
 
 		final VersionChange versionChange = (VersionChange) object;
+
+		if(versionChange.oldMod == null || versionChange.newMod == null) {
+			return false;
+		}
+
 		return versionChange.oldMod.equals(oldMod) && versionChange.newMod.equals(newMod);
 	}
 
