@@ -108,7 +108,10 @@ public class ModLoaderVersionChange extends VersionChange {
 	protected void loadChangelogFiles() throws CurseException {}
 
 	@Override
-	protected List<String> getURLsToPreload() {
+	protected void primaryPreload() throws CurseException {}
+
+	@Override
+	protected List<String> getSecondaryPreloadURLs() {
 		return ImmutableList.empty();
 	}
 

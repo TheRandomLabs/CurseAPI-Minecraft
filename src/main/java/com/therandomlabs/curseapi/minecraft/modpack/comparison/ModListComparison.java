@@ -1,5 +1,7 @@
 package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
@@ -8,7 +10,7 @@ import com.therandomlabs.curseapi.minecraft.modpack.ModList;
 import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
 
-public class ModListComparison {
+public class ModListComparison implements Closeable {
 	private final ModList oldList;
 	private final ModList newList;
 
@@ -34,6 +36,12 @@ public class ModListComparison {
 		this.downgraded = downgraded;
 		this.removed = removed;
 		this.added = added;
+	}
+
+	@Override
+	public void close() {
+		updated.forEach(VersionChange::close);
+		downgraded.forEach(VersionChange::close);
 	}
 
 	public ModList getOldList() {

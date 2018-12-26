@@ -1,7 +1,9 @@
 package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.URL;
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,7 +26,7 @@ import com.therandomlabs.utils.collection.TRLList;
 import com.therandomlabs.utils.misc.ThreadUtils;
 import com.therandomlabs.utils.throwable.ThrowableHandling;
 
-public class VersionChange implements Comparable<VersionChange> {
+public class VersionChange implements Closeable, Comparable<VersionChange> {
 	public static final String ARCHIVED_FILE = "[Archived file]";
 
 	boolean preloaded;
@@ -49,6 +51,8 @@ public class VersionChange implements Comparable<VersionChange> {
 
 		this.oldMod = oldMod;
 		this.newMod = newMod;
+
+		Documents.putTemporaryCache(this, new ConcurrentHashMap<>());
 	}
 
 	@Override
@@ -80,6 +84,11 @@ public class VersionChange implements Comparable<VersionChange> {
 		}
 
 		return 0;
+	}
+
+	@Override
+	public void close() {
+		Documents.removeTemporaryCache(this);
 	}
 
 	public Mod getOldMod() {
@@ -258,7 +267,7 @@ public class VersionChange implements Comparable<VersionChange> {
 		return changelogs;
 	}
 
-	void loadChangelogFiles() throws CurseException {
+	protected void loadChangelogFiles() throws CurseException {
 		if(changelogFiles != null) {
 			return;
 		}
@@ -280,7 +289,11 @@ public class VersionChange implements Comparable<VersionChange> {
 		}
 	}
 
-	List<String> getURLsToPreload() throws CurseException {
+	protected void primaryPreload() throws CurseException {
+		getProject();
+	}
+
+	protected List<String> getSecondaryPreloadURLs() throws CurseException {
 		if(preloaded) {
 			return ImmutableList.empty();
 		}
@@ -321,7 +334,13 @@ public class VersionChange implements Comparable<VersionChange> {
 	public static Map<VersionChange, Map<String, String>> getChangelogs(
 			List<VersionChange> versionChanges, boolean urls, boolean quietly)
 			throws CurseException {
-		final Set<String> urlsToPreload = ConcurrentHashMap.newKeySet();
+		ThreadUtils.splitWorkload(
+				CurseAPI.getMaximumThreads(),
+				versionChanges.size(),
+				index -> versionChanges.get(index).primaryPreload()
+		);
+
+		final Set<Map.Entry<VersionChange, String>> urlsToPreload = ConcurrentHashMap.newKeySet();
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), versionChanges.size(), index -> {
 			final VersionChange versionChange = versionChanges.get(index);
@@ -331,7 +350,10 @@ public class VersionChange implements Comparable<VersionChange> {
 				return;
 			}
 
-			urlsToPreload.addAll(versionChange.getURLsToPreload());
+			versionChange.getSecondaryPreloadURLs().stream().
+					map(url -> new AbstractMap.SimpleEntry<>(versionChange, url)).
+					forEach(urlsToPreload::add);
+
 			versionChange.preloaded = true;
 		});
 
@@ -339,14 +361,16 @@ public class VersionChange implements Comparable<VersionChange> {
 		sorted.removeIf(versionChange -> !versionChange.valid);
 		sorted.sort();
 
-		final List<String> urlList = new TRLList<>(urlsToPreload);
+		final List<Map.Entry<VersionChange, String>> urlList = new TRLList<>(urlsToPreload);
 
 		ThreadUtils.splitWorkload(CurseAPI.getMaximumThreads(), urlList.size(), index -> {
-			final URL url = URLs.of(urlList.get(index));
+			final Map.Entry<VersionChange, String> entry = urlList.get(index);
+			final URL url = URLs.of(entry.getValue());
 
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
 
-			CurseAPI.doWithRetries(() -> Documents.get(url));
+			//The VersionChange is used as the cache key
+			CurseAPI.doWithRetries(() -> Documents.getWithCache(url, entry.getKey()));
 
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
 		});
