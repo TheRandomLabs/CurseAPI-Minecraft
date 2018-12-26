@@ -373,7 +373,7 @@ public class VersionChange implements Comparable<VersionChange> {
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
 
 			//The VersionChange is used as the cache key
-			CurseAPI.doWithRetries(() -> Documents.getWithCache(url, entry.getKey()));
+			CurseAPI.doWithRetries(() -> Documents.getWithCache(url, cacheKey));
 
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
 		});
