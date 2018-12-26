@@ -29,9 +29,6 @@ import com.therandomlabs.utils.throwable.ThrowableHandling;
 public class VersionChange implements Closeable, Comparable<VersionChange> {
 	public static final String ARCHIVED_FILE = "[Archived file]";
 
-	boolean preloaded;
-	boolean valid = true;
-
 	private final MCVersion mcVersion;
 
 	private final Mod oldMod;
@@ -46,13 +43,14 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 
 	private CurseFileList changelogFiles;
 
+	private boolean preloaded;
+	private boolean valid = true;
+
 	VersionChange(MCVersion mcVersion, Mod oldMod, Mod newMod) {
 		this.mcVersion = mcVersion;
 
 		this.oldMod = oldMod;
 		this.newMod = newMod;
-
-		Documents.putTemporaryCache(this, new ConcurrentHashMap<>());
 	}
 
 	@Override
@@ -267,6 +265,10 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 		return changelogs;
 	}
 
+	protected final boolean isPreloaded() {
+		return preloaded;
+	}
+
 	protected void loadChangelogFiles() throws CurseException {
 		if(changelogFiles != null) {
 			return;
@@ -290,7 +292,10 @@ public class VersionChange implements Closeable, Comparable<VersionChange> {
 	}
 
 	protected void primaryPreload() throws CurseException {
-		getProject();
+		if(!preloaded) {
+			Documents.putTemporaryCache(this, new ConcurrentHashMap<>());
+			getProject();
+		}
 	}
 
 	protected List<String> getSecondaryPreloadURLs() throws CurseException {

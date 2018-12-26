@@ -89,7 +89,7 @@ public final class ModListComparer {
 			updated.add(handler.getVersionChange(
 					mcVersion, oldModLoaderVersion, newModLoaderVersion, true
 			));
-		} else {
+		} else if(compare > 0) {
 			downgraded.add(handler.getVersionChange(
 					mcVersion, oldModLoaderVersion, newModLoaderVersion, false
 			));
