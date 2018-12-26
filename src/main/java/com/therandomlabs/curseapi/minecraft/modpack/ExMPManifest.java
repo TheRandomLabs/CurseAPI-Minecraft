@@ -172,7 +172,7 @@ public final class ExMPManifest extends MPManifest {
 
 	@Override
 	public String clientJVMArguments() {
-		return clientJVMArguments;
+		return clientJVMArguments.isEmpty() ? super.clientJVMArguments() : clientJVMArguments;
 	}
 
 	@Override
