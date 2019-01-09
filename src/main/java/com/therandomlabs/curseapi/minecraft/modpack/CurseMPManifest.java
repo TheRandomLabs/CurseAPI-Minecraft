@@ -91,7 +91,6 @@ public final class CurseMPManifest extends MPManifest {
 		return projectID;
 	}
 
-	@SuppressWarnings("Duplicates")
 	@Override
 	public void validate() {
 		Assertions.equals(manifestType, "manifestType", "minecraftModpack");

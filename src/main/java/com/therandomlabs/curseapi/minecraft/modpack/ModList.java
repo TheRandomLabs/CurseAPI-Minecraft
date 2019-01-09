@@ -48,6 +48,11 @@ public class ModList extends TRLList<Mod> {
 	}
 
 	@Override
+	public ModList clone() {
+		return new ModList(Utils.tryClone(this), mcVersion, modLoaderName, modLoaderVersion);
+	}
+
+	@Override
 	public boolean equals(Object object) {
 		if(!super.equals(object)) {
 			return false;
@@ -62,11 +67,6 @@ public class ModList extends TRLList<Mod> {
 	public int hashCode() {
 		return super.hashCode() * mcVersion.hashCode() * modLoaderName.hashCode() *
 				modLoaderVersion.hashCode();
-	}
-
-	@Override
-	public ModList clone() {
-		return new ModList(Utils.tryClone(this), mcVersion, modLoaderName, modLoaderVersion);
 	}
 
 	public MCVersion getMCVersion() {

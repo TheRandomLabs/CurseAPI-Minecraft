@@ -185,7 +185,6 @@ public final class ExMPManifest extends MPManifest {
 		return recommendedClientRAM;
 	}
 
-	@SuppressWarnings("Duplicates")
 	@Override
 	public void validate() {
 		Assertions.equals(manifestType, "manifestType", "minecraftModpack");
