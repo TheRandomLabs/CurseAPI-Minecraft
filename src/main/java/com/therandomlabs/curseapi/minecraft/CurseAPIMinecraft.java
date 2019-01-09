@@ -68,13 +68,13 @@ public final class CurseAPIMinecraft {
 			return Paths.get(System.getenv("APPDATA"), ".minecraft");
 		case MAC_OS_X:
 			return Paths.get(
-					SystemProperties.USER_HOME_DIRECTORY.get(),
+					SystemProperties.USER_HOME_DIRECTORY.getRaw(),
 					"Library",
 					"Application Support",
 					"minecraft"
 			);
 		default:
-			return Paths.get(SystemProperties.USER_HOME_DIRECTORY.get(), ".minecraft");
+			return SystemProperties.USER_HOME_DIRECTORY.get().resolve(".minecraft");
 		}
 	}
 
