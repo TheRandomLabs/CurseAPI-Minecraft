@@ -18,7 +18,7 @@ public interface MCEventHandler {
 	}
 
 	default void projectNotFound(int projectID) {
-		getLogger().info("Project with ID %s not found", projectID);
+		getLogger().warning("Project with ID %s not found", projectID);
 	}
 
 	default void downloadedProjectData(CurseProject project) {
