@@ -185,12 +185,12 @@ public class VersionChange implements Comparable<VersionChange> {
 	}
 
 	public Map<String, String> getChangelogsQuietly() {
-		return getChangelogsQuietly(false);
+		return getChangelogsQuietly(null, false);
 	}
 
-	public Map<String, String> getChangelogsQuietly(boolean urls) {
+	public Map<String, String> getChangelogsQuietly(Object cacheKey, boolean urls) {
 		try {
-			return getChangelogs(urls);
+			return getChangelogs(cacheKey, urls);
 		} catch(CurseException | NumberFormatException | IndexOutOfBoundsException |
 				NullPointerException ex) {
 			ThrowableHandling.handleWithoutExit(ex);
@@ -203,10 +203,10 @@ public class VersionChange implements Comparable<VersionChange> {
 	}
 
 	public Map<String, String> getChangelogs() throws CurseException {
-		return getChangelogs(false);
+		return getChangelogs(null, false);
 	}
 
-	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
+	public Map<String, String> getChangelogs(Object cacheKey, boolean urls) throws CurseException {
 		final CurseFile oldFile = getOlderFile();
 		final CurseFile newFile = getNewerFile();
 
@@ -231,7 +231,7 @@ public class VersionChange implements Comparable<VersionChange> {
 			String changelog = null;
 
 			for(ModSpecificChangelogHandler handler : handlers) {
-				changelog = handler.getChangelog(file);
+				changelog = handler.getChangelog(file, cacheKey);
 			}
 
 			if(changelog == null) {
@@ -371,7 +371,6 @@ public class VersionChange implements Comparable<VersionChange> {
 
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
 
-			//The VersionChange is used as the cache key
 			CurseAPI.doWithRetries(() -> Documents.getWithCache(url, cacheKey));
 
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
@@ -382,9 +381,9 @@ public class VersionChange implements Comparable<VersionChange> {
 
 		for(VersionChange versionChange : sorted) {
 			if(quietly) {
-				changelogs.put(versionChange, versionChange.getChangelogsQuietly(urls));
+				changelogs.put(versionChange, versionChange.getChangelogsQuietly(cacheKey, urls));
 			} else {
-				changelogs.put(versionChange, versionChange.getChangelogs(urls));
+				changelogs.put(versionChange, versionChange.getChangelogs(cacheKey, urls));
 			}
 		}
 

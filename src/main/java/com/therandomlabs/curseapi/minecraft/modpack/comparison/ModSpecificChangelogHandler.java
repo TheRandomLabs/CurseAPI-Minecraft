@@ -1,32 +1,15 @@
 package com.therandomlabs.curseapi.minecraft.modpack.comparison;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFileList;
-import com.therandomlabs.curseapi.minecraft.MCEventHandling;
 import com.therandomlabs.curseapi.project.CurseProject;
-import com.therandomlabs.utils.io.NetUtils;
 
 public abstract class ModSpecificChangelogHandler {
-	protected String read(String url) throws IOException {
-		return read(new URL(url));
-	}
-
-	protected String read(URL url) throws IOException {
-		MCEventHandling.forEach(eventHandler -> eventHandler.downloadingChangelogData(url));
-
-		final String string = NetUtils.read(url);
-
-		MCEventHandling.forEach(eventHandler -> eventHandler.downloadedChangelogData(url));
-
-		return string;
-	}
-
 	public abstract boolean handlesMod(CurseProject project) throws CurseException;
 
 	public boolean isFullChangelogInNewFile(CurseProject project) {
@@ -46,7 +29,7 @@ public abstract class ModSpecificChangelogHandler {
 		return null;
 	}
 
-	public String getChangelog(CurseFile file) throws CurseException {
+	public String getChangelog(CurseFile file, Object cacheKey) throws CurseException {
 		return null;
 	}
 
