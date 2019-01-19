@@ -219,9 +219,8 @@ public class VersionChange implements Comparable<VersionChange> {
 					return changelogs;
 				}
 			}
-		} catch(IOException ex) {
-			throw CurseException.fromThrowable(ex);
-		} catch(IndexOutOfBoundsException | NullPointerException | NumberFormatException ex) {
+		} catch(IOException | IndexOutOfBoundsException | NullPointerException |
+				NumberFormatException ex) {
 			ThrowableHandling.handleWithoutExit(ex);
 		}
 
