@@ -371,15 +371,12 @@ public class VersionChange implements Comparable<VersionChange> {
 
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
 
-			CurseAPI.doWithRetries(() -> {
-				try {
-					Documents.readWithCache(url, cacheKey);
-				} catch(IOException ex) {
-					throw CurseException.fromThrowable(ex);
-				}
-			});
-
-			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
+			try {
+				CurseAPI.doWithRetries(() -> Documents.readWithCache(url, cacheKey));
+				MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
+			} catch(IOException ex) {
+				ThrowableHandling.handleWithoutExit(ex);
+			}
 		});
 
 		final Map<VersionChange, Map<String, String>> changelogs =
