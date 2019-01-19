@@ -24,12 +24,12 @@ public abstract class ModSpecificChangelogHandler {
 	public void filterFileList(CurseFileList files, CurseFile oldFile, CurseFile newFile)
 			throws CurseException {}
 
-	public Map<String, String> getChangelogs(CurseFile oldFile, CurseFile newFile, boolean urls)
-			throws CurseException, IOException {
+	public Map<String, String> getChangelogs(Object cacheKey, CurseFile oldFile, CurseFile newFile,
+			boolean urls) throws CurseException, IOException {
 		return null;
 	}
 
-	public String getChangelog(CurseFile file, Object cacheKey) throws CurseException {
+	public String getChangelog(CurseFile file) throws CurseException {
 		return null;
 	}
 

@@ -100,7 +100,7 @@ public class ModLoaderVersionChange extends VersionChange {
 	}
 
 	@Override
-	public Map<String, String> getChangelogs(boolean urls) throws CurseException {
+	public Map<String, String> getChangelogs(Object cacheKey, boolean urls) throws CurseException {
 		return Collections.singletonMap("Unsupported", "This mod loader is currently unsupported.");
 	}
 

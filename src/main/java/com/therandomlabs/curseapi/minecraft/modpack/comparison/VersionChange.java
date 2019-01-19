@@ -213,7 +213,7 @@ public class VersionChange implements Comparable<VersionChange> {
 		try {
 			for(ModSpecificChangelogHandler handler : handlers) {
 				final Map<String, String> changelogs =
-						handler.getChangelogs(oldFile, newFile, urls);
+						handler.getChangelogs(cacheKey, oldFile, newFile, urls);
 
 				if(changelogs != null) {
 					return changelogs;
@@ -231,7 +231,7 @@ public class VersionChange implements Comparable<VersionChange> {
 			String changelog = null;
 
 			for(ModSpecificChangelogHandler handler : handlers) {
-				changelog = handler.getChangelog(file, cacheKey);
+				changelog = handler.getChangelog(file);
 			}
 
 			if(changelog == null) {
