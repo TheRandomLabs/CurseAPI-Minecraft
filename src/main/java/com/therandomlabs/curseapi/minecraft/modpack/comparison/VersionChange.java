@@ -371,7 +371,13 @@ public class VersionChange implements Comparable<VersionChange> {
 
 			MCEventHandling.forEach(handler -> handler.downloadingChangelogData(url));
 
-			CurseAPI.doWithRetries(() -> Documents.getWithCache(url, cacheKey));
+			CurseAPI.doWithRetries(() -> {
+				try {
+					Documents.readWithCache(url, cacheKey);
+				} catch(IOException ex) {
+					throw CurseException.fromThrowable(ex);
+				}
+			});
 
 			MCEventHandling.forEach(handler -> handler.downloadedChangelogData(url));
 		});
