@@ -262,7 +262,7 @@ public final class ExMPManifest extends MPManifest {
 		Assertions.positive(minimumClientRAM, "minimumClientRAM", false);
 		Assertions.positive(recommendedClientRAM, "recommendedClientRAM", false);
 
-		Assertions.larger(
+		Assertions.largerThanOrEqualTo(
 				recommendedClientRAM, "recommendedClientRAM",
 				minimumClientRAM, "minimumClientRAM"
 		);
