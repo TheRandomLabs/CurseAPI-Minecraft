@@ -51,7 +51,6 @@ public final class FileInfo implements Cloneable, Comparable<FileInfo> {
 	}
 
 	public void validate() {
-		Assertions.validPath(path);
 		Assertions.nonNull(side, "side");
 	}
 
