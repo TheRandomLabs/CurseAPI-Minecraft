@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Locale;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
@@ -24,7 +23,7 @@ public abstract class MPManifest implements Cloneable {
 	public abstract MPManifest clone();
 
 	public String toJson() {
-		return new Gson().toJson(this);
+		return new GsonBuilder().disableHtmlEscaping().create().toJson(this);
 	}
 
 	public String toPrettyJsonWithTabs() {
@@ -32,7 +31,7 @@ public abstract class MPManifest implements Cloneable {
 	}
 
 	public String toPrettyJson() {
-		return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+		return new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(this);
 	}
 
 	public String id() {
