@@ -2,7 +2,7 @@ apply plugin: "java"
 
 repositories {
 	maven {
-		url = "https://jitpack.io"
+		url "https://jitpack.io"
 	}
 }
 
