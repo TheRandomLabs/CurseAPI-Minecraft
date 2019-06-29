@@ -135,7 +135,11 @@ public enum MCVersion implements GameVersion<MCVersion, MCVersionGroup> {
 	@SerializedName("1.14")
 	V1_14,
 	@SerializedName("1.14.1")
-	V1_14_1;
+	V1_14_1,
+	@SerializedName("1.14.2")
+	V1_14_2,
+	@SerializedName("1.14.3")
+	V1_14_3;
 
 	public static final GameVersionHandler<MCVersion, MCVersionGroup> HANDLER =
 			MCVersionHandler.INSTANCE;
