@@ -24,22 +24,7 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 	static final ForgeSVCMinecraft FORGESVC_MINECRAFT =
 			RetrofitUtils.get("https://addons-ecs.forgesvc.net/").create(ForgeSVCMinecraft.class);
 
-	static final SortedSet<MCVersion> versions;
-
-	static {
-		try {
-			final List<MCVersion> versionList =
-					RetrofitUtils.execute(FORGESVC_MINECRAFT.getVersions());
-
-			for (int i = 0; i < versionList.size(); i++) {
-				versionList.get(i).setIndex(i);
-			}
-
-			versions = ImmutableSortedSet.copyOf(versionList);
-		} catch (CurseException ex) {
-			throw new IllegalStateException("Failed to retrieve Minecraft versions", ex);
-		}
-	}
+	static final SortedSet<MCVersion> versions = getVersions();
 
 	private ForgeSVCMinecraftProvider() {}
 
@@ -49,5 +34,21 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 	@Override
 	public SortedSet<? extends CurseGameVersion<?>> gameVersions(int id) {
 		return id == CurseAPIMinecraft.MINECRAFT_ID ? new TreeSet<>(versions) : null;
+	}
+
+	@SuppressWarnings("PMD.ForLoopCanBeForeach")
+	private static SortedSet<MCVersion> getVersions() {
+		try {
+			final List<MCVersion> versions =
+					RetrofitUtils.execute(FORGESVC_MINECRAFT.getVersions());
+
+			for (int i = 0; i < versions.size(); i++) {
+				versions.get(i).setIndex(i);
+			}
+
+			return ImmutableSortedSet.copyOf(versions);
+		} catch (CurseException ex) {
+			throw new IllegalStateException("Failed to retrieve Minecraft versions", ex);
+		}
 	}
 }

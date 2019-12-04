@@ -2,6 +2,7 @@ package com.therandomlabs.curseapi.minecraft;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 /**
  * Contains {@link MCVersion} constants that represent all versions of Minecraft supported
@@ -308,7 +309,6 @@ public final class MCVersions {
 	 */
 	public static final MCVersion V1_14_4 = get("1.14.4");
 
-
 	private MCVersions() {}
 
 	/**
@@ -319,6 +319,15 @@ public final class MCVersions {
 	 */
 	public static SortedSet<MCVersion> getAll() {
 		return new TreeSet<>(ForgeSVCMinecraftProvider.versions);
+	}
+
+	/**
+	 * Returns a {@link Stream} for all Minecraft versions supported by CurseForge.
+	 *
+	 * @return a {@link Stream} for all Minecraft versions supported by CurseForge.
+	 */
+	public static Stream<MCVersion> streamAll() {
+		return ForgeSVCMinecraftProvider.versions.stream();
 	}
 
 	private static MCVersion get(String versionString) {
