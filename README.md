@@ -1,50 +1,9 @@
 # CurseAPI-Minecraft
 
-An extension of CurseAPI that deals with the parsing of Curse manifests. Used by several other of
-my projects related to modpack management and installation.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Build](https://github.com/TheRandomLabs/CurseAPI-Minecraft/workflows/build/badge.svg)
 
-Example Gradle buildscript:
+An extension of [CurseAPI](https://github.com/TheRandomLabs/CurseAPI) for parsing CurseForge
+modpack manifests and for performing more Minecraft-specific operations.
 
-	apply plugin: "java"
-
-	repositories {
-		jcenter()
-		maven {
-			url "https://jitpack.io"
-		}
-	}
-
-	dependencies {
-		compile "com.github.TheRandomLabs:CurseAPI-Minecraft:master-SNAPSHOT"
-	}
-
-	task sourcesJar(type: Jar, dependsOn: classes) {
-		classifier = "sources"
-		from sourceSets.main.allSource
-	}
-
-	artifacts {
-		archives sourcesJar
-	}
-
-	jar {
-		manifest {
-			attributes "Main-Class": "com.example.MainClass"
-		}
-
-		from {
-			configurations.compile.collect {
-				it.isDirectory() ? it : zipTree(it)
-			}
-		}
-	}
-
-
-Features:
-* The extended Curse manifest format. You can see an example
-[here](https://github.com/TheRandomLabs/LightChocolate) at manifest.json
-(I'm going to rework this soon)
-* Parsing Curse manifests
-* Manifest comparisons (which can be used to
-[create changelogs](https://github.com/TheRandomLabs/ChangelogGenerator))
-* Basic event handling
+All code will soon be documented with Javadoc and tested with JUnit.
