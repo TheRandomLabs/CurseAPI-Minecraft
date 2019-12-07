@@ -10,7 +10,7 @@ import com.therandomlabs.curseapi.CurseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class MCVersionTest {
+public class MCVersionsTest {
 	@Test
 	public void mcVersionsShouldNotBeEmpty() throws CurseException {
 		final Optional<SortedSet<MCVersion>> optionalVersions =
@@ -24,6 +24,12 @@ public class MCVersionTest {
 		assertThat(MCVersions.V1_14_4.newerThan(MCVersions.V1_14_3)).isTrue();
 		assertThat(MCVersions.V1_0.olderThan(MCVersions.V1_2_1)).isTrue();
 		assertThat(MCVersions.V1_1.olderThan(MCVersions.V1_0)).isFalse();
+	}
+
+	@Test
+	public void mcVersionsShouldBeValid() {
+		assertThat(MCVersions.V1_0.gameID()).isEqualTo(CurseAPIMinecraft.MINECRAFT_ID);
+		assertThat(MCVersions.V1_0.toString()).isEqualTo(MCVersions.V1_0.versionString());
 	}
 
 	@BeforeAll
