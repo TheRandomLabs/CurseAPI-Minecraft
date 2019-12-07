@@ -10,6 +10,8 @@ import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.forgesvc.ForgeSVCProvider;
 import com.therandomlabs.curseapi.game.CurseGameVersion;
 import com.therandomlabs.curseapi.util.RetrofitUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link CurseAPIProvider} that uses the API at {@code https://addons-ecs.forgesvc.net/}
@@ -25,6 +27,7 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 			RetrofitUtils.get("https://addons-ecs.forgesvc.net/").create(ForgeSVCMinecraft.class);
 
 	static final SortedSet<MCVersion> versions = getVersions();
+	static boolean failedToRetrieveVersions;
 
 	private ForgeSVCMinecraftProvider() {}
 
@@ -33,22 +36,37 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 	 */
 	@Override
 	public SortedSet<? extends CurseGameVersion<?>> gameVersions(int id) {
+		if (failedToRetrieveVersions && versions.isEmpty()) {
+			//This initializes the MCVersion constants, which create local MCVersion instances
+			//if failedToRetrieveVersions is true.
+			MCVersions.getAll();
+		}
+
 		return id == CurseAPIMinecraft.MINECRAFT_ID ? new TreeSet<>(versions) : null;
 	}
 
 	@SuppressWarnings("PMD.ForLoopCanBeForeach")
 	private static SortedSet<MCVersion> getVersions() {
+		final Logger logger = LoggerFactory.getLogger(ForgeSVCMinecraftProvider.class);
+
 		try {
 			final List<MCVersion> versions =
 					RetrofitUtils.execute(FORGESVC_MINECRAFT.getVersions());
 
 			for (int i = 0; i < versions.size(); i++) {
-				versions.get(i).setIndex(i);
+				versions.get(i).setIndex(versions.size() - i - 1);
 			}
 
 			return ImmutableSortedSet.copyOf(versions);
 		} catch (CurseException ex) {
-			throw new IllegalStateException("Failed to retrieve Minecraft versions", ex);
+			logger.error(
+					"Failed to retrieve Minecraft versions; a local copy will be used instead", ex
+			);
 		}
+
+		failedToRetrieveVersions = true;
+		//When MCVersion is initialized, it sees that failedToRetrieveVersions is true
+		//and adds local MCVersion instances to this TreeSet.
+		return new TreeSet<>();
 	}
 }

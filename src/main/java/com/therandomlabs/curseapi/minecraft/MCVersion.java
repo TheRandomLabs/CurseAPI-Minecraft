@@ -9,6 +9,11 @@ public final class MCVersion extends CurseGameVersion<MCVersion> {
 	private int index;
 	private String versionString;
 
+	MCVersion(int index, String versionString) {
+		this.index = index;
+		this.versionString = versionString;
+	}
+
 	/**
 	 * Returns the value returned by {@link #versionString()}.
 	 *
@@ -40,7 +45,7 @@ public final class MCVersion extends CurseGameVersion<MCVersion> {
 	 */
 	@Override
 	public int compareTo(MCVersion version) {
-		return Integer.compare(version.index, index);
+		return Integer.compare(index, version.index);
 	}
 
 	//This method is called by ForgeSVCMinecraftProvider.

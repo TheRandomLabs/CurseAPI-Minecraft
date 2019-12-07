@@ -331,6 +331,13 @@ public final class MCVersions {
 	}
 
 	private static MCVersion get(String versionString) {
+		if (ForgeSVCMinecraftProvider.failedToRetrieveVersions) {
+			final MCVersion version =
+					new MCVersion(ForgeSVCMinecraftProvider.versions.size(), versionString);
+			ForgeSVCMinecraftProvider.versions.add(version);
+			return version;
+		}
+
 		for (MCVersion version : ForgeSVCMinecraftProvider.versions) {
 			if (versionString.equals(version.versionString())) {
 				return version;
