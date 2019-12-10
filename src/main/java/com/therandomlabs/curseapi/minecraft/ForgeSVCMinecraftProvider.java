@@ -65,7 +65,7 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 		}
 
 		failedToRetrieveVersions = true;
-		//When MCVersion is initialized, it sees that failedToRetrieveVersions is true
+		//When MCVersions is initialized, it sees that failedToRetrieveVersions is true
 		//and adds local MCVersion instances to this TreeSet.
 		return new TreeSet<>();
 	}
