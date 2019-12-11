@@ -1,14 +1,18 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
+import com.therandomlabs.curseapi.CurseAPI;
+import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.MinimalCurseFile;
 import com.therandomlabs.curseapi.minecraft.MCVersion;
 import com.therandomlabs.curseapi.minecraft.MCVersions;
+import com.therandomlabs.curseapi.util.MoshiUtils;
 
 @SuppressWarnings("squid:S1068")
 final class DefaultCurseModpack implements CurseModpack {
@@ -22,6 +26,14 @@ final class DefaultCurseModpack implements CurseModpack {
 		List<ModLoaderInfo> modLoaders = Collections.singletonList(new ModLoaderInfo());
 	}
 
+	private static final class FileInfo extends MinimalCurseFile.Immutable {
+		boolean required = true;
+
+		FileInfo() {
+			super(CurseAPI.MIN_PROJECT_ID, CurseAPI.MIN_FILE_ID);
+		}
+	}
+
 	private MinecraftInfo minecraft = new MinecraftInfo();
 	private String manifestType = "minecraftModpack";
 	private int manifestVersion = 1;
@@ -30,7 +42,7 @@ final class DefaultCurseModpack implements CurseModpack {
 	private String author = "";
 	//This files field is used for Moshi so that it knows that files should be converted t o
 	//MinimalCurseFile.Immutables.
-	private List<MinimalCurseFile.Immutable> files = new ArrayList<>();
+	private List<FileInfo> files = new ArrayList<>();
 	//This files field is used for everything else and uses the MinimalCurseFile type.
 	private transient List<MinimalCurseFile> actualFiles;
 
@@ -120,5 +132,15 @@ final class DefaultCurseModpack implements CurseModpack {
 		this.actualFiles.clear();
 		this.actualFiles.addAll(files);
 		return this;
+	}
+
+	@Override
+	public String toJSON() {
+		return MoshiUtils.toJSON(this, DefaultCurseModpack.class);
+	}
+
+	@Override
+	public void toJSON(Path path) throws CurseException {
+		MoshiUtils.toJSON(this, DefaultCurseModpack.class, path);
 	}
 }

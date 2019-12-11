@@ -1,10 +1,13 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
+import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.MinimalCurseFile;
 import com.therandomlabs.curseapi.minecraft.MCVersion;
+import com.therandomlabs.curseapi.util.MoshiUtils;
 
 /**
  * Represents a CurseForge Minecraft modpack.
@@ -101,4 +104,41 @@ public interface CurseModpack {
 	 * @return this {@link CurseModpack}.
 	 */
 	CurseModpack files(Collection<? extends MinimalCurseFile> files);
+
+	/**
+	 * Returns this modpack as a JSON string.
+	 *
+	 * @return this modpack as a JSON string.
+	 */
+	String toJSON();
+
+	/**
+	 * Writes this modpack as a JSON string to the specified {@link Path}.
+	 *
+	 * @param path a {@link Path}.
+	 * @throws CurseException if an error occurs.
+	 */
+	void toJSON(Path path) throws CurseException;
+
+	/**
+	 * Creates a {@link CurseModpack} instance from a JSON string.
+	 *
+	 * @param json a JSON string.
+	 * @return a {@link CurseModpack} instance.
+	 * @throws CurseException if an error occurs.
+	 */
+	static CurseModpack fromJSON(String json) throws CurseException {
+		return MoshiUtils.fromJSON(json, DefaultCurseModpack.class);
+	}
+
+	/**
+	 * Parses the specified JSON string to create a {@link CurseModpack} instance.
+	 *
+	 * @param json a JSON string.
+	 * @return a {@link CurseModpack} instance.
+	 * @throws CurseException if an error occurs.
+	 */
+	static CurseModpack fromJSON(Path json) throws CurseException {
+		return MoshiUtils.fromJSON(json, DefaultCurseModpack.class);
+	}
 }
