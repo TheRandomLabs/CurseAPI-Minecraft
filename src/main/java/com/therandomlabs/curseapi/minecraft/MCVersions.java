@@ -360,6 +360,8 @@ public final class MCVersions {
 			final MCVersion version =
 					new MCVersion(ForgeSVCMinecraftProvider.versions.size(), versionString);
 			ForgeSVCMinecraftProvider.versions.add(version);
+			//Initialize MCVersionGroup instance.
+			version.versionGroup();
 			return version;
 		}
 

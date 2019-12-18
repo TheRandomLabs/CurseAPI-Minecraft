@@ -9,7 +9,8 @@ import java.util.List;
 import com.google.common.base.Preconditions;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.file.MinimalCurseFile;
+import com.therandomlabs.curseapi.file.BasicCurseFile;
+import com.therandomlabs.curseapi.file.CurseFiles;
 import com.therandomlabs.curseapi.minecraft.MCVersion;
 import com.therandomlabs.curseapi.minecraft.MCVersions;
 import com.therandomlabs.curseapi.util.MoshiUtils;
@@ -26,25 +27,31 @@ final class DefaultCurseModpack implements CurseModpack {
 		List<ModLoaderInfo> modLoaders = Collections.singletonList(new ModLoaderInfo());
 	}
 
-	private static final class FileInfo extends MinimalCurseFile.Immutable {
+	private static final class FileInfo extends BasicCurseFile.Immutable {
 		boolean required = true;
 
 		FileInfo() {
 			super(CurseAPI.MIN_PROJECT_ID, CurseAPI.MIN_FILE_ID);
 		}
+
+		FileInfo(BasicCurseFile file) {
+			super(file.projectID(), file.id());
+		}
 	}
 
 	private MinecraftInfo minecraft = new MinecraftInfo();
+	@SuppressWarnings("PMD.UnusedPrivateField")
 	private String manifestType = "minecraftModpack";
+	@SuppressWarnings("PMD.UnusedPrivateField")
 	private int manifestVersion = 1;
 	private String name = "";
 	private String version = "";
 	private String author = "";
-	//This files field is used for Moshi so that it knows that files should be converted t o
-	//MinimalCurseFile.Immutables.
+	//This files field is used for Moshi so that it knows that files should be converted to
+	//BasicCurseFile.Immutables.
 	private List<FileInfo> files = new ArrayList<>();
-	//This files field is used for everything else and uses the MinimalCurseFile type.
-	private transient List<MinimalCurseFile> actualFiles;
+	//This files field is used for everything else and uses the BasicCurseFile type.
+	private transient CurseFiles<BasicCurseFile> actualFiles;
 
 	@Override
 	public MCVersion mcVersion() {
@@ -118,24 +125,27 @@ final class DefaultCurseModpack implements CurseModpack {
 	}
 
 	@Override
-	public List<MinimalCurseFile> files() {
+	public CurseFiles<BasicCurseFile> files() {
 		if (actualFiles == null) {
-			actualFiles = new ArrayList<>(files);
+			actualFiles = new CurseFiles<>(files);
 		}
 
 		return actualFiles;
 	}
 
 	@Override
-	public CurseModpack files(Collection<? extends MinimalCurseFile> files) {
+	public CurseModpack files(Collection<? extends BasicCurseFile> files) {
 		Preconditions.checkNotNull(files, "files should not be null");
-		this.actualFiles.clear();
-		this.actualFiles.addAll(files);
+		files().clear();
+		files().addAll(files);
 		return this;
 	}
 
 	@Override
 	public String toJSON() {
+		//Convert BasicCurseFiles in actualFiles to FileInfos in files.
+		files.clear();
+		files().stream().map(FileInfo::new).forEach(files::add);
 		return MoshiUtils.toJSON(this, DefaultCurseModpack.class);
 	}
 

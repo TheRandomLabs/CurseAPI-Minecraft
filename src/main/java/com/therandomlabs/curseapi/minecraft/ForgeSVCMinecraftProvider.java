@@ -54,7 +54,10 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 					RetrofitUtils.execute(FORGESVC_MINECRAFT.getVersions());
 
 			for (int i = 0; i < versions.size(); i++) {
-				versions.get(i).setIndex(versions.size() - i - 1);
+				final MCVersion version = versions.get(i);
+				version.setIndex(versions.size() - i - 1);
+				//Initialize MCVersionGroup instance.
+				version.versionGroup();
 			}
 
 			return ImmutableSortedSet.copyOf(versions);

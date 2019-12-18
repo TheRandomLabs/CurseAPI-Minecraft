@@ -2,10 +2,10 @@ package com.therandomlabs.curseapi.minecraft.modpack;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.file.MinimalCurseFile;
+import com.therandomlabs.curseapi.file.BasicCurseFile;
+import com.therandomlabs.curseapi.file.CurseFiles;
 import com.therandomlabs.curseapi.minecraft.MCVersion;
 import com.therandomlabs.curseapi.util.MoshiUtils;
 
@@ -91,19 +91,19 @@ public interface CurseModpack {
 	/**
 	 * Returns this modpack's files.
 	 *
-	 * @return a mutable list containing {@link MinimalCurseFile} instances that represent
+	 * @return a mutable list containing {@link BasicCurseFile} instances that represent
 	 * this modpack's files. Changes to this list are reflected in this
 	 * {@link CurseModpack} instance.
 	 */
-	List<MinimalCurseFile> files();
+	CurseFiles<BasicCurseFile> files();
 
 	/**
 	 * Sets this modpack's files.
 	 *
-	 * @param files a {@link Collection} of {@link MinimalCurseFile}s.
+	 * @param files a {@link Collection} of {@link BasicCurseFile}s.
 	 * @return this {@link CurseModpack}.
 	 */
-	CurseModpack files(Collection<? extends MinimalCurseFile> files);
+	CurseModpack files(Collection<? extends BasicCurseFile> files);
 
 	/**
 	 * Returns this modpack as a JSON string.
@@ -140,5 +140,14 @@ public interface CurseModpack {
 	 */
 	static CurseModpack fromJSON(Path json) throws CurseException {
 		return MoshiUtils.fromJSON(json, DefaultCurseModpack.class);
+	}
+
+	/**
+	 * Returns an empty {@link CurseModpack} instance.
+	 *
+	 * @return an empty {@link CurseModpack} instance.
+	 */
+	static CurseModpack createEmpty() {
+		return new DefaultCurseModpack();
 	}
 }
