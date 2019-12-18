@@ -8,6 +8,8 @@ public class MCVersionGroupsTest {
 	@Test
 	public void mcVersionGroupsShouldContainCorrectVersions() {
 		assertThat(MCVersionGroups.V1_10.containsAnyStrings("1.10.1")).isTrue();
+		assertThat(MCVersionGroups.V1_10.containsAnyStrings("1.9")).isFalse();
 		assertThat(MCVersionGroups.V1_7.containsAny(MCVersions.V1_7_2)).isTrue();
+		assertThat(MCVersionGroups.V1_7.containsAny(MCVersions.V1_8)).isFalse();
 	}
 }
