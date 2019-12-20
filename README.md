@@ -6,4 +6,14 @@
 An extension of [CurseAPI](https://github.com/TheRandomLabs/CurseAPI) for parsing CurseForge
 modpack manifests and for performing more Minecraft-specific operations.
 
-All code will soon be documented with Javadoc and tested with JUnit.
+All code is documented with Javadoc and tested with JUnit.
+
+# Using with Gradle
+
+To use CurseAPI-Minecraft with
+[CurseAPI](https://github.com/TheRandomLabs/CurseAPI#using-with-gradle),
+add this to your dependencies:
+
+```groovy
+api "com.github.TheRandomLabs:CurseAPI-Minecraft:master-SNAPSHOT"
+```
