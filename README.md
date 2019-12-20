@@ -8,6 +8,22 @@ modpack manifests and for performing more Minecraft-specific operations.
 
 All code is documented with Javadoc and tested with JUnit.
 
+# Usage
+
+Before using CurseAPI-Minecraft, `CurseAPIMinecraft#initialize()` should be called so that
+CurseAPI-Minecraft can perform any necessary initialization and register itself with CurseAPI.
+
+* `MCVersion` represents a Minecraft version supported by CurseForge.
+`MCVersion` instances can be retrieved by accessing the constants and methods in the
+`MCVersions` class.
+* `MCVersionGroups` contains `CurseGameVersionGroup<MCVersion>` constants that represent Minecraft
+version groups.
+* `CurseModpack#fromJSON(String)` and `CurseModpack#fromJSON(Path)` can be used to parse CurseForge
+modpack manifest JSONs.
+* `CurseModpack#createEmpty()` can be used to create a new `CurseModpack` instance.
+* `CurseModpack` instances can be converted back to JSONs by calling `CurseModpack#toJSON()` or
+`CurseModpack#toJSON(Path)`.
+
 # Using with Gradle
 
 To use CurseAPI-Minecraft with
