@@ -22,6 +22,7 @@ public class MCVersionsTest {
 	@Test
 	public void mcVersionComparisonsShouldBeCorrect() {
 		assertThat(MCVersions.V1_14_4.newerThan(MCVersions.V1_14_3)).isTrue();
+		assertThat(MCVersions.V1_8_SNAPSHOT.olderThan(MCVersions.V1_8)).isTrue();
 		assertThat(MCVersions.V1_0.olderThan(MCVersions.V1_2_1)).isTrue();
 		assertThat(MCVersions.V1_1.olderThan(MCVersions.V1_0)).isFalse();
 	}

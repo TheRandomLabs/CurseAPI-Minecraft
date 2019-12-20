@@ -100,7 +100,6 @@
 	<rule ref="category/java/errorprone.xml/CloneMethodMustImplementCloneable"/>
 	<rule ref="category/java/errorprone.xml/CloneMethodReturnTypeMustMatchClassName"/>
 	<rule ref="category/java/errorprone.xml/CloseResource"/>
-	<rule ref="category/java/errorprone.xml/CompareObjectsWithEquals"/>
 	<rule ref="category/java/errorprone.xml/DoNotCallGarbageCollectionExplicitly"/>
 	<rule ref="category/java/errorprone.xml/DoNotExtendJavaLangThrowable"/>
 	<rule ref="category/java/errorprone.xml/DontUseFloatTypeForLoopIndices"/>

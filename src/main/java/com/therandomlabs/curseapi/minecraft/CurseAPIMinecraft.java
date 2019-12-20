@@ -7,7 +7,7 @@ import com.therandomlabs.curseapi.CurseAPI;
  */
 public final class CurseAPIMinecraft {
 	/**
-	 * The ID of Minecraft on CurseForge.
+	 * Minecraft's ID on CurseForge.
 	 */
 	public static final int MINECRAFT_ID = 432;
 

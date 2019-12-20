@@ -10,6 +10,11 @@ import java.util.stream.Stream;
  */
 public final class MCVersions {
 	/**
+	 * Represents an unknown version of Minecraft.
+	 */
+	public static final MCVersion UNKNOWN = new MCVersion(-1, "Unknown");
+
+	/**
 	 * Minecraft 1.0.
 	 */
 	public static final MCVersion V1_0 = initialize("1.0");
@@ -150,6 +155,11 @@ public final class MCVersions {
 	public static final MCVersion V1_7_10 = initialize("1.7.10");
 
 	/**
+	 * Minecraft 1.8 snapshots.
+	 */
+	public static final MCVersion V1_8_SNAPSHOT = create("1.8", "1.8-Snapshot");
+
+	/**
 	 * Minecraft 1.8.
 	 */
 	public static final MCVersion V1_8 = initialize("1.8");
@@ -200,6 +210,11 @@ public final class MCVersions {
 	public static final MCVersion V1_8_9 = initialize("1.8.9");
 
 	/**
+	 * Minecraft 1.9 snapshots.
+	 */
+	public static final MCVersion V1_9_SNAPSHOT = create("1.9", "1.9-Snapshot");
+
+	/**
 	 * Minecraft 1.9.
 	 */
 	public static final MCVersion V1_9 = initialize("1.9");
@@ -225,6 +240,11 @@ public final class MCVersions {
 	public static final MCVersion V1_9_4 = initialize("1.9.4");
 
 	/**
+	 * Minecraft 1.10 snapshots.
+	 */
+	public static final MCVersion V1_10_SNAPSHOT = create("1.10", "1.10-Snapshot");
+
+	/**
 	 * Minecraft 1.10.
 	 */
 	public static final MCVersion V1_10 = initialize("1.10");
@@ -238,6 +258,11 @@ public final class MCVersions {
 	 * Minecraft 1.10.2.
 	 */
 	public static final MCVersion V1_10_2 = initialize("1.10.2");
+
+	/**
+	 * Minecraft 1.11 snapshots.
+	 */
+	public static final MCVersion V1_11_SNAPSHOT = create("1.11", "1.11-Snapshot");
 
 	/**
 	 * Minecraft 1.11.
@@ -255,6 +280,11 @@ public final class MCVersions {
 	public static final MCVersion V1_11_2 = initialize("1.11.2");
 
 	/**
+	 * Minecraft 1.12 snapshots.
+	 */
+	public static final MCVersion V1_12_SNAPSHOT = create("1.12", "1.12-Snapshot");
+
+	/**
 	 * Minecraft 1.12.
 	 */
 	public static final MCVersion V1_12 = initialize("1.12");
@@ -270,6 +300,11 @@ public final class MCVersions {
 	public static final MCVersion V1_12_2 = initialize("1.12.2");
 
 	/**
+	 * Minecraft 1.13 snapshots.
+	 */
+	public static final MCVersion V1_13_SNAPSHOT = create("1.13", "1.13-Snapshot");
+
+	/**
 	 * Minecraft 1.13.
 	 */
 	public static final MCVersion V1_13 = initialize("1.13");
@@ -283,6 +318,11 @@ public final class MCVersions {
 	 * Minecraft 1.13.2.
 	 */
 	public static final MCVersion V1_13_2 = initialize("1.13.2");
+
+	/**
+	 * Minecraft 1.14 snapshots.
+	 */
+	public static final MCVersion V1_14_SNAPSHOT = create("1.14", "1.14-Snapshot");
 
 	/**
 	 * Minecraft 1.14.
@@ -310,9 +350,34 @@ public final class MCVersions {
 	public static final MCVersion V1_14_4 = initialize("1.14.4");
 
 	/**
-	 * Represents an unknown version of Minecraft.
+	 * Minecraft 1.15 snapshots.
 	 */
-	public static final MCVersion UNKNOWN = new MCVersion(-1, "Unknown");
+	public static final MCVersion V1_15_SNAPSHOT = create("1.15", "1.15-Snapshot");
+
+	/**
+	 * Minecraft 1.15.
+	 */
+	public static final MCVersion V1_15 = initialize("1.15");
+
+	/**
+	 * Minecraft 1.15.1.
+	 */
+	public static final MCVersion V1_15_1 = initialize("1.15.1");
+
+	/**
+	 * The Fabric modloader.
+	 */
+	public static final MCVersion FABRIC = initialize("Fabric");
+
+	/**
+	 * The Minecraft Forge modloader.
+	 */
+	public static final MCVersion FORGE = initialize("Forge");
+
+	/**
+	 * The Rift modloader.
+	 */
+	public static final MCVersion RIFT = initialize("Rift");
 
 	private MCVersions() {}
 
@@ -355,14 +420,13 @@ public final class MCVersions {
 		return UNKNOWN;
 	}
 
+	static void initialize() {
+		//This is called by ForgeSVCMinecraftProvider.
+	}
+
 	private static MCVersion initialize(String versionString) {
 		if (ForgeSVCMinecraftProvider.failedToRetrieveVersions) {
-			final MCVersion version =
-					new MCVersion(ForgeSVCMinecraftProvider.versions.size(), versionString);
-			ForgeSVCMinecraftProvider.versions.add(version);
-			//Initialize MCVersionGroup instance.
-			version.versionGroup();
-			return version;
+			return create(-1, versionString);
 		}
 
 		for (MCVersion version : ForgeSVCMinecraftProvider.versions) {
@@ -371,6 +435,33 @@ public final class MCVersions {
 			}
 		}
 
-		throw new IllegalArgumentException("Invalid version string: " + versionString);
+		//The Minecraft versions API often takes some time to acknowledge newer versions of
+		//Minecraft.
+		return create(-1, versionString);
+	}
+
+	//Snapshots and modloaders are also not provided in the Minecraft versions API.
+	private static MCVersion create(int index, String versionString) {
+		if (index == -1) {
+			index = ForgeSVCMinecraftProvider.versions.size() * 2;
+		}
+
+		final MCVersion version = new MCVersion(index, versionString);
+		//Initialize MCVersion#versionGroup so that the MCVersion adds itself to the version group.
+		version.versionGroup();
+		ForgeSVCMinecraftProvider.versions.add(version);
+		return version;
+	}
+
+	//This method is used to create snapshot versions.
+	private static MCVersion create(String nextVersionString, String versionString) {
+		if (ForgeSVCMinecraftProvider.failedToRetrieveVersions) {
+			return create(-1, versionString);
+		}
+
+		final MCVersion nextVersion = get(nextVersionString);
+		//Since sort indexes are normally separated by 2,
+		//there should be a gap that this version can fit in.
+		return create(nextVersion == UNKNOWN ? -1 : nextVersion.getSortIndex() - 1, versionString);
 	}
 }

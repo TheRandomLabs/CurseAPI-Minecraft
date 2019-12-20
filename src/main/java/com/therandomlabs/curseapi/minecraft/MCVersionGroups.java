@@ -82,5 +82,10 @@ public final class MCVersionGroups {
 	 */
 	public static final CurseGameVersionGroup<MCVersion> V1_14 = MCVersions.V1_14.versionGroup();
 
+	/**
+	 * Minecraft 1.15.
+	 */
+	public static final CurseGameVersionGroup<MCVersion> V1_15 = MCVersions.V1_15.versionGroup();
+
 	private MCVersionGroups() {}
 }

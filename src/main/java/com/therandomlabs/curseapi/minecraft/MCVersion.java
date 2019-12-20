@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.common.primitives.Ints;
 import com.therandomlabs.curseapi.game.CurseGameVersion;
 import com.therandomlabs.curseapi.game.CurseGameVersionGroup;
 
@@ -38,8 +39,14 @@ public final class MCVersion extends CurseGameVersion<MCVersion> {
 			return new TreeSet<>(versions);
 		}
 
-		static MCVersionGroup get(MCVersion version) {
+		static CurseGameVersionGroup<MCVersion> get(MCVersion version) {
 			final String[] versionElements = version.versionString().split("\\.");
+
+			//Modloaders don't have version groups.
+			if (Ints.tryParse(versionElements[0]) == null) {
+				return CurseGameVersionGroup.none(CurseAPIMinecraft.MINECRAFT_ID);
+			}
+
 			final String versionString = versionElements[0] + "." + versionElements[1];
 			final MCVersionGroup versionGroup =
 					versionGroups.computeIfAbsent(versionString, MCVersionGroup::new);
@@ -48,13 +55,13 @@ public final class MCVersion extends CurseGameVersion<MCVersion> {
 		}
 	}
 
-	private int index;
+	private int sortIndex;
 	private String versionString;
 
-	private transient MCVersionGroup versionGroup;
+	private transient CurseGameVersionGroup<MCVersion> versionGroup;
 
-	MCVersion(int index, String versionString) {
-		this.index = index;
+	MCVersion(int sortIndex, String versionString) {
+		this.sortIndex = sortIndex;
 		this.versionString = versionString;
 	}
 
@@ -91,11 +98,16 @@ public final class MCVersion extends CurseGameVersion<MCVersion> {
 	 */
 	@Override
 	public int compareTo(MCVersion version) {
-		return Integer.compare(index, version.index);
+		return Integer.compare(sortIndex, version.sortIndex);
 	}
 
-	//This method is called by ForgeSVCMinecraftProvider.
-	void setIndex(int index) {
-		this.index = index;
+	//This method is called by MCVersions.
+	int getSortIndex() {
+		return sortIndex;
+	}
+
+	//This method is called by ForgeSVCMinecraftProvider and MCVersions.
+	void setSortIndex(int sortIndex) {
+		this.sortIndex = sortIndex;
 	}
 }

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.google.common.collect.ImmutableSortedSet;
 import com.therandomlabs.curseapi.CurseAPIProvider;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.forgesvc.ForgeSVCProvider;
@@ -36,13 +35,17 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 	 */
 	@Override
 	public SortedSet<? extends CurseGameVersion<?>> gameVersions(int id) {
-		if (failedToRetrieveVersions && versions.isEmpty()) {
-			//This initializes the MCVersion constants, which create local MCVersion instances
-			//if failedToRetrieveVersions is true.
-			MCVersions.getAll();
-		}
-
+		MCVersions.initialize();
 		return id == CurseAPIMinecraft.MINECRAFT_ID ? new TreeSet<>(versions) : null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public CurseGameVersion<?> gameVersion(int gameID, String versionString) {
+		MCVersions.initialize();
+		return gameID == CurseAPIMinecraft.MINECRAFT_ID ? MCVersions.get(versionString) : null;
 	}
 
 	@SuppressWarnings("PMD.ForLoopCanBeForeach")
@@ -55,12 +58,14 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 
 			for (int i = 0; i < versions.size(); i++) {
 				final MCVersion version = versions.get(i);
-				version.setIndex(versions.size() - i - 1);
-				//Initialize MCVersionGroup instance.
+				//Initialize MCVersion#versionGroup so that the MCVersion adds itself to the
+				//version group.
 				version.versionGroup();
+				//We multiply the index by 2 so that snapshots defined in MCVersions can fit in.
+				version.setSortIndex((versions.size() - i - 1) * 2);
 			}
 
-			return ImmutableSortedSet.copyOf(versions);
+			return new TreeSet<>(versions);
 		} catch (CurseException ex) {
 			logger.error(
 					"Failed to retrieve Minecraft versions; a local copy will be used instead", ex
