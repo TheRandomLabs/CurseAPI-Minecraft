@@ -6,7 +6,7 @@
 An extension of [CurseAPI](https://github.com/TheRandomLabs/CurseAPI) for parsing CurseForge
 modpack manifests and for performing more Minecraft-specific operations.
 
-All code is documented with Javadoc and tested with JUnit.
+All public-facing code is documented with Javadoc and (mostly) tested with JUnit.
 
 ## Usage
 
