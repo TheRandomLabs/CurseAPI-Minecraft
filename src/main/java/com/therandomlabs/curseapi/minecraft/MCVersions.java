@@ -388,7 +388,7 @@ public final class MCVersions {
 	 * represent all Minecraft versions supported by CurseForge.
 	 */
 	public static SortedSet<MCVersion> getAll() {
-		return new TreeSet<>(ForgeSVCMinecraftProvider.versions);
+		return new TreeSet<>(ForgeSvcMinecraftProvider.versions);
 	}
 
 	/**
@@ -397,7 +397,7 @@ public final class MCVersions {
 	 * @return a {@link Stream} for all Minecraft versions supported by CurseForge.
 	 */
 	public static Stream<MCVersion> streamAll() {
-		return ForgeSVCMinecraftProvider.versions.stream();
+		return ForgeSvcMinecraftProvider.versions.stream();
 	}
 
 	/**
@@ -411,7 +411,7 @@ public final class MCVersions {
 			return UNKNOWN;
 		}
 
-		for (MCVersion version : ForgeSVCMinecraftProvider.versions) {
+		for (MCVersion version : ForgeSvcMinecraftProvider.versions) {
 			if (versionString.equals(version.versionString())) {
 				return version;
 			}
@@ -425,11 +425,11 @@ public final class MCVersions {
 	}
 
 	private static MCVersion initialize(String versionString) {
-		if (ForgeSVCMinecraftProvider.failedToRetrieveVersions) {
+		if (ForgeSvcMinecraftProvider.failedToRetrieveVersions) {
 			return create(-1, versionString);
 		}
 
-		for (MCVersion version : ForgeSVCMinecraftProvider.versions) {
+		for (MCVersion version : ForgeSvcMinecraftProvider.versions) {
 			if (versionString.equals(version.versionString())) {
 				return version;
 			}
@@ -443,19 +443,19 @@ public final class MCVersions {
 	//Snapshots and modloaders are also not provided in the Minecraft versions API.
 	private static MCVersion create(int index, String versionString) {
 		if (index == -1) {
-			index = ForgeSVCMinecraftProvider.versions.size() * 2;
+			index = ForgeSvcMinecraftProvider.versions.size() * 2;
 		}
 
 		final MCVersion version = new MCVersion(index, versionString);
 		//Initialize MCVersion#versionGroup so that the MCVersion adds itself to the version group.
 		version.versionGroup();
-		ForgeSVCMinecraftProvider.versions.add(version);
+		ForgeSvcMinecraftProvider.versions.add(version);
 		return version;
 	}
 
 	//This method is used to create snapshot versions.
 	private static MCVersion create(String nextVersionString, String versionString) {
-		if (ForgeSVCMinecraftProvider.failedToRetrieveVersions) {
+		if (ForgeSvcMinecraftProvider.failedToRetrieveVersions) {
 			return create(-1, versionString);
 		}
 

@@ -15,7 +15,7 @@ import com.therandomlabs.curseapi.minecraft.MCVersion;
 import com.therandomlabs.curseapi.minecraft.MCVersions;
 import com.therandomlabs.curseapi.util.MoshiUtils;
 
-@SuppressWarnings("squid:S1068")
+@SuppressWarnings({"unused", "PMD.UnusedPrivateField", "squid:S1068"})
 final class DefaultCurseModpack implements CurseModpack {
 	private static final class MinecraftInfo {
 		private static final class ModLoaderInfo {
@@ -40,17 +40,15 @@ final class DefaultCurseModpack implements CurseModpack {
 	}
 
 	private MinecraftInfo minecraft = new MinecraftInfo();
-	@SuppressWarnings("PMD.UnusedPrivateField")
 	private String manifestType = "minecraftModpack";
-	@SuppressWarnings("PMD.UnusedPrivateField")
 	private int manifestVersion = 1;
 	private String name = "";
 	private String version = "";
 	private String author = "";
-	//This files field is used for Moshi so that it knows that files should be converted to
+	//This field is used for Moshi so that it knows that files should be converted to
 	//BasicCurseFile.Immutables.
 	private List<FileInfo> files = new ArrayList<>();
-	//This files field is used for everything else and uses the BasicCurseFile type.
+	//This field is used for everything else and uses the BasicCurseFile type.
 	private transient CurseFiles<BasicCurseFile> actualFiles;
 
 	@Override

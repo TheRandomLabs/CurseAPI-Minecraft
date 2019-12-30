@@ -5,7 +5,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.GET;
 
-interface ForgeSVCMinecraft {
+interface ForgeSvcMinecraft {
 	@GET("api/v2/minecraft/version")
 	Call<List<MCVersion>> getVersions();
 }

@@ -18,6 +18,6 @@ public final class CurseAPIMinecraft {
 	 * This method should be called first in any project that uses CurseAPI-Minecraft.
 	 */
 	public static void initialize() {
-		CurseAPI.addProvider(ForgeSVCMinecraftProvider.INSTANCE, false);
+		CurseAPI.addProvider(ForgeSvcMinecraftProvider.INSTANCE, false);
 	}
 }

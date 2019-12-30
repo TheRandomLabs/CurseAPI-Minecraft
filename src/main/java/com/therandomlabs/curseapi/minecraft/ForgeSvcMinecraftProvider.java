@@ -6,7 +6,6 @@ import java.util.TreeSet;
 
 import com.therandomlabs.curseapi.CurseAPIProvider;
 import com.therandomlabs.curseapi.CurseException;
-import com.therandomlabs.curseapi.forgesvc.ForgeSVCProvider;
 import com.therandomlabs.curseapi.game.CurseGameVersion;
 import com.therandomlabs.curseapi.util.RetrofitUtils;
 import org.slf4j.Logger;
@@ -16,19 +15,19 @@ import org.slf4j.LoggerFactory;
  * A {@link CurseAPIProvider} that uses the API at {@code https://addons-ecs.forgesvc.net/}
  * used by the Twitch launcher to provide {@link CurseGameVersion}s for Minecraft.
  */
-public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
+public final class ForgeSvcMinecraftProvider implements CurseAPIProvider {
 	/**
-	 * The singleton instance of {@link ForgeSVCProvider}.
+	 * The singleton instance of {@link ForgeSvcMinecraftProvider}.
 	 */
-	public static final ForgeSVCMinecraftProvider INSTANCE = new ForgeSVCMinecraftProvider();
+	public static final ForgeSvcMinecraftProvider INSTANCE = new ForgeSvcMinecraftProvider();
 
-	static final ForgeSVCMinecraft FORGESVC_MINECRAFT =
-			RetrofitUtils.get("https://addons-ecs.forgesvc.net/").create(ForgeSVCMinecraft.class);
+	static final ForgeSvcMinecraft FORGESVC_MINECRAFT =
+			RetrofitUtils.get("https://addons-ecs.forgesvc.net/").create(ForgeSvcMinecraft.class);
 
 	static final SortedSet<MCVersion> versions = getVersions();
 	static boolean failedToRetrieveVersions;
 
-	private ForgeSVCMinecraftProvider() {}
+	private ForgeSvcMinecraftProvider() {}
 
 	/**
 	 * {@inheritDoc}
@@ -50,7 +49,7 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 
 	@SuppressWarnings("PMD.ForLoopCanBeForeach")
 	private static SortedSet<MCVersion> getVersions() {
-		final Logger logger = LoggerFactory.getLogger(ForgeSVCMinecraftProvider.class);
+		final Logger logger = LoggerFactory.getLogger(ForgeSvcMinecraftProvider.class);
 
 		try {
 			final List<MCVersion> versions =
@@ -73,8 +72,8 @@ public final class ForgeSVCMinecraftProvider implements CurseAPIProvider {
 		}
 
 		failedToRetrieveVersions = true;
-		//When MCVersions is initialized, it sees that failedToRetrieveVersions is true
-		//and adds local MCVersion instances to this TreeSet.
+		//When MCVersions is initialized, it sees that failedToRetrieveVersions is true and
+		//adds local MCVersion instances to this TreeSet.
 		return new TreeSet<>();
 	}
 }
