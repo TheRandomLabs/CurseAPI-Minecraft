@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-	implementation "com.google.guava:guava:28.1-jre"
+	implementation "com.google.guava:guava:28.2-jre"
 	implementation "org.slf4j:slf4j-api:2.0.0-alpha1"
 	api "com.github.TheRandomLabs:CurseAPI:master-SNAPSHOT"
 
