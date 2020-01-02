@@ -27,7 +27,7 @@ dependencies {
 	api "com.github.TheRandomLabs:CurseAPI:master-SNAPSHOT"
 
 	testRuntimeOnly "org.apache.logging.log4j:log4j-core:2.13.0"
-	testRuntimeOnly "org.apache.logging.log4j:log4j-slf4j18-impl:2.12.1"
+	testRuntimeOnly "org.apache.logging.log4j:log4j-slf4j18-impl:2.13.0"
 
 	testImplementation "com.github.TheRandomLabs:TRLUtils-IO:master-SNAPSHOT"
 
