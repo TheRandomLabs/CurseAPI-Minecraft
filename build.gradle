@@ -1,54 +1,36 @@
-import com.github.spotbugs.SpotBugsTask
+buildscript {
+	repositories {
+		mavenCentral()
+	}
 
-plugins {
-	id "java-library"
-	id "maven-publish"
-	id "checkstyle"
-	id "pmd"
-	id "com.github.spotbugs" version "3.0.0"
-	id "net.ltgt.errorprone" version "1.1.1"
-	id "jacoco"
+	configurations.maybeCreate("pitest")
+
+	dependencies {
+		classpath "info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.6"
+		pitest "org.pitest:pitest-junit5-plugin:0.11"
+	}
 }
+
+apply from: "https://raw.githubusercontent.com/TheRandomLabs/Common-Gradle/master/build.gradle"
+apply plugin: "info.solidsoft.pitest"
 
 group = "com.therandomlabs.curseapi.minecraft"
 version = "1.0.0"
 
 repositories {
-	mavenCentral()
-
 	maven {
 		url "https://jitpack.io"
 	}
 }
 
 dependencies {
-	implementation "com.google.guava:guava:28.2-jre"
-	implementation "org.slf4j:slf4j-api:2.0.0-alpha1"
 	api "com.github.TheRandomLabs:CurseAPI:master-SNAPSHOT"
 
-	testRuntimeOnly "org.apache.logging.log4j:log4j-core:2.13.0"
-	testRuntimeOnly "org.apache.logging.log4j:log4j-slf4j18-impl:2.13.0"
-
 	testImplementation "com.github.TheRandomLabs:TRLUtils-IO:master-SNAPSHOT"
-
-	testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0-M1"
-	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.0-M1"
-	testImplementation "org.assertj:assertj-core:3.14.0"
-
-	spotbugsPlugins "com.mebigfatguy.fb-contrib:fb-contrib:7.4.3.sb"
-	spotbugsPlugins "com.h3xstream.findsecbugs:findsecbugs-plugin:1.10.1"
-	spotbugsPlugins "jp.skypencil.findbugs.slf4j:bug-pattern:1.5.0@jar"
-
-	errorprone "com.google.errorprone:error_prone_core:2.3.4"
-	errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
 }
 
-test {
-	useJUnitPlatform()
-	finalizedBy jacocoTestReport
-}
 
-jacocoTestCoverageVerification {
+/* jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			element = "CLASS"
@@ -56,68 +38,15 @@ jacocoTestCoverageVerification {
 			limit {
 				counter = "INSTRUCTION"
 				value = "COVEREDRATIO"
-				minimum = 0.6
+				minimum = 0.8
 			}
 		}
 	}
-}
+} */
 
-check.dependsOn jacocoTestCoverageVerification
-
-pmd {
-	ruleSets = []
-	ruleSetConfig = resources.text.fromFile("config/pmd.xml")
-}
-
-spotbugs {
-	excludeFilter = file("config/spotbugs-exclude.xml")
-}
-
-tasks.withType(SpotBugsTask) {
-	reports {
-		xml.enabled false
-		html.enabled true
-	}
-}
-
-tasks.withType(JavaCompile) {
-	options.encoding = "UTF-8"
-	options.compilerArgs << "-Xlint:all"
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-	archiveClassifier.set("sources")
-	from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar) {
-	archiveClassifier.set("javadoc")
-	from javadoc
-}
-
-artifacts {
-	archives sourcesJar
-	archives javadocJar
-}
-
-publishing {
-	repositories {
-		maven {
-			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/TheRandomLabs/CurseAPI-Minecraft")
-
-			credentials {
-				username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-				password = project.findProperty("gpr.key") ?: System.getenv("PASSWORD")
-			}
-		}
-	}
-
-	publications {
-		gpr(MavenPublication) {
-			artifact sourcesJar
-			artifact javadocJar
-			from components.java
-		}
-	}
+pitest {
+	testPlugin = "junit5"
+	threads = 4
+	outputFormats = ["XML", "HTML"]
+	timestampedReports = false
 }

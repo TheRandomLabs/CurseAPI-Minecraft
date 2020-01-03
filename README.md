@@ -1,7 +1,14 @@
 # CurseAPI-Minecraft
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Build](https://jitci.com/gh/TheRandomLabs/CurseAPI-Minecraft/svg)](https://jitci.com/gh/TheRandomLabs/CurseAPI-Minecraft)
+[![Dependabot](https://badgen.net/dependabot/TheRandomLabs/CurseAPI-Minecraft/?icon=dependabot)](https://dependabot.com/)
+
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/TheRandomLabs/CurseAPI-Minecraft.svg)](http://isitmaintained.com/project/TheRandomLabs/CurseAPI-Minecraft "Average time to resolve an issue")
+
+<!-- [![Maven Central](https://img.shields.io/maven-central/v/com.therandomlabs.curseapi.minecraft/curseapi-minecraft.svg?style=shield)](https://maven-badges.herokuapp.com/maven-central/com.therandomlabs.curseapi.minecraft/curseapi-minecraft/)
+
+[comment]: # [![Javadoc](https://javadoc.io/badge/com.therandomlabs.curseapi.minecraft/curseapi-minecraft.svg?color=blue)](https://javadoc.io/doc/com.therandomlabs.curseapi.minecraft/curseapi-minecraft)-->
 
 An extension of [CurseAPI](https://github.com/TheRandomLabs/CurseAPI) for parsing CurseForge
 modpack manifests and for performing more Minecraft-specific operations.
