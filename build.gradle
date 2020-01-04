@@ -1,7 +1,9 @@
-apply from: "https://raw.githubusercontent.com/TheRandomLabs/Common-Gradle/master/build.gradle"
-
 group = "com.therandomlabs.curseapi.minecraft"
 version = "1.0.0"
+
+ext.jacocoMinimumInstructionCoverage = 0.0
+
+apply from: "https://raw.githubusercontent.com/TheRandomLabs/Common-Gradle/master/build.gradle"
 
 repositories {
 	maven {
@@ -14,18 +16,3 @@ dependencies {
 
 	testImplementation "com.github.TheRandomLabs:TRLUtils-IO:master-SNAPSHOT"
 }
-
-
-/* jacocoTestCoverageVerification {
-	violationRules {
-		rule {
-			element = "CLASS"
-
-			limit {
-				counter = "INSTRUCTION"
-				value = "COVEREDRATIO"
-				minimum = 0.8
-			}
-		}
-	}
-} */
