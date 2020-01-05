@@ -44,6 +44,10 @@
 	</Match>
 
 	<Match>
+		<Bug pattern="PL_PARALLEL_LISTS"/>
+	</Match>
+
+	<Match>
 		<Class name="~.*Test"/>
 
 		<Not>
