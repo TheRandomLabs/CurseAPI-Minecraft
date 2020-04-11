@@ -24,6 +24,7 @@
 package com.therandomlabs.curseapi.minecraft;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -58,7 +59,7 @@ public final class ForgeSvcMinecraftProvider implements CurseAPIProvider {
 	 */
 	@Nullable
 	@Override
-	public SortedSet<? extends CurseGameVersion<?>> gameVersions(int id) {
+	public NavigableSet<? extends CurseGameVersion<?>> gameVersions(int id) {
 		MCVersions.initialize();
 		return id == CurseAPIMinecraft.MINECRAFT_ID ? new TreeSet<>(versions) : null;
 	}

@@ -40,6 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Represents a version of Minecraft supported by CurseForge.
  */
 public final class MCVersion extends CurseGameVersion<MCVersion> {
+	@SuppressWarnings("FieldMayBeFinal")
 	private static class MCVersionGroup extends CurseGameVersionGroup<MCVersion> {
 		private static final Splitter FULL_STOP_SPLITTER = Splitter.on('.');
 

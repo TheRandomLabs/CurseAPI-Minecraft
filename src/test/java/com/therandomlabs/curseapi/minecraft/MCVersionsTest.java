@@ -25,8 +25,8 @@ package com.therandomlabs.curseapi.minecraft;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.SortedSet;
 
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 public class MCVersionsTest {
 	@Test
 	public void mcVersionsShouldNotBeEmpty() throws CurseException {
-		final Optional<SortedSet<MCVersion>> optionalVersions =
+		final Optional<NavigableSet<MCVersion>> optionalVersions =
 				CurseAPI.gameVersions(CurseAPIMinecraft.MINECRAFT_ID);
 		assertThat(optionalVersions).isPresent();
 		assertThat(MCVersions.getAll()).isNotEmpty().isEqualTo(optionalVersions.get());

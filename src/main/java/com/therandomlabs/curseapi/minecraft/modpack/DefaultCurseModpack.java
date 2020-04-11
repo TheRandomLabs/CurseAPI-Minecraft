@@ -33,14 +33,18 @@ import com.google.common.base.Preconditions;
 import com.therandomlabs.curseapi.CurseAPI;
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.BasicCurseFile;
+import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFiles;
 import com.therandomlabs.curseapi.minecraft.MCVersion;
 import com.therandomlabs.curseapi.minecraft.MCVersions;
 import com.therandomlabs.curseapi.util.MoshiUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@SuppressWarnings({"unused", "PMD.UnusedPrivateField", "squid:S1068"})
+@SuppressWarnings({
+		"unused", "PMD.UnusedPrivateField", "squid:S1068", "FieldMayBeFinal"
+})
 final class DefaultCurseModpack implements CurseModpack {
+	//We set some default values so CurseModpack#createEmpty() is easier to use.
 	private static final class MinecraftInfo {
 		private static final class ModLoaderInfo {
 			String id = "forge-14.23.5.2847";
@@ -74,7 +78,10 @@ final class DefaultCurseModpack implements CurseModpack {
 	private List<FileInfo> files = new ArrayList<>();
 	//This field is used for everything else and uses the BasicCurseFile type.
 	@Nullable
-	private transient CurseFiles<BasicCurseFile> actualFiles;
+	private transient CurseFiles<BasicCurseFile> basicCurseFiles;
+	//This field is used for the implementation of CurseModpack#files().
+	@Nullable
+	private transient CurseFiles<CurseFile> curseFiles;
 
 	@Override
 	public MCVersion mcVersion() {
@@ -142,25 +149,37 @@ final class DefaultCurseModpack implements CurseModpack {
 
 	@Override
 	public CurseModpack author(String author) {
-		Preconditions.checkNotNull(version, "version should not be null");
+		Preconditions.checkNotNull(author, "author should not be null");
 		this.author = author;
 		return this;
 	}
 
 	@Override
-	public CurseFiles<BasicCurseFile> files() {
-		if (actualFiles == null) {
-			actualFiles = new CurseFiles<>(files);
+	public CurseFiles<BasicCurseFile> basicFiles() {
+		if (basicCurseFiles == null) {
+			basicCurseFiles = new CurseFiles<>(files);
 		}
 
-		return actualFiles;
+		return basicCurseFiles;
+	}
+
+	@Override
+	public CurseFiles<CurseFile> files() throws CurseException {
+		if (curseFiles == null) {
+			curseFiles = basicFiles().parallelMap(
+					BasicCurseFile::toCurseFile, CurseFiles.toCurseFiles()
+			);
+		}
+
+		return curseFiles.clone();
 	}
 
 	@Override
 	public CurseModpack files(Collection<? extends BasicCurseFile> files) {
 		Preconditions.checkNotNull(files, "files should not be null");
-		files().clear();
-		files().addAll(files);
+		basicFiles().clear();
+		basicFiles().addAll(files);
+		curseFiles = null;
 		return this;
 	}
 
@@ -168,12 +187,12 @@ final class DefaultCurseModpack implements CurseModpack {
 	public String toJSON() {
 		//Convert BasicCurseFiles in actualFiles to FileInfos in files.
 		files.clear();
-		files().stream().map(FileInfo::new).forEach(files::add);
-		return MoshiUtils.toJSON(this, DefaultCurseModpack.class);
+		basicFiles().stream().map(FileInfo::new).forEach(files::add);
+		return MoshiUtils.toJSON(this);
 	}
 
 	@Override
 	public void toJSON(Path path) throws CurseException {
-		MoshiUtils.toJSON(this, DefaultCurseModpack.class, path);
+		MoshiUtils.toJSON(this, path);
 	}
 }

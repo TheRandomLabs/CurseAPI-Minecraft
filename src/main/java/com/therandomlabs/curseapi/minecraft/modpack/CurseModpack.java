@@ -28,6 +28,7 @@ import java.util.Collection;
 
 import com.therandomlabs.curseapi.CurseException;
 import com.therandomlabs.curseapi.file.BasicCurseFile;
+import com.therandomlabs.curseapi.file.CurseFile;
 import com.therandomlabs.curseapi.file.CurseFiles;
 import com.therandomlabs.curseapi.minecraft.MCVersion;
 import com.therandomlabs.curseapi.util.MoshiUtils;
@@ -112,13 +113,22 @@ public interface CurseModpack {
 	CurseModpack author(String author);
 
 	/**
-	 * Returns this modpack's files.
+	 * Returns this modpack's files as {@link BasicCurseFile}s.
 	 *
-	 * @return a mutable list containing {@link BasicCurseFile} instances that represent
+	 * @return a {@link CurseFiles} containing {@link BasicCurseFile} instances that represent
 	 * this modpack's files. Changes to this list are reflected in this
 	 * {@link CurseModpack} instance.
 	 */
-	CurseFiles<BasicCurseFile> files();
+	CurseFiles<BasicCurseFile> basicFiles();
+
+	/**
+	 * Returns this modpack's files.
+	 *
+	 * @return a {@link CurseFiles} containing {@link CurseFile} instances that represent
+	 * this modpack's files. Changes to this list are <strong>not</strong> reflected in this
+	 * {@link CurseModpack} instance.
+	 */
+	CurseFiles<CurseFile> files() throws CurseException;
 
 	/**
 	 * Sets this modpack's files.
@@ -133,7 +143,7 @@ public interface CurseModpack {
 	 *
 	 * @return this modpack as a JSON string.
 	 */
-	String toJSON();
+	String toJSON() throws CurseException;
 
 	/**
 	 * Writes this modpack as a JSON string to the specified {@link Path}.
