@@ -69,7 +69,8 @@ final class DefaultCurseModpack implements CurseModpack {
 
 	private MinecraftInfo minecraft = new MinecraftInfo();
 	private String manifestType = "minecraftModpack";
-	private int manifestVersion = 1;
+	@SuppressWarnings("FieldCanBeLocal")
+	int manifestVersion;
 	private String name = "";
 	private String version = "";
 	private String author = "";
@@ -194,5 +195,9 @@ final class DefaultCurseModpack implements CurseModpack {
 	@Override
 	public void toJSON(Path path) throws CurseException {
 		MoshiUtils.toJSON(this, path);
+	}
+
+	boolean isValid() {
+		return manifestVersion != 0;
 	}
 }

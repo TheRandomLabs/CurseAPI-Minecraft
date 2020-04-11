@@ -127,6 +127,7 @@ public interface CurseModpack {
 	 * @return a {@link CurseFiles} containing {@link CurseFile} instances that represent
 	 * this modpack's files. Changes to this list are <strong>not</strong> reflected in this
 	 * {@link CurseModpack} instance.
+	 * @throws CurseException if an error occurs.
 	 */
 	CurseFiles<CurseFile> files() throws CurseException;
 
@@ -142,6 +143,7 @@ public interface CurseModpack {
 	 * Returns this modpack as a JSON string.
 	 *
 	 * @return this modpack as a JSON string.
+	 * @throws CurseException if an error occurs.
 	 */
 	String toJSON() throws CurseException;
 
@@ -161,7 +163,13 @@ public interface CurseModpack {
 	 * @throws CurseException if an error occurs.
 	 */
 	static CurseModpack fromJSON(String json) throws CurseException {
-		return MoshiUtils.fromJSON(json, DefaultCurseModpack.class);
+		final DefaultCurseModpack modpack = MoshiUtils.fromJSON(json, DefaultCurseModpack.class);
+
+		if (!modpack.isValid()) {
+			throw new CurseException("Invalid modpack manifest: " + json);
+		}
+
+		return modpack;
 	}
 
 	/**
@@ -172,7 +180,13 @@ public interface CurseModpack {
 	 * @throws CurseException if an error occurs.
 	 */
 	static CurseModpack fromJSON(Path json) throws CurseException {
-		return MoshiUtils.fromJSON(json, DefaultCurseModpack.class);
+		final DefaultCurseModpack modpack = MoshiUtils.fromJSON(json, DefaultCurseModpack.class);
+
+		if (!modpack.isValid()) {
+			throw new CurseException("Invalid modpack manifest: " + json);
+		}
+
+		return modpack;
 	}
 
 	/**
@@ -181,6 +195,8 @@ public interface CurseModpack {
 	 * @return an empty {@link CurseModpack} instance.
 	 */
 	static CurseModpack createEmpty() {
-		return new DefaultCurseModpack();
+		final DefaultCurseModpack modpack = new DefaultCurseModpack();
+		modpack.manifestVersion = 1;
+		return modpack;
 	}
 }

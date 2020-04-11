@@ -24,8 +24,10 @@
 package com.therandomlabs.curseapi.minecraft.modpack;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
@@ -39,6 +41,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class CurseModpackTest {
+	@Test
+	public void invalidManifestShouldThrowCurseException(@TempDir Path tempDirectory)
+			throws IOException {
+		final Path manifest = tempDirectory.resolve("manifest.json");
+		Files.write(manifest, Collections.singletonList("{\"invalid\":\"manifest\"}"));
+		assertThatThrownBy(() -> CurseModpack.fromJSON(manifest)).
+				isInstanceOf(CurseException.class).
+				hasMessageContaining("Invalid modpack manifest");
+	}
+
 	@Test
 	public void atm4ShouldBeValid(@TempDir Path tempDirectory) throws CurseException, IOException {
 		final Optional<Path> optionalPath =
