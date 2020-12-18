@@ -1,9 +1,12 @@
 group = "com.therandomlabs.curseapi.minecraft"
 version = "1.0.0"
 
-ext.jacocoMinimumInstructionCoverage = 0.0
+ext {
+	commonGradleBranch = "master"
+	jacocoMinimumInstructionCoverage = 0.0
+}
 
-apply from: "https://raw.githubusercontent.com/TheRandomLabs/Common-Gradle/master/build.gradle"
+apply from: "https://raw.githubusercontent.com/TheRandomLabs/Common-Gradle/${project.commonGradleBranch}/build.gradle"
 
 repositories {
 	maven {

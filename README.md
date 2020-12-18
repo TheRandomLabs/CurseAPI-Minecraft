@@ -1,7 +1,8 @@
 # CurseAPI-Minecraft
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Build](https://jitci.com/gh/TheRandomLabs/CurseAPI-Minecraft/svg)](https://jitci.com/gh/TheRandomLabs/CurseAPI-Minecraft)
+
+![Build](https://github.com/TheRandomLabs/CurseAPI-Minecraft/workflows/Build/badge.svg?branch=master)
 [![Dependabot](https://badgen.net/dependabot/TheRandomLabs/CurseAPI-Minecraft/?icon=dependabot)](https://dependabot.com/)
 
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/TheRandomLabs/CurseAPI-Minecraft.svg)](http://isitmaintained.com/project/TheRandomLabs/CurseAPI-Minecraft "Average time to resolve an issue")
