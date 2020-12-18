@@ -3,7 +3,7 @@ version = "1.0.0"
 
 ext {
 	commonGradleBranch = "master"
-	jacocoMinimumInstructionCoverage = 0.0
+	jacocoMinimumInstructionCoverage = 0.3
 }
 
 apply from: "https://raw.githubusercontent.com/TheRandomLabs/Common-Gradle/${project.commonGradleBranch}/build.gradle"
